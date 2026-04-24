@@ -18,7 +18,7 @@ function EmptySlot({ index, onClick }) {
   )
 }
 
-function InscriptionStep({ match, onContinue, onRegisterAddPlayerHandler }) {
+function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
   const [showJoinModal, setShowJoinModal] = useState(false)
   const [showPlayerInfo, setShowPlayerInfo] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState(null)
@@ -96,13 +96,11 @@ function InscriptionStep({ match, onContinue, onRegisterAddPlayerHandler }) {
   }
   
   const handleContinue = async () => {
-    if (isQuotaComplete && onContinue) {
-      // Update match step
+    if (isQuotaComplete) {
       await updateMatch({
         matchId: match._id,
         pasoActual: 'armado_equipos',
       })
-      onContinue()
     }
   }
   

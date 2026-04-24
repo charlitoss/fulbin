@@ -62,12 +62,6 @@ function App() {
       return <LandingPage onNavigate={navigate} />
     }
     
-    // Redirect #/crear to home (form is now in the landing hero)
-    if (route === '#/crear') {
-      window.location.hash = '#/'
-      return <LandingPage onNavigate={navigate} />
-    }
-    
     // Short code route: #/p/ABC123
     const shortCodeRoute = route.match(/^#\/p\/([A-Za-z0-9]{6})$/)
     if (shortCodeRoute) {

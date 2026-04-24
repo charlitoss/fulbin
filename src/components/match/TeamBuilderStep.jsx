@@ -22,8 +22,6 @@ function TeamBuilderStep({ match, onRegisterAddPlayerHandler }) {
   const [showPlayerInfo, setShowPlayerInfo] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState(null)
   const [selectedRegistration, setSelectedRegistration] = useState(null)
-  const [showAutoConfirm, setShowAutoConfirm] = useState(false)
-  
   // Convex queries
   const teamConfigData = useQuery(api.teamConfigurations.getByMatch, { matchId: match._id })
   const registrationsData = useQuery(api.registrations.listByMatch, { matchId: match._id })
@@ -248,22 +246,6 @@ function TeamBuilderStep({ match, onRegisterAddPlayerHandler }) {
     })
   }
   
-  // Handle auto-generate teams (kept for future use)
-  const handleAutoGenerate = async () => {
-    const jugadorRegs = registrations.filter(r => 
-      r.tipoInscripcion === 'jugador' || r.tipoInscripcion === undefined || r.tipoInscripcion === null
-    )
-    const playerList = jugadorRegs.map(r => players[r.jugadorId]).filter(Boolean)
-    const assignments = generateBalancedTeams(playerList, jugadorRegs, match.jugadoresPorEquipo)
-    
-    await saveTeamConfig({
-      partidoId: match._id,
-      asignaciones: assignments
-    })
-    
-    setShowAutoConfirm(false)
-  }
-  
   // Open assign modal for a player
   const handleOpenAssign = (player) => {
     const playerId = player._id || player.id
@@ -483,39 +465,6 @@ function TeamBuilderStep({ match, onRegisterAddPlayerHandler }) {
         onSwapTeam={handleSwapTeam}
       />
       
-      {/* Regenerate confirmation modal - Hidden temporarily */}
-      {showAutoConfirm && (
-        <div className="modal-overlay" onClick={() => setShowAutoConfirm(false)}>
-          <div className="modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <h2>Regenerar Equipos</h2>
-            </div>
-            <div className="modal-body">
-              <p>
-                ¿Quieres regenerar los equipos automáticamente? 
-                Esto reemplazará los cambios que hayas hecho.
-              </p>
-              <p className="text-muted mt-md">
-                El algoritmo balanceará los equipos según el nivel y estado físico de cada jugador.
-              </p>
-            </div>
-            <div className="modal-footer">
-              <button 
-                className="btn btn-secondary"
-                onClick={() => setShowAutoConfirm(false)}
-              >
-                Cancelar
-              </button>
-              <button 
-                className="btn btn-primary"
-                onClick={handleAutoGenerate}
-              >
-                Regenerar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
