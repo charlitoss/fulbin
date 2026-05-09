@@ -403,27 +403,27 @@ h4 { font-size: var(--type-lg); }
    =================================== */
 
 .card {
-  background: var(--surface-1);
-  border: var(--border-subtle);
-  border-radius: var(--radius-xl);
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 4px 4px;
+  border: none;
+  border-radius: 0;
+  box-shadow: inset 0 0 0 4px #000;
   padding: var(--space-5);
-  transition: background var(--duration-normal) var(--ease-in-out);
+  transition: background-color var(--duration-normal) var(--ease-in-out);
   overflow: hidden;
 }
 
 .card:hover {
-  background: var(--surface-2);
+  background-color: var(--surface-1);
 }
 
 .card-clickable {
   cursor: pointer;
-  transition: all var(--duration-normal) var(--ease-in-out);
 }
 
 .card-clickable:hover {
-  background: var(--surface-2);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-2px);
+  background-color: var(--surface-1);
 }
 
 /* ===================================
@@ -898,12 +898,14 @@ h4 { font-size: var(--type-lg); }
 }
 
 .match-header {
-  background: var(--surface-1);
-  border-radius: var(--radius-lg);
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 4px 4px;
+  border: none;
+  border-radius: 0;
+  box-shadow: inset 0 0 0 4px #000;
   padding: var(--space-4) var(--space-4) var(--space-3);
   margin-bottom: 0;
-  box-shadow: var(--shadow-sm);
-  border: var(--border-subtle);
   flex-shrink: 0;
   height: fit-content;
   width: 100%;
@@ -992,8 +994,8 @@ h4 { font-size: var(--type-lg); }
   align-items: center;
   gap: 4px;
   padding: 1px 0 1px 4px;
-  background-color: #0a0a0a;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-color: var(--surface-2);
+  background-image: radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px);
   background-size: 4px 4px;
   border: none;
   border-radius: 0;
@@ -1005,7 +1007,11 @@ h4 { font-size: var(--type-lg); }
 }
 
 .editable-field:hover:not(.editing) {
-  background-color: var(--surface-1);
+  background-color: var(--surface-3);
+}
+
+.editable-field.editing {
+  background-color: var(--surface-3);
 }
 
 .editable-field .edit-icon {
@@ -1105,11 +1111,13 @@ h4 { font-size: var(--type-lg); }
    =================================== */
 
 .inscription-step {
-  background: var(--surface-1);
-  border-radius: var(--radius-xl);
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 4px 4px;
+  border: none;
+  border-radius: 0;
+  box-shadow: inset 0 0 0 4px #000;
   padding: var(--space-6);
-  box-shadow: var(--shadow-sm);
-  border: var(--border-subtle);
   overflow-y: auto;
   max-height: calc(100vh - 200px);
 }
@@ -1152,8 +1160,8 @@ h4 { font-size: var(--type-lg); }
   align-items: center;
   gap: 4px;
   padding: 1px 0 1px 4px;
-  background-color: rgba(30,255,180,0.04);
-  background-image: radial-gradient(circle, rgba(30,255,180,0.20) 1px, transparent 1px);
+  background-color: rgba(30,255,180,0.10);
+  background-image: radial-gradient(circle, rgba(30,255,180,0.30) 1px, transparent 1px);
   background-size: 4px 4px;
   border: none;
   border-radius: 0;
@@ -1254,13 +1262,17 @@ h4 { font-size: var(--type-lg); }
   align-items: center;
   justify-content: space-between;
   padding: var(--space-3);
-  background: var(--surface-2);
-  border-radius: var(--radius-md);
-  transition: background var(--duration-fast) var(--ease-in-out);
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 4px 4px;
+  border: none;
+  border-radius: 0;
+  box-shadow: inset 0 0 0 4px #000;
+  transition: background-color var(--duration-fast) var(--ease-in-out);
 }
 
 .player-card:hover {
-  background: var(--surface-3);
+  background-color: var(--surface-1);
 }
 
 .player-card-left {
@@ -1508,14 +1520,16 @@ h4 { font-size: var(--type-lg); }
 }
 
 .modal {
-  background: var(--surface-2);
-  border: var(--border-default);
-  border-radius: var(--radius-2xl);
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 4px 4px;
+  border: none;
+  border-radius: 0;
   width: 100%;
   max-width: 480px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: var(--shadow-lg);
+  box-shadow: inset 0 0 0 4px #000, var(--shadow-lg);
   animation: slideUp var(--duration-normal) var(--ease-out-expo);
 }
 
@@ -1812,10 +1826,12 @@ h4 { font-size: var(--type-lg); }
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  background: var(--surface-2);
-  border: var(--border-default);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 4px 4px;
+  border: none;
+  border-radius: 0;
+  box-shadow: inset 0 0 0 4px #000, var(--shadow-lg);
   min-width: 260px;
   z-index: var(--z-floating);
   overflow: hidden;
@@ -2148,8 +2164,12 @@ h4 { font-size: var(--type-lg); }
 
 /* Team Panel */
 .team-panel {
-  background: var(--bg-card);
-  border-radius: var(--radius-lg);
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 4px 4px;
+  border: none;
+  border-radius: 0;
+  box-shadow: inset 0 0 0 4px #000;
   padding: 0;
   display: flex;
   flex-direction: column;
