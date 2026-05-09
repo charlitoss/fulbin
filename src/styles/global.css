@@ -988,42 +988,44 @@ h4 { font-size: var(--type-lg); }
 }
 
 .editable-field {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-1) var(--space-2);
-  border-radius: var(--radius-sm);
+  gap: 4px;
+  padding: 1px 0 1px 4px;
+  background-color: #0a0a0a;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 4px 4px;
+  border: none;
+  border-radius: 0;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: var(--type-md);
   cursor: pointer;
-  transition: background var(--duration-fast);
+  transition: background-color var(--duration-fast) var(--ease-in-out);
 }
 
-.editable-field:hover {
-  background: var(--surface-2);
+.editable-field:hover:not(.editing) {
+  background-color: var(--surface-1);
 }
 
 .editable-field .edit-icon {
-  opacity: 0;
-  transition: opacity var(--duration-fast);
-  color: var(--text-tertiary);
-}
-
-.editable-field:hover .edit-icon {
-  opacity: 1;
+  color: var(--text-secondary);
+  margin-left: auto;
 }
 
 .editable-field.editing {
-  background: var(--surface-2);
   cursor: default;
 }
 
 .editable-input {
   border: none;
-  border-bottom: 2px solid var(--acid-yellow);
   background: transparent;
-  padding: var(--space-1) 0;
-  font-size: var(--type-sm);
+  padding: 0;
+  font-family: var(--font-display);
+  font-size: var(--type-md);
   color: var(--text-primary);
   min-width: 120px;
+  flex: 1;
 }
 
 .editable-input:focus {
@@ -1032,39 +1034,36 @@ h4 { font-size: var(--type-lg); }
 
 .editable-select {
   border: none;
-  border-bottom: 2px solid var(--acid-yellow);
   background: transparent;
-  padding: var(--space-1) 0;
-  font-size: var(--type-sm);
+  padding: 0;
+  font-family: var(--font-display);
+  font-size: var(--type-md);
   color: var(--text-primary);
   cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  flex: 1;
 }
 
 .editable-select:focus {
   outline: none;
 }
 
-/* Inline select for player count */
 .inline-select {
   border: none;
-  border-bottom: none;
   background: transparent;
-  color: var(--text-secondary);
-  font-size: var(--type-sm);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: var(--type-md);
   cursor: pointer;
   padding: 0;
-}
-
-.inline-select:hover {
-  color: var(--text-primary);
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: var(--space-1);
 }
 
 .player-count-select {
   cursor: pointer;
-}
-
-.player-count-select:hover .inline-select {
-  color: var(--text-primary);
 }
 
 .edit-action-btn {
@@ -1147,8 +1146,17 @@ h4 { font-size: var(--type-lg); }
   color: var(--text-secondary);
 }
 
-/* Countdown - inline text style */
+/* Countdown - green pixel display */
 .countdown-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 0 1px 4px;
+  background-color: rgba(30,255,180,0.04);
+  background-image: radial-gradient(circle, rgba(30,255,180,0.20) 1px, transparent 1px);
+  background-size: 4px 4px;
+  border: none;
+  border-radius: 0;
   color: var(--color-primary);
 }
 
@@ -1157,8 +1165,9 @@ h4 { font-size: var(--type-lg); }
 }
 
 .countdown-text {
-  font-family: var(--font-body);
-  font-weight: 600;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--type-md);
   color: var(--color-primary);
 }
 

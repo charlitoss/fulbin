@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Calendar, Clock, MapPin, Users, Edit2, Check, X, UserPlus } from 'lucide-react'
+import { Calendar, Clock, MapPin, Users, Edit2, Check, X, UserPlus, ChevronRight } from 'lucide-react'
 import { useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import ShareButton from '../ui/ShareButton'
@@ -88,13 +88,13 @@ function EditableMatchHeader({ match, onAddPlayer, onPlayersPerTeamChange }) {
     }
     
     return (
-      <div 
+      <div
         className="editable-field"
         onClick={() => startEdit(field, value)}
       >
         {icon}
         <span>{value || placeholder}</span>
-        <Edit2 size={12} className="edit-icon" />
+        <ChevronRight size={16} className="edit-icon" />
       </div>
     )
   }
@@ -124,13 +124,13 @@ function EditableMatchHeader({ match, onAddPlayer, onPlayersPerTeamChange }) {
     }
     
     return (
-      <div 
+      <div
         className="editable-field"
         onClick={() => startEdit('fecha', match.fecha)}
       >
         <Calendar size={18} />
         <span>{dateInfo.dayName} {dateInfo.day} de {dateInfo.month}, {dateInfo.year}</span>
-        <Edit2 size={12} className="edit-icon" />
+        <ChevronRight size={16} className="edit-icon" />
       </div>
     )
   }
@@ -161,13 +161,13 @@ function EditableMatchHeader({ match, onAddPlayer, onPlayersPerTeamChange }) {
     
     return (
       <div className="time-with-countdown">
-        <div 
+        <div
           className="editable-field"
           onClick={() => startEdit('horario', match.horario)}
         >
           <Clock size={18} />
           <span>{match.horario}</span>
-          <Edit2 size={12} className="edit-icon" />
+          <ChevronRight size={16} className="edit-icon" />
         </div>
         <Countdown targetDate={match.fecha} targetTime={match.horario} />
       </div>
@@ -211,6 +211,7 @@ function EditableMatchHeader({ match, onAddPlayer, onPlayersPerTeamChange }) {
             <option key={n} value={n}>{n} vs {n}</option>
           ))}
         </select>
+        <ChevronRight size={16} className="edit-icon" />
       </div>
     )
   }
