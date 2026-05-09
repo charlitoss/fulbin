@@ -1,17 +1,18 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { PHYSICAL_STATES } from '../../utils/constants'
 
-function SoccerField({ 
-  teamConfig, 
-  players, 
-  registrations, 
+function SoccerField({
+  teamConfig,
+  players,
+  registrations,
   onPositionChange,
   onSwapTeam,
-  onPlayerClick 
+  onPlayerClick
 }) {
   const [dragging, setDragging] = useState(null)
   const [dragPosition, setDragPosition] = useState(null)
   const fieldRef = useRef(null)
+  const draggingRef = useRef(null)
   
   // Get initials from name
   const getInitials = (name) => {
@@ -69,52 +70,82 @@ function SoccerField({
     setDragging(null)
   }
   
-  // Touch handlers for mobile
+  // Touch handlers for mobile — attached to document during drag
+  // to ensure events are captured regardless of which element the finger is over
   const handleTouchStart = (e, playerId, assignment) => {
+    e.preventDefault()
+    draggingRef.current = playerId
     setDragging(playerId)
     setDragPosition({ x: assignment.coordenadaX, y: assignment.coordenadaY })
   }
-  
-  const handleTouchMove = (e) => {
-    if (!dragging || !fieldRef.current) return
+
+  const handleTouchMove = useCallback((e) => {
+    if (!draggingRef.current || !fieldRef.current) return
     e.preventDefault()
-    
+
     const touch = e.touches[0]
     const rect = fieldRef.current.getBoundingClientRect()
     const x = ((touch.clientX - rect.left) / rect.width) * 100
     const y = ((touch.clientY - rect.top) / rect.height) * 100
-    
+
     const clampedX = Math.max(5, Math.min(95, x))
     const clampedY = Math.max(5, Math.min(95, y))
-    
+
     setDragPosition({ x: clampedX, y: clampedY })
-  }
-  
-  const handleTouchEnd = (e) => {
-    if (!dragging || !fieldRef.current || !dragPosition) {
+  }, [])
+
+  const handleTouchEnd = useCallback(() => {
+    const currentDragging = draggingRef.current
+    if (!currentDragging || !fieldRef.current) {
+      draggingRef.current = null
       setDragging(null)
       setDragPosition(null)
       return
     }
-    
-    // Check if player crossed the center line during touch drag
-    const assignment = teamConfig.asignaciones.find(a => a.jugadorId === dragging)
-    if (assignment) {
-      const wasInBlancoHalf = assignment.equipo === 'blanco'
-      const isNowInBlancoHalf = dragPosition.y < 50
-      
-      if (wasInBlancoHalf !== isNowInBlancoHalf) {
-        onSwapTeam(dragging)
+
+    setDragPosition(prev => {
+      if (!prev) {
+        draggingRef.current = null
         setDragging(null)
-        setDragPosition(null)
-        return
+        return null
       }
+
+      // Check if player crossed the center line during touch drag
+      const assignment = teamConfig.asignaciones.find(a => a.jugadorId === currentDragging)
+      if (assignment) {
+        const wasInBlancoHalf = assignment.equipo === 'blanco'
+        const isNowInBlancoHalf = prev.y < 50
+
+        if (wasInBlancoHalf !== isNowInBlancoHalf) {
+          onSwapTeam(currentDragging)
+          draggingRef.current = null
+          setDragging(null)
+          return null
+        }
+      }
+
+      onPositionChange(currentDragging, prev.x, prev.y)
+      draggingRef.current = null
+      setDragging(null)
+      return null
+    })
+  }, [teamConfig.asignaciones, onSwapTeam, onPositionChange])
+
+  // Attach touch move/end listeners to document during drag so events
+  // are captured even if the finger moves outside the player element
+  useEffect(() => {
+    if (!dragging) return
+
+    document.addEventListener('touchmove', handleTouchMove, { passive: false })
+    document.addEventListener('touchend', handleTouchEnd)
+    document.addEventListener('touchcancel', handleTouchEnd)
+
+    return () => {
+      document.removeEventListener('touchmove', handleTouchMove)
+      document.removeEventListener('touchend', handleTouchEnd)
+      document.removeEventListener('touchcancel', handleTouchEnd)
     }
-    
-    onPositionChange(dragging, dragPosition.x, dragPosition.y)
-    setDragging(null)
-    setDragPosition(null)
-  }
+  }, [dragging, handleTouchMove, handleTouchEnd])
   
   // Render player marker
   const renderPlayer = (assignment) => {
@@ -160,8 +191,6 @@ function SoccerField({
         className="soccer-field"
         onDragOver={handleDragOver}
         onDrop={handleDrop}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
       >
         <svg viewBox="0 0 100 150" className="field-svg" preserveAspectRatio="xMidYMid slice">
           {/* Field background */}

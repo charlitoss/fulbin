@@ -6,7 +6,7 @@ import ShareButton from '../ui/ShareButton'
 import Countdown from '../ui/Countdown'
 import { formatDate } from '../../utils/dateUtils'
 
-function EditableMatchHeader({ match, onMatchUpdate, onAddPlayer, onPlayersPerTeamChange }) {
+function EditableMatchHeader({ match, onAddPlayer, onPlayersPerTeamChange }) {
   const [editingField, setEditingField] = useState(null)
   const [editValue, setEditValue] = useState('')
   
@@ -40,21 +40,13 @@ function EditableMatchHeader({ match, onMatchUpdate, onAddPlayer, onPlayersPerTe
         [editingField]: newValue,
       })
       
-      const updatedMatch = {
-        ...match,
-        [editingField]: newValue
-      }
-      
       // If players per team changed and we have a handler, call it
       if (editingField === 'jugadoresPorEquipo' && onPlayersPerTeamChange) {
         const oldValue = match.jugadoresPorEquipo
         if (newValue < oldValue) {
-          // Notify parent to handle excess players
           onPlayersPerTeamChange(newValue, oldValue)
         }
       }
-      
-      onMatchUpdate(updatedMatch)
     } catch (err) {
       console.error('Error updating match:', err)
     }
@@ -193,12 +185,6 @@ function EditableMatchHeader({ match, onMatchUpdate, onAddPlayer, onPlayersPerTe
         cantidadJugadores: newValue * 2,
       })
       
-      const updatedMatch = {
-        ...match,
-        jugadoresPorEquipo: newValue,
-        cantidadJugadores: newValue * 2
-      }
-      
       // If players per team changed and we have a handler, call it
       if (onPlayersPerTeamChange) {
         const oldValue = match.jugadoresPorEquipo
@@ -206,8 +192,6 @@ function EditableMatchHeader({ match, onMatchUpdate, onAddPlayer, onPlayersPerTe
           onPlayersPerTeamChange(newValue, oldValue)
         }
       }
-      
-      onMatchUpdate(updatedMatch)
     } catch (err) {
       console.error('Error updating match:', err)
     }

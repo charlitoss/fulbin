@@ -26,14 +26,6 @@ function MatchPage({ matchId, onNavigate }) {
     inscriptionAddPlayerRef.current = null  // Reset inscription handler
   }, [matchId])
   
-  const handleContinueToTeamBuilder = () => {
-    // Data will auto-refresh via Convex
-  }
-  
-  const handleMatchUpdate = (updatedMatch) => {
-    // Data will auto-refresh via Convex
-  }
-  
   const handleBack = () => {
     onNavigate('#/')
   }
@@ -148,18 +140,16 @@ function MatchPage({ matchId, onNavigate }) {
   return (
     <div className="match-page">
       {/* Editable Header */}
-      <EditableMatchHeader 
+      <EditableMatchHeader
         match={match}
-        onMatchUpdate={handleMatchUpdate}
         onAddPlayer={handleAddPlayer}
         onPlayersPerTeamChange={handlePlayersPerTeamChange}
       />
       
       {/* Content based on current step */}
       {match.pasoActual === 'inscripcion' && (
-        <InscriptionStep 
-          match={match} 
-          onContinue={handleContinueToTeamBuilder}
+        <InscriptionStep
+          match={match}
           onRegisterAddPlayerHandler={registerInscriptionAddPlayer}
         />
       )}
