@@ -2,6 +2,14 @@
    Soccer Organizer App - Global Styles
    =================================== */
 
+@font-face {
+  font-family: 'GeistPixel-Grid';
+  src: url('/fonts/geist-pixel/GeistPixel-Grid.woff2') format('woff2');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* CSS Variables - Design System Tokens */
 :root {
   /* ── COLOR PRIMITIVES ── */
@@ -53,8 +61,8 @@
   --semantic-info: #40C4FF;
 
   /* ── TYPOGRAPHY ── */
-  --font-display: 'DM Sans', sans-serif;
-  --font-body: 'DM Sans', sans-serif;
+  --font-display: 'GeistPixel-Grid', sans-serif;
+  --font-body: 'GeistPixel-Grid', sans-serif;
 
   /* Text Colors */
   --text-primary: #FFFFFF;
