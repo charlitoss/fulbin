@@ -1,22 +1,8 @@
 import { useState } from 'react'
 import { X, Info, Edit2, Check, ArrowLeftRight, UserPlus } from 'lucide-react'
 import { PHYSICAL_STATES } from '../../utils/constants'
-
-// Empty slot component for team spots
-function EmptyTeamSlot({ index, onClick, team }) {
-  return (
-    <div className="empty-team-slot">
-      <span className="empty-slot-index">{index + 1}.</span>
-      <button 
-        className="empty-slot-add-btn"
-        onClick={() => onClick(team)}
-      >
-        <UserPlus size={14} />
-        <span>Agregar jugador</span>
-      </button>
-    </div>
-  )
-}
+import PlayerCard from '../player/PlayerCard'
+import EmptySlot from '../player/EmptySlot'
 
 function TeamPanel({
   team, // 'blanco' or 'oscuro'
@@ -101,50 +87,27 @@ function TeamPanel({
   const renderAssignedPlayer = (assignment, index) => {
     const player = assignment.player
     if (!player) return null
-    
+
     const playerId = player._id || player.id
-    const state = getPhysicalState(playerId)
-    
+    const registration = registrations.find(r => r.jugadorId === playerId)
     const isDragging = draggingPlayerId === playerId
-    
+
     return (
-      <div 
-        key={playerId} 
-        className={`team-panel-player team-${team} ${isDragging ? 'dragging' : ''}`}
+      <div
+        key={playerId}
+        className={isDragging ? 'dragging' : ''}
         draggable
         onDragStart={(e) => handleDragStart(e, playerId)}
         onDragEnd={handleDragEnd}
       >
-        <div className="team-panel-player-info">
-          <span className="team-panel-player-number">{index + 1}.</span>
-          <span className="team-panel-player-name">{player.nombre}</span>
-          <span className="team-panel-player-state">{state.emoji}</span>
-        </div>
-        <div className="team-panel-player-meta">
-          <div className="team-panel-player-actions">
-            <button 
-              className="btn-icon-sm btn-swap-team"
-              onClick={() => onSwapTeam(playerId)}
-              title="Cambiar al otro equipo"
-            >
-              <ArrowLeftRight size={14} />
-            </button>
-            <button 
-              className="btn-icon-sm"
-              onClick={() => onViewInfo(player)}
-              title="Ver información"
-            >
-              <Info size={14} />
-            </button>
-            <button 
-              className="btn-icon-sm btn-remove-sm"
-              onClick={() => onUnassign(playerId)}
-              title="Quitar del equipo"
-            >
-              <X size={14} />
-            </button>
-          </div>
-        </div>
+        <PlayerCard
+          player={player}
+          registration={registration}
+          onMove={() => onSwapTeam(playerId)}
+          onRemove={() => onUnassign(playerId)}
+          index={index}
+          compact={true}
+        />
       </div>
     )
   }
@@ -159,6 +122,13 @@ function TeamPanel({
       <div className={`team-panel-header team-${team}`}>
         {isEditing ? (
           <div className="team-panel-title-edit">
+            <img
+              src={team === 'blanco' ? '/icons/teamflag-light.svg' : '/icons/teamflag-dark.svg'}
+              alt=""
+              className="step-title-icon team-flag-icon"
+              width="32"
+              height="32"
+            />
             <input
               type="text"
               value={editName}
@@ -174,7 +144,14 @@ function TeamPanel({
             </button>
           </div>
         ) : (
-          <h3 className="team-panel-title" onClick={handleStartEdit} title="Click para editar">
+          <h3 className="step-title team-panel-title" onClick={handleStartEdit} title="Click para editar">
+            <img
+              src={team === 'blanco' ? '/icons/teamflag-light.svg' : '/icons/teamflag-dark.svg'}
+              alt=""
+              className="step-title-icon team-flag-icon"
+              width="32"
+              height="32"
+            />
             {teamName}
             <Edit2 size={12} className="edit-icon-inline" />
           </h3>
@@ -188,11 +165,10 @@ function TeamPanel({
         
         {/* Lugares vacíos */}
         {jugadoresPorEquipo && Array.from({ length: Math.max(0, jugadoresPorEquipo - players.length) }).map((_, index) => (
-          <EmptyTeamSlot
+          <EmptySlot
             key={`empty-${index}`}
             index={players.length + index}
-            onClick={onAddPlayer}
-            team={team}
+            onClick={() => onAddPlayer(team)}
           />
         ))}
       </div>

@@ -1,9 +1,9 @@
 import { Info } from 'lucide-react'
 import { PHYSICAL_STATES } from '../../utils/constants'
 
-function PlayerCard({ player, registration, onViewInfo, index, compact = false }) {
+function PlayerCard({ player, registration, onViewInfo, onRemove, onMove, index, compact = false, showState = true }) {
   const physicalState = PHYSICAL_STATES[registration?.estadoFisico] || PHYSICAL_STATES.normal
-  
+
   // Get initials from name
   const getInitials = (name) => {
     if (!name) return '?'
@@ -14,7 +14,7 @@ function PlayerCard({ player, registration, onViewInfo, index, compact = false }
       .toUpperCase()
       .slice(0, 2)
   }
-  
+
   // Compact version - single line, minimal
   if (compact) {
     return (
@@ -24,19 +24,37 @@ function PlayerCard({ player, registration, onViewInfo, index, compact = false }
             <span className="player-index">{index + 1}.</span>
           )}
           <span className="player-name-compact">{player?.nombre || 'Jugador'}</span>
-          <span className="physical-state-compact" title={physicalState.label}>
-            {physicalState.emoji}
-          </span>
+          {showState && (
+            <img
+              src={physicalState.icon}
+              alt={physicalState.label}
+              title={physicalState.label}
+              className="physical-state-icon"
+              width="24"
+              height="24"
+            />
+          )}
         </div>
-        {onViewInfo && (
-          <button 
-            className="btn-info-compact" 
-            onClick={() => onViewInfo(player)}
-            title="Ver información"
-          >
-            <Info size={14} />
-          </button>
-        )}
+        <div className="player-card-actions">
+          {onMove && (
+            <button
+              className="btn-icon-card btn-move-player"
+              onClick={() => onMove(player, registration)}
+              title="Cambiar de equipo"
+            >
+              <img src="/icons/moveplayer.svg" alt="" width="24" height="24" />
+            </button>
+          )}
+          {onRemove && (
+            <button
+              className="btn-icon-card"
+              onClick={() => onRemove(player, registration)}
+              title="Quitar"
+            >
+              <img src="/icons/removeplayer.svg" alt="" width="24" height="24" />
+            </button>
+          )}
+        </div>
       </div>
     )
   }

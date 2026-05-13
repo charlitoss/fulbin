@@ -9,6 +9,9 @@ import HinchadaPanel from './HinchadaPanel'
 import AssignPlayerModal from './AssignPlayerModal'
 import JoinMatchModal from '../player/JoinMatchModal'
 import PlayerInfoModal from '../player/PlayerInfoModal'
+import PlayerCard from '../player/PlayerCard'
+import EmptySlot from '../player/EmptySlot'
+import { MAX_SUPLENTES } from '../../utils/constants'
 import { generateBalancedTeams, calculateTeamStats } from '../../utils/teamBalancer'
 
 function TeamBuilderStep({ match, onRegisterAddPlayerHandler }) {
@@ -18,6 +21,7 @@ function TeamBuilderStep({ match, onRegisterAddPlayerHandler }) {
   const [showAssignModal, setShowAssignModal] = useState(false)
   const [showJoinModal, setShowJoinModal] = useState(false)
   const [joinModalPlayerOnly, setJoinModalPlayerOnly] = useState(false)
+  const [joinModalType, setJoinModalType] = useState(null)
   const [joinTargetTeam, setJoinTargetTeam] = useState(null) // Track which team the empty slot was clicked on
   const [showPlayerInfo, setShowPlayerInfo] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState(null)
@@ -322,8 +326,25 @@ function TeamBuilderStep({ match, onRegisterAddPlayerHandler }) {
   // Open join modal from header (all options)
   const handleOpenJoinFromHeader = useCallback(() => {
     setJoinModalPlayerOnly(false)
+    setJoinModalType(null)
     setShowJoinModal(true)
   }, [])
+
+  // Open join modal pre-selecting a registration type (suplente / hinchada)
+  const openJoinWithType = useCallback((type) => {
+    setJoinModalPlayerOnly(false)
+    setJoinTargetTeam(null)
+    setJoinModalType(type)
+    setShowJoinModal(true)
+  }, [])
+
+  const handleRemoveExtraPlayer = useCallback(async (player) => {
+    try {
+      await removeRegistration({ matchId: match._id, playerId: player._id })
+    } catch (err) {
+      console.error('Error removing registration:', err)
+    }
+  }, [match._id, removeRegistration])
 
   // Register the add player handler for the header button
   useEffect(() => {
@@ -358,74 +379,62 @@ function TeamBuilderStep({ match, onRegisterAddPlayerHandler }) {
     .filter(a => a.player) || []
   
   if (!teamConfig) {
-    return <div className="loading">Cargando configuración...</div>
+    return <div className="loading">Cargando...</div>
   }
   
+  const sortedSuplentes = [...suplentes].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+  const sortedHinchada = [...hinchada].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+
+  const teamsHaveEmptySlots =
+    blancoPlayers.length < match.jugadoresPorEquipo ||
+    oscuroPlayers.length < match.jugadoresPorEquipo
+  const promoteSuplente = (player) => handlePromoteSuplente(player._id)
+
   return (
+    <>
+    <SoccerField
+      teamConfig={teamConfig}
+      players={players}
+      registrations={registrations}
+      onPositionChange={handlePositionChange}
+      onSwapTeam={handleSwapTeam}
+      onPlayerClick={handleViewPlayerInfo}
+    />
     <div className="team-builder-step">
       <div className="team-builder-layout-new">
-        {/* Left Panel - Team Blanco */}
-        <TeamPanel
-          team="blanco"
-          teamName={teamConfig.nombreEquipoBlanco}
-          players={blancoPlayers}
-          registrations={registrations}
-          onViewInfo={handleViewPlayerInfo}
-          onUnassign={handleUnassignPlayer}
-          onSwapTeam={handleSwapTeam}
-          onAddPlayer={handleOpenJoinFromEmptySlot}
-          onTeamNameChange={handleTeamNameChange}
-          jugadoresPorEquipo={match.jugadoresPorEquipo}
-        />
-        
-        {/* Center - Soccer Field */}
-        <div className="team-builder-center">
-          <SoccerField
-            teamConfig={teamConfig}
-            players={players}
+        <div className="team-builder-teams-row">
+          <TeamPanel
+            team="blanco"
+            teamName={teamConfig.nombreEquipoBlanco}
+            players={blancoPlayers}
             registrations={registrations}
-            onPositionChange={handlePositionChange}
+            onViewInfo={handleViewPlayerInfo}
+            onUnassign={handleUnassignPlayer}
             onSwapTeam={handleSwapTeam}
-            onPlayerClick={handleViewPlayerInfo}
+            onAddPlayer={handleOpenJoinFromEmptySlot}
+            onTeamNameChange={handleTeamNameChange}
+            jugadoresPorEquipo={match.jugadoresPorEquipo}
           />
-          
-          {teamStats && (
-            <BalanceIndicator
-              teamStats={teamStats}
-              teamConfig={teamConfig}
-            />
-          )}
-          
-          {/* Suplentes and Hinchada panels */}
-          <div className="extra-panels">
-            <SuplentesPanel 
-              suplentes={suplentes}
-              players={players}
-              registrations={registrations}
-              onPromote={handlePromoteSuplente}
-              currentAssignments={teamConfig?.asignaciones || []}
-              playersPerTeam={match.jugadoresPorEquipo}
-            />
-            <HinchadaPanel 
-              hinchada={hinchada}
-              players={players}
-            />
-          </div>
+          <TeamPanel
+            team="oscuro"
+            teamName={teamConfig.nombreEquipoOscuro}
+            players={oscuroPlayers}
+            registrations={registrations}
+            onViewInfo={handleViewPlayerInfo}
+            onUnassign={handleUnassignPlayer}
+            onSwapTeam={handleSwapTeam}
+            onAddPlayer={handleOpenJoinFromEmptySlot}
+            onTeamNameChange={handleTeamNameChange}
+            jugadoresPorEquipo={match.jugadoresPorEquipo}
+          />
         </div>
-        
-        {/* Right Panel - Team Oscuro */}
-        <TeamPanel
-          team="oscuro"
-          teamName={teamConfig.nombreEquipoOscuro}
-          players={oscuroPlayers}
-          registrations={registrations}
-          onViewInfo={handleViewPlayerInfo}
-          onUnassign={handleUnassignPlayer}
-          onSwapTeam={handleSwapTeam}
-          onAddPlayer={handleOpenJoinFromEmptySlot}
-          onTeamNameChange={handleTeamNameChange}
-          jugadoresPorEquipo={match.jugadoresPorEquipo}
-        />
+
+        {teamStats && (
+          <BalanceIndicator
+            teamStats={teamStats}
+            teamConfig={teamConfig}
+          />
+        )}
       </div>
       
       {/* Modals */}
@@ -451,6 +460,7 @@ function TeamBuilderStep({ match, onRegisterAddPlayerHandler }) {
         match={match}
         onJoined={handlePlayerJoined}
         playerOnly={joinModalPlayerOnly}
+        defaultType={joinModalType}
       />
       
       <PlayerInfoModal
@@ -464,8 +474,67 @@ function TeamBuilderStep({ match, onRegisterAddPlayerHandler }) {
         assignment={selectedPlayer ? getAssignment(selectedPlayer._id || selectedPlayer.id) : null}
         onSwapTeam={handleSwapTeam}
       />
-      
+
     </div>
+
+    <div className="team-builder-extras-row">
+      <div className="inscription-step">
+        <div className="inscription-step-header">
+          <p className="step-title">
+            <img src="/icons/moveplayer.svg" alt="" className="step-title-icon" width="24" height="24" />
+            Suplentes
+          </p>
+        </div>
+        <div className="player-list compact-list">
+          {sortedSuplentes.map((registration, index) => {
+            const player = players[registration.jugadorId]
+            if (!player) return null
+            return (
+              <PlayerCard
+                key={registration.jugadorId}
+                player={player}
+                registration={registration}
+                onRemove={handleRemoveExtraPlayer}
+                onMove={teamsHaveEmptySlots ? promoteSuplente : undefined}
+                index={index}
+                compact={true}
+              />
+            )
+          })}
+          {sortedSuplentes.length < MAX_SUPLENTES && (
+            <EmptySlot index={sortedSuplentes.length} onClick={() => openJoinWithType('suplente')} />
+          )}
+        </div>
+      </div>
+
+      <div className="inscription-step">
+        <div className="inscription-step-header">
+          <p className="step-title">
+            <img src="/icons/hinchada.svg" alt="" className="step-title-icon" width="24" height="24" />
+            Hinchada
+          </p>
+        </div>
+        <div className="player-list compact-list">
+          {sortedHinchada.map((registration, index) => {
+            const player = players[registration.jugadorId]
+            if (!player) return null
+            return (
+              <PlayerCard
+                key={registration.jugadorId}
+                player={player}
+                registration={registration}
+                onRemove={handleRemoveExtraPlayer}
+                index={index}
+                compact={true}
+                showState={false}
+              />
+            )
+          })}
+          <EmptySlot index={sortedHinchada.length} onClick={() => openJoinWithType('hinchada')} />
+        </div>
+      </div>
+    </div>
+    </>
   )
 }
 
