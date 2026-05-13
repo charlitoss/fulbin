@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Calendar, Clock, MapPin, Users, Edit2, Check, X, UserPlus } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { Calendar, Clock, MapPin, Users, Edit2, Check, X, UserPlus, ChevronRight } from 'lucide-react'
 import { useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import ShareButton from '../ui/ShareButton'
@@ -9,6 +9,32 @@ import { formatDate } from '../../utils/dateUtils'
 function EditableMatchHeader({ match, onAddPlayer, onPlayersPerTeamChange }) {
   const [editingField, setEditingField] = useState(null)
   const [editValue, setEditValue] = useState('')
+  const pickerInputRef = useRef(null)
+
+  // Open the native picker as soon as the field enters edit mode
+  useEffect(() => {
+    if (editingField === 'fechaHorario' && pickerInputRef.current) {
+      pickerInputRef.current.showPicker?.()
+    }
+  }, [editingField])
+
+  const saveDateTime = async (datetimeLocalValue) => {
+    if (!datetimeLocalValue) {
+      cancelEdit()
+      return
+    }
+    const [datePart, timePart] = datetimeLocalValue.split('T')
+    try {
+      await updateMatch({
+        matchId: match._id,
+        fecha: datePart,
+        horario: timePart,
+      })
+    } catch (err) {
+      console.error('Error updating match:', err)
+    }
+    cancelEdit()
+  }
   
   const updateMatch = useMutation(api.matches.update)
   
@@ -24,6 +50,20 @@ function EditableMatchHeader({ match, onAddPlayer, onPlayersPerTeamChange }) {
     setEditValue('')
   }
   
+  const saveFieldValue = async (field, rawValue) => {
+    const value = field === 'jugadoresPorEquipo' ? parseInt(rawValue, 10) : rawValue
+    if (!value && field !== 'detallesUbicacion') {
+      cancelEdit()
+      return
+    }
+    try {
+      await updateMatch({ matchId: match._id, [field]: value })
+    } catch (err) {
+      console.error('Error updating match:', err)
+    }
+    cancelEdit()
+  }
+
   const saveEdit = async () => {
     if (!editValue.trim() && editingField !== 'detallesUbicacion') {
       cancelEdit()
@@ -88,88 +128,46 @@ function EditableMatchHeader({ match, onAddPlayer, onPlayersPerTeamChange }) {
     }
     
     return (
-      <div 
+      <div
         className="editable-field"
         onClick={() => startEdit(field, value)}
       >
         {icon}
         <span>{value || placeholder}</span>
-        <Edit2 size={12} className="edit-icon" />
+        <ChevronRight size={16} className="edit-icon" />
       </div>
     )
   }
   
-  // Render editable date
-  const renderEditableDate = () => {
-    if (editingField === 'fecha') {
+  // Render combined editable date + time as a single field
+  const renderEditableDateTime = () => {
+    if (editingField === 'fechaHorario') {
       return (
         <div className="editable-field editing">
-          <Calendar size={18} />
           <input
-            type="date"
+            ref={pickerInputRef}
+            type="datetime-local"
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
+            onBlur={() => saveDateTime(editValue)}
             onKeyDown={handleKeyDown}
             autoFocus
             className="editable-input"
           />
-          <button className="edit-action-btn save" onClick={saveEdit}>
-            <Check size={14} />
-          </button>
-          <button className="edit-action-btn cancel" onClick={cancelEdit}>
-            <X size={14} />
-          </button>
         </div>
       )
     }
-    
+
+    const monthNum = match.fecha ? Number(match.fecha.split('-')[1]) : ''
+    const display = `${dateInfo.dayShort} ${dateInfo.day}/${monthNum} ${match.horario}`
+
     return (
-      <div 
+      <div
         className="editable-field"
-        onClick={() => startEdit('fecha', match.fecha)}
+        onClick={() => startEdit('fechaHorario', `${match.fecha}T${match.horario}`)}
       >
-        <Calendar size={18} />
-        <span>{dateInfo.dayName} {dateInfo.day} de {dateInfo.month}, {dateInfo.year}</span>
-        <Edit2 size={12} className="edit-icon" />
-      </div>
-    )
-  }
-  
-  // Render editable time with countdown
-  const renderEditableTime = () => {
-    if (editingField === 'horario') {
-      return (
-        <div className="editable-field editing">
-          <Clock size={18} />
-          <input
-            type="time"
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onKeyDown={handleKeyDown}
-            autoFocus
-            className="editable-input"
-          />
-          <button className="edit-action-btn save" onClick={saveEdit}>
-            <Check size={14} />
-          </button>
-          <button className="edit-action-btn cancel" onClick={cancelEdit}>
-            <X size={14} />
-          </button>
-        </div>
-      )
-    }
-    
-    return (
-      <div className="time-with-countdown">
-        <div 
-          className="editable-field"
-          onClick={() => startEdit('horario', match.horario)}
-        >
-          <Clock size={18} />
-          <span>{match.horario}</span>
-          <Edit2 size={12} className="edit-icon" />
-        </div>
-        <Countdown targetDate={match.fecha} targetTime={match.horario} />
+        <span>{display}</span>
+        <ChevronRight size={16} className="edit-icon" />
       </div>
     )
   }
@@ -201,7 +199,6 @@ function EditableMatchHeader({ match, onAddPlayer, onPlayersPerTeamChange }) {
   const renderEditablePlayersPerTeam = () => {
     return (
       <div className="editable-field player-count-select">
-        <Users size={18} />
         <select
           value={match.jugadoresPorEquipo}
           onChange={handlePlayersPerTeamChange}
@@ -211,6 +208,7 @@ function EditableMatchHeader({ match, onAddPlayer, onPlayersPerTeamChange }) {
             <option key={n} value={n}>{n} vs {n}</option>
           ))}
         </select>
+        <ChevronRight size={16} className="edit-icon" />
       </div>
     )
   }
@@ -220,7 +218,7 @@ function EditableMatchHeader({ match, onAddPlayer, onPlayersPerTeamChange }) {
     if (editingField === 'nombre') {
       return (
         <div className="editable-title editing">
-          <span>⚽</span>
+          <img src="/soccer-ball.png" alt="" className="title-ball" />
           <input
             type="text"
             value={editValue}
@@ -245,7 +243,7 @@ function EditableMatchHeader({ match, onAddPlayer, onPlayersPerTeamChange }) {
         className="editable-title"
         onClick={() => startEdit('nombre', match.nombre)}
       >
-        <span>⚽</span>
+        <img src="/soccer-ball.png" alt="" className="title-ball" />
         {match.nombre}
         <Edit2 size={14} className="edit-icon" />
       </h1>
@@ -254,22 +252,25 @@ function EditableMatchHeader({ match, onAddPlayer, onPlayersPerTeamChange }) {
   
   return (
     <div className="match-header">
-      <div className="match-header-top">
+      <div className="match-header-title">
         {renderEditableTitle()}
+      </div>
+
+      <div className="match-header-info editable-info">
+        {renderEditablePlayersPerTeam()}
+        {renderEditableText('ubicacion', match.ubicacion, null, 'Ubicación')}
+        {renderEditableDateTime()}
+        <Countdown targetDate={match.fecha} targetTime={match.horario} />
+      </div>
+
+      <div className="match-header-actions">
+        <ShareButton matchId={match._id} match={match} />
         {onAddPlayer && (
           <button className="btn-add-player" onClick={onAddPlayer} title="Agregar jugador">
-            <UserPlus size={18} />
+            <span className="icon-plus" aria-hidden="true" />
             <span>Anotarse</span>
           </button>
         )}
-        <ShareButton matchId={match._id} match={match} />
-      </div>
-      
-      <div className="match-header-info editable-info">
-        {renderEditableTime()}
-        {renderEditableText('ubicacion', match.ubicacion, <MapPin size={18} />, 'Ubicación')}
-        {renderEditableDate()}
-        {renderEditablePlayersPerTeam()}
       </div>
     </div>
   )

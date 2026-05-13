@@ -4,25 +4,22 @@ import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import ProgressBar from '../ui/ProgressBar'
 import PlayerCard from '../player/PlayerCard'
+import EmptySlot from '../player/EmptySlot'
+import { MAX_SUPLENTES } from '../../utils/constants'
 import JoinMatchModal from '../player/JoinMatchModal'
 import PlayerInfoModal from '../player/PlayerInfoModal'
 
-// Empty slot component for available spots
-function EmptySlot({ index, onClick }) {
-  return (
-    <div className="empty-slot" onClick={onClick}>
-      <span className="empty-slot-index">{index + 1}.</span>
-      <span className="empty-slot-text">Lugar disponible</span>
-      <Plus size={14} className="empty-slot-icon" />
-    </div>
-  )
-}
-
 function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
   const [showJoinModal, setShowJoinModal] = useState(false)
+  const [joinModalType, setJoinModalType] = useState(null)
   const [showPlayerInfo, setShowPlayerInfo] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState(null)
   const [selectedRegistration, setSelectedRegistration] = useState(null)
+
+  const openJoinModal = (type = null) => {
+    setJoinModalType(type)
+    setShowJoinModal(true)
+  }
   
   // Convex queries
   const registrationsData = useQuery(api.registrations.listByMatch, { matchId: match._id })
@@ -30,6 +27,15 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
   
   // Convex mutations
   const updateMatch = useMutation(api.matches.update)
+  const removeRegistration = useMutation(api.registrations.remove)
+
+  const handleRemovePlayer = async (player) => {
+    try {
+      await removeRegistration({ matchId: match._id, playerId: player._id })
+    } catch (err) {
+      console.error('Error removing registration:', err)
+    }
+  }
   
   // Convert players array to object for easy lookup
   const players = useMemo(() => {
@@ -69,7 +75,7 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
   // Register add player handler for header button
   useEffect(() => {
     if (onRegisterAddPlayerHandler) {
-      onRegisterAddPlayerHandler(() => setShowJoinModal(true))
+      onRegisterAddPlayerHandler(() => openJoinModal())
     }
   }, [onRegisterAddPlayerHandler])
   
@@ -108,109 +114,132 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
     return <div className="loading">Cargando...</div>
   }
   
+  const sortedSuplentes = [...suplentes].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+  const sortedHinchada = [...hinchada].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+
   return (
-    <div className="inscription-step">
-      <p className="step-title">Paso 1: Inscripción de Jugadores</p>
-      
-      <ProgressBar 
-        current={confirmedCount} 
-        total={requiredCount} 
-      />
-      
-      <div className="player-list-section">
+    <>
+      <div className="inscription-step">
+        <div className="inscription-step-header">
+          <p className="step-title">Jugas?</p>
+          <ProgressBar
+            current={confirmedCount}
+            total={requiredCount}
+            showMessage={false}
+          />
+        </div>
+
+        <div className="player-list-section">
+          <div className="player-list compact-list">
+            {/* Jugadores confirmados */}
+            {sortedRegistrations.map((registration, index) => {
+              const player = players[registration.jugadorId]
+              if (!player) return null
+
+              return (
+                <PlayerCard
+                  key={registration.jugadorId}
+                  player={player}
+                  registration={registration}
+                  onRemove={handleRemovePlayer}
+                  index={index}
+                  compact={true}
+                />
+              )
+            })}
+
+            {/* Lugares vacíos */}
+            {Array.from({ length: Math.max(0, requiredCount - confirmedCount) }).map((_, index) => (
+              <EmptySlot
+                key={`empty-${index}`}
+                index={confirmedCount + index}
+                onClick={() => openJoinModal('jugador')}
+              />
+            ))}
+          </div>
+        </div>
+
+        <div className="inscription-actions">
+          <button
+            className={`btn-continue ${isQuotaComplete ? 'ready' : ''}`}
+            onClick={handleContinue}
+            disabled={!isQuotaComplete}
+          >
+            <span>Armar equipos</span>
+            <span className="icon-arrow-right" aria-hidden="true" />
+          </button>
+
+          {!isQuotaComplete && (
+            <p className="continue-hint">
+              Necesitas {requiredCount - confirmedCount} jugador{requiredCount - confirmedCount !== 1 ? 'es' : ''} más para continuar
+            </p>
+          )}
+          {isQuotaComplete && (
+            <p className="progress-message complete">
+              Somos {confirmedCount}! Armemos los equipos
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="inscription-step">
+        <div className="inscription-step-header">
+          <p className="step-title">
+            <img src="/icons/moveplayer.svg" alt="" className="step-title-icon" width="24" height="24" />
+            Suplentes
+          </p>
+        </div>
         <div className="player-list compact-list">
-          {/* Jugadores confirmados */}
-          {sortedRegistrations.map((registration, index) => {
+          {sortedSuplentes.map((registration, index) => {
             const player = players[registration.jugadorId]
             if (!player) return null
-            
             return (
               <PlayerCard
                 key={registration.jugadorId}
                 player={player}
                 registration={registration}
-                onViewInfo={handleViewPlayerInfo}
+                onRemove={handleRemovePlayer}
                 index={index}
                 compact={true}
               />
             )
           })}
-          
-          {/* Lugares vacíos */}
-          {Array.from({ length: Math.max(0, requiredCount - confirmedCount) }).map((_, index) => (
-            <EmptySlot
-              key={`empty-${index}`}
-              index={confirmedCount + index}
-              onClick={() => setShowJoinModal(true)}
-            />
-          ))}
+          {sortedSuplentes.length < MAX_SUPLENTES && (
+            <EmptySlot index={sortedSuplentes.length} onClick={() => openJoinModal('suplente')} />
+          )}
         </div>
       </div>
-      
-      {/* Suplentes and Hinchada sections */}
-      {(suplentes.length > 0 || hinchada.length > 0) && (
-        <div className="inscription-extras">
-          {suplentes.length > 0 && (
-            <div className="inscription-extra-section">
-              <div className="inscription-extra-header">
-                <Clock size={14} />
-                <span>Suplentes ({suplentes.length})</span>
-              </div>
-              <div className="inscription-extra-list">
-                {suplentes.map((reg, index) => {
-                  const player = players[reg.jugadorId]
-                  if (!player) return null
-                  return (
-                    <div key={reg.jugadorId} className="inscription-extra-item suplente">
-                      <span className="inscription-extra-priority">{index + 1}</span>
-                      <span className="inscription-extra-name">{player.nombre}</span>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-          
-          {hinchada.length > 0 && (
-            <div className="inscription-extra-section">
-              <div className="inscription-extra-header">
-                <Eye size={14} />
-                <span>Hinchada ({hinchada.length})</span>
-              </div>
-              <div className="inscription-extra-list">
-                {hinchada.map((reg) => {
-                  const player = players[reg.jugadorId]
-                  if (!player) return null
-                  return (
-                    <div key={reg.jugadorId} className="inscription-extra-item hinchada">
-                      <Eye size={14} className="inscription-extra-icon" />
-                      <span className="inscription-extra-name">{player.nombre}</span>
-                    </div>
-                  )
-                })}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
-      <div className="inscription-actions">
-        <button 
-          className={`btn-continue ${isQuotaComplete ? 'ready' : ''}`}
-          onClick={handleContinue}
-          disabled={!isQuotaComplete}
-        >
-          <span>Continuar al Armado de Equipos</span>
-          <ArrowRight size={20} />
-        </button>
-        
-        {!isQuotaComplete && (
-          <p className="continue-hint">
-            Necesitas {requiredCount - confirmedCount} jugador{requiredCount - confirmedCount !== 1 ? 'es' : ''} más para continuar
+      <div className="inscription-step">
+        <div className="inscription-step-header">
+          <p className="step-title">
+            <img src="/icons/hinchada.svg" alt="" className="step-title-icon" width="24" height="24" />
+            Hinchada
           </p>
-        )}
+        </div>
+        <div className="player-list compact-list">
+          {sortedHinchada.length === 0 ? (
+            <EmptySlot index={0} onClick={() => openJoinModal('hinchada')} />
+          ) : (
+            sortedHinchada.map((registration, index) => {
+              const player = players[registration.jugadorId]
+              if (!player) return null
+              return (
+                <PlayerCard
+                  key={registration.jugadorId}
+                  player={player}
+                  registration={registration}
+                  onRemove={handleRemovePlayer}
+                  index={index}
+                  compact={true}
+                  showState={false}
+                />
+              )
+            })
+          )}
+        </div>
       </div>
-      
+
       <JoinMatchModal
         isOpen={showJoinModal}
         onClose={() => setShowJoinModal(false)}
@@ -218,15 +247,16 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
         match={match}
         onJoined={handleJoined}
         playerOnly={false}
+        defaultType={joinModalType}
       />
-      
+
       <PlayerInfoModal
         isOpen={showPlayerInfo}
         onClose={() => setShowPlayerInfo(false)}
         player={selectedPlayer}
         registration={selectedRegistration}
       />
-    </div>
+    </>
   )
 }
 

@@ -3,6 +3,7 @@ import { useQuery } from 'convex/react'
 import { api } from '../convex/_generated/api'
 import LandingPage from './components/landing/LandingPage'
 import MatchPage from './components/match/MatchPage'
+import Footer from './components/ui/Footer'
 
 // Component to handle short code redirect
 function ShortCodeRedirect({ shortCode, onNavigate }) {
@@ -82,7 +83,11 @@ function App() {
   
   return (
     <div className="app">
+      <header className="app-logo">
+        <img src="/LOGO.svg" alt="Fulbin" width="120" height="41" />
+      </header>
       {getRouteComponent()}
+      <Footer />
     </div>
   )
 }

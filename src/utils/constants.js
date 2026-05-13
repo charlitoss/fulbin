@@ -1,7 +1,9 @@
+export const MAX_SUPLENTES = 10;
+
 export const PHYSICAL_STATES = {
-  cansado: { emoji: '😫', label: 'Cansado', factor: 0.6, color: '#ef4444' },
-  normal: { emoji: '😐', label: 'Normal', factor: 1.0, color: '#f59e0b' },
-  excelente: { emoji: '💪', label: 'Excelente', factor: 1.3, color: '#10b981' }
+  cansado: { emoji: '😫', label: 'Cansado', factor: 0.6, color: '#ef4444', icon: '/icons/State=Down, Size=Medium.svg' },
+  normal: { emoji: '😐', label: 'Normal', factor: 1.0, color: '#f59e0b', icon: '/icons/State=Good, Size=Medium.svg' },
+  excelente: { emoji: '💪', label: 'Excelente', factor: 1.3, color: '#10b981', icon: '/icons/State=Fire, Size=Medium.svg' }
 };
 
 export const PLAYER_COUNTS = [

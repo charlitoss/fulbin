@@ -79,32 +79,18 @@ Anotate acá: ${shareUrl}`
         className={`share-btn ${showMenu ? 'active' : ''}`}
         onClick={() => setShowMenu(!showMenu)}
       >
-        <Share2 size={16} />
+        <span className="icon-compartir" aria-hidden="true" />
         <span>Compartir</span>
       </button>
       
       {showMenu && (
         <div className="share-menu">
-          <div className="share-menu-header">
-            <span>Compartir partido</span>
-            <button className="share-menu-close" onClick={() => setShowMenu(false)}>
-              <X size={16} />
-            </button>
-          </div>
-          
-          {shortCode && (
-            <div className="share-code">
-              <span className="share-code-label">Código:</span>
-              <span className="share-code-value">{shortCode}</span>
-            </div>
-          )}
-          
           <div className="share-menu-options">
             <button className="share-option" onClick={shareWhatsApp}>
               <MessageCircle size={18} />
               <span>Enviar por WhatsApp</span>
             </button>
-            
+
             <button className="share-option" onClick={copyLink}>
               <Link2 size={18} />
               <span>{copied ? '¡Copiado!' : 'Copiar link'}</span>

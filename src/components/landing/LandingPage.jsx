@@ -73,19 +73,30 @@ export default function LandingPage({ onNavigate }) {
   return (
     <div className="landing-page">
       <div className="landing-hero">
-        <div className="hero-content">
-          <h1 className="hero-title">Organizador de Partidos</h1>
-          <p className="hero-subtitle">
-            Crea tu partido, invita a tus amigos y arma los equipos de forma simple y rápida
-          </p>
-        </div>
-
         <div className="hero-form-container">
           <form onSubmit={handleSubmit} className="match-form hero-form">
+            <h2 className="form-heading">Nuevo partido</h2>
+
             {error && (
               <div className="form-error">{error}</div>
             )}
-            
+
+            <div className="form-group">
+              <div className="player-count-grid">
+                {PLAYER_COUNTS.map(option => (
+                  <button
+                    key={option.total}
+                    type="button"
+                    className={`count-option ${formData.cantidadJugadores === option.total ? 'selected' : ''}`}
+                    onClick={() => handleChange('cantidadJugadores', option.total)}
+                  >
+                    <span className="count-number">{option.total}</span>
+                    <span className="count-format">{option.format}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <div className="form-group">
               <label htmlFor="nombre">
                 Nombre del partido <span className="required">*</span>
@@ -110,6 +121,7 @@ export default function LandingPage({ onNavigate }) {
                   type="date"
                   value={formData.fecha}
                   onChange={(e) => handleChange('fecha', e.target.value)}
+                  onClick={(e) => e.currentTarget.showPicker?.()}
                   min={getTodayString()}
                 />
               </div>
@@ -123,6 +135,7 @@ export default function LandingPage({ onNavigate }) {
                   type="time"
                   value={formData.horario}
                   onChange={(e) => handleChange('horario', e.target.value)}
+                  onClick={(e) => e.currentTarget.showPicker?.()}
                 />
               </div>
             </div>
@@ -139,25 +152,6 @@ export default function LandingPage({ onNavigate }) {
                 placeholder="Ej: Cancha Los Pinos, Av. Libertador 1234"
                 maxLength={100}
               />
-            </div>
-
-            <div className="form-group">
-              <label>
-                Cantidad de jugadores <span className="required">*</span>
-              </label>
-              <div className="player-count-grid">
-                {PLAYER_COUNTS.map(option => (
-                  <button
-                    key={option.total}
-                    type="button"
-                    className={`count-option ${formData.cantidadJugadores === option.total ? 'selected' : ''}`}
-                    onClick={() => handleChange('cantidadJugadores', option.total)}
-                  >
-                    <span className="count-number">{option.total}</span>
-                    <span className="count-format">{option.format}</span>
-                  </button>
-                ))}
-              </div>
             </div>
 
             <button 

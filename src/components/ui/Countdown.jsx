@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react'
-import { Timer } from 'lucide-react'
 
 function Countdown({ targetDate, targetTime }) {
   const [timeLeft, setTimeLeft] = useState(null)
@@ -55,18 +54,14 @@ function Countdown({ targetDate, targetTime }) {
     return null // Don't show countdown if match has passed
   }
   
-  const { days, hours, minutes, seconds } = timeLeft
-  
-  // Build countdown text: "Jugamos en xd xx:xx:xx"
-  const timePart = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-  const countdownText = days > 0 
-    ? `Jugamos en ${days}d ${timePart}`
-    : `Jugamos en ${timePart}`
-  
+  const { days, hours, minutes } = timeLeft
+  const minutesPart = minutes.toString().padStart(2, '0')
+
   return (
     <div className="info-item countdown-inline">
-      <Timer size={18} />
-      <span className="countdown-text">{countdownText}</span>
+      <span className="countdown-text">
+        Falta {days > 0 ? `${days}d ` : ''}{hours}h<span className="blink-colon">:</span>{minutesPart}m
+      </span>
     </div>
   )
 }

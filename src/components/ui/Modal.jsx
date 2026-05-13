@@ -44,7 +44,7 @@ function Modal({ isOpen, onClose, title, children, footer, onSubmit }) {
         <div className="modal-header">
           <h2 id="modal-title">{title}</h2>
           <button className="modal-close" onClick={onClose} aria-label="Cerrar">
-            <X size={20} />
+            <img src="/icons/removeplayer.svg" alt="" width="24" height="24" />
           </button>
         </div>
         <div className="modal-body">

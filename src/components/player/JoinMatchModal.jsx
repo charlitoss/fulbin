@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { X, UserPlus, Users, Clock, Eye } from 'lucide-react'
+import { X, UserPlus, Users, Clock, Eye, ArrowRight } from 'lucide-react'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import Modal from '../ui/Modal'
-import { PHYSICAL_STATES } from '../../utils/constants'
+import { PHYSICAL_STATES, MAX_SUPLENTES } from '../../utils/constants'
 
 const REGISTRATION_TYPES = {
   jugador: { label: 'Jugador', icon: Users, description: 'Jugar en el partido' },
@@ -11,7 +11,13 @@ const REGISTRATION_TYPES = {
   hinchada: { label: 'Hinchada', icon: Eye, description: 'Ir a ver el partido' }
 }
 
-function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly = false }) {
+const STATE_ICONS = {
+  cansado: '/icons/State=Down, Size=Medium.svg',
+  normal: '/icons/State=Good, Size=Medium.svg',
+  excelente: '/icons/State=Fire, Size=Medium.svg',
+}
+
+function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly = false, defaultType = null }) {
   // Main player (the person filling the form)
   const [nombre, setNombre] = useState('')
   const [estadoFisico, setEstadoFisico] = useState('normal')
@@ -45,11 +51,11 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
   // Calculate available spots - always count from registrations
   const spotsInfo = useMemo(() => {
     if (!registrations || !match) {
-      return { jugadores: 0, suplentes: 0, cupoTotal: 10, maxSuplentes: 5 }
+      return { jugadores: 0, suplentes: 0, cupoTotal: 10, maxSuplentes: MAX_SUPLENTES }
     }
-    
+
     const cupoTotal = match.cantidadJugadores // Total de jugadores (ya es jugadoresPorEquipo * 2)
-    const maxSuplentes = Math.floor(cupoTotal / 2)
+    const maxSuplentes = MAX_SUPLENTES
     
     // Siempre contar desde registrations - jugadores son los que NO son suplente ni hinchada
     const jugadores = registrations.filter(r => 
@@ -71,6 +77,9 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
       // If playerOnly mode, always set to jugador
       if (playerOnly) {
         setTipoInscripcion('jugador')
+      } else if (defaultType) {
+        // Caller pre-selected a type (e.g. clicked the Suplentes empty slot)
+        setTipoInscripcion(defaultType)
       } else {
         // Auto-select type based on availability
         if (spotsInfo.jugadores >= spotsInfo.cupoTotal) {
@@ -84,7 +93,7 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
         }
       }
     }
-  }, [isOpen, matchId, playerOnly, spotsInfo])
+  }, [isOpen, matchId, playerOnly, defaultType, spotsInfo])
   
   // Check if type is available
   const isTypeAvailable = (type) => {
@@ -371,27 +380,30 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
       isOpen={isOpen}
       onClose={handleClose}
       onSubmit={handleSubmit}
-      title="Anotarse al Partido"
+      title="Anotarse al partido"
       footer={
         <>
-          <button 
-            className="btn btn-secondary" 
+          <button
+            className="btn btn-secondary"
             onClick={handleClose}
             disabled={isSubmitting}
           >
             Cancelar
           </button>
-          <button 
-            className="btn btn-primary" 
+          <button
+            className="btn btn-primary"
             onClick={handleSubmit}
             disabled={isSubmitting}
           >
-            {isSubmitting 
-              ? 'Inscribiendo...' 
-              : (friends.length > 0 || pendingFriendsCount > 0)
-                ? `Confirmar (${totalToRegister})` 
-                : 'Confirmar'
-            }
+            <span>
+              {isSubmitting
+                ? 'Inscribiendo...'
+                : (friends.length > 0 || pendingFriendsCount > 0)
+                  ? `Confirmar (${totalToRegister})`
+                  : 'Confirmar'
+              }
+            </span>
+            {!isSubmitting && <span className="icon-arrow-right" aria-hidden="true" />}
           </button>
         </>
       }
@@ -404,34 +416,27 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
         {/* Registration type selector - only show if not playerOnly */}
         {!playerOnly && (
           <div className="form-group">
-            <label>Tipo de inscripción</label>
             <div className="registration-type-selector">
               {Object.entries(REGISTRATION_TYPES).map(([key, type]) => {
-                const Icon = type.icon
                 const available = isTypeAvailable(key)
                 const isSelected = tipoInscripcion === key
-                
+
                 return (
                   <div
                     key={key}
                     className={`type-option ${isSelected ? 'selected' : ''} ${!available ? 'disabled' : ''}`}
                     onClick={() => available && setTipoInscripcion(key)}
                   >
-                    <Icon size={20} />
-                    <div className="type-option-text">
-                      <span className="type-label">{type.label}</span>
-                      <span className="type-description">{type.description}</span>
-                    </div>
-                    {!available && <span className="type-full">Lleno</span>}
+                    <span className="type-label">{type.label}</span>
                   </div>
                 )
               })}
             </div>
-            
+
             {/* Spots info */}
             <div className="spots-info">
-              <span>Jugadores: {spotsInfo.jugadores}/{spotsInfo.cupoTotal}</span>
-              <span>Suplentes: {spotsInfo.suplentes}/{spotsInfo.maxSuplentes}</span>
+              <span>Jugadores {spotsInfo.jugadores}/{spotsInfo.cupoTotal}</span>
+              <span>Suplentes {spotsInfo.suplentes}</span>
             </div>
           </div>
         )}
@@ -455,7 +460,6 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
         {/* Physical state - only for jugador and suplente */}
         {tipoInscripcion !== 'hinchada' && (
           <div className="form-group">
-            <label>Tu estado físico</label>
             <div className="physical-state-selector">
               {Object.entries(PHYSICAL_STATES).map(([key, state]) => (
                 <div
@@ -463,7 +467,7 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
                   className={`state-option ${estadoFisico === key ? 'selected' : ''}`}
                   onClick={() => setEstadoFisico(key)}
                 >
-                  <span className="state-emoji">{state.emoji}</span>
+                  <img src={STATE_ICONS[key]} alt="" className="state-icon" />
                   <span className="state-label">{state.label}</span>
                 </div>
               ))}
@@ -473,57 +477,19 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
         
         {/* Friends section - only for jugador and suplente */}
         {tipoInscripcion !== 'hinchada' && (
-          <div className="friends-section">
-            <div className="friends-section-header">
-              Agregar amigos (opcional)
-            </div>
-            
-            <div className="friend-input-row">
-              <input
-                ref={friendInputRef}
-                type="text"
-                value={friendName}
-                onChange={(e) => setFriendName(e.target.value)}
-                onKeyDown={handleFriendKeyDown}
-                placeholder="Nombre del amigo"
-                maxLength={200}
-                className="friend-input"
-              />
-              <button 
-                type="button"
-                className="btn btn-secondary btn-add-friend"
-                onClick={handleAddFriend}
-              >
-                <UserPlus size={16} />
-                <span className="btn-add-friend-text">Agregar</span>
-              </button>
-            </div>
-            <span className="hint">Podés agregar varios separados por coma</span>
-            
-            {/* Friends list */}
-            {friends.length > 0 && (
-              <div className="friends-list">
-                <div className="friends-list-header">
-                  Amigos a inscribir ({friends.length}):
-                </div>
-                <div className="friends-list-items">
-                  {friends.map((friend, index) => (
-                    <div key={friend.id} className="friend-item">
-                      <span className="friend-number">{index + 1}.</span>
-                      <span className="friend-name">{friend.nombre}</span>
-                      <button
-                        type="button"
-                        className="friend-remove"
-                        onClick={() => handleRemoveFriend(friend.id)}
-                        title="Quitar de la lista"
-                      >
-                        <X size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+          <div className="friends-section form-group">
+            <label htmlFor="friend-input">Anota a un amigo (opcional)</label>
+            <input
+              id="friend-input"
+              ref={friendInputRef}
+              type="text"
+              value={friendName}
+              onChange={(e) => setFriendName(e.target.value)}
+              placeholder="Juan, Pedro, Mati"
+              maxLength={200}
+              className="friend-input"
+            />
+            <span className="hint">Podes agregar varios separados por coma</span>
           </div>
         )}
       </div>

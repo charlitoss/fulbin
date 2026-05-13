@@ -118,7 +118,7 @@ function MatchPage({ matchId, onNavigate }) {
   if (match === undefined) {
     return (
       <div className="match-page">
-        <div className="loading">Cargando partido...</div>
+        <div className="loading">Cargando...</div>
       </div>
     )
   }
@@ -138,7 +138,7 @@ function MatchPage({ matchId, onNavigate }) {
   }
   
   return (
-    <div className="match-page">
+    <div className={`match-page match-page--${match.pasoActual}`}>
       {/* Editable Header */}
       <EditableMatchHeader
         match={match}
