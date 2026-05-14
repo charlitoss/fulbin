@@ -659,7 +659,6 @@ h4 { font-size: var(--type-lg); }
    =================================== */
 
 .landing-page {
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
 }
