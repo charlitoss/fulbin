@@ -3,7 +3,7 @@
 ## Estructura Actual
 
 ```
-soccer-organizer-app/
+fulbin/
 ├── src/
 │   ├── components/
 │   │   └── match/

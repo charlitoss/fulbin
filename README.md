@@ -1,4 +1,4 @@
-# Hoy Juego ⚽
+# Fulbin ⚽
 
 Una aplicación web para organizar partidos de fútbol con amigos de manera fácil y rápida.
 
