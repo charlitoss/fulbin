@@ -4,6 +4,12 @@ import { api } from '../convex/_generated/api'
 import LandingPage from './components/landing/LandingPage'
 import MatchPage from './components/match/MatchPage'
 import Footer from './components/ui/Footer'
+import CrtEffect from './components/ui/CrtEffect'
+import CrtToggle from './components/ui/CrtToggle'
+import CrtControlPanel from './components/ui/CrtControlPanel'
+import { CRT_DEFAULTS, loadCrtParams, saveCrtParams } from './components/ui/crtSettings'
+
+const CRT_STORAGE_KEY = 'fulbin:crt-enabled'
 
 // Component to handle short code redirect
 function ShortCodeRedirect({ shortCode, onNavigate }) {
@@ -43,12 +49,33 @@ function ShortCodeRedirect({ shortCode, onNavigate }) {
 
 function App() {
   const [route, setRoute] = useState(window.location.hash || '#/')
-  
+  const [crtEnabled, setCrtEnabled] = useState(() => {
+    try {
+      return localStorage.getItem(CRT_STORAGE_KEY) === 'true'
+    } catch {
+      return false
+    }
+  })
+  const [crtParams, setCrtParams] = useState(loadCrtParams)
+  const [crtPanelOpen, setCrtPanelOpen] = useState(false)
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(CRT_STORAGE_KEY, String(crtEnabled))
+    } catch {}
+    document.body.classList.toggle('crt-on', crtEnabled)
+    if (!crtEnabled) setCrtPanelOpen(false)
+  }, [crtEnabled])
+
+  useEffect(() => {
+    saveCrtParams(crtParams)
+  }, [crtParams])
+
   useEffect(() => {
     const handleHashChange = () => {
       setRoute(window.location.hash || '#/')
     }
-    
+
     window.addEventListener('hashchange', handleHashChange)
     return () => window.removeEventListener('hashchange', handleHashChange)
   }, [])
@@ -88,6 +115,20 @@ function App() {
       </header>
       {getRouteComponent()}
       <Footer />
+      <CrtToggle
+        enabled={crtEnabled}
+        onToggle={() => setCrtEnabled(v => !v)}
+        onOpenSettings={() => setCrtPanelOpen(v => !v)}
+      />
+      {crtEnabled && <CrtEffect params={crtParams} />}
+      {crtEnabled && crtPanelOpen && (
+        <CrtControlPanel
+          params={crtParams}
+          onChange={setCrtParams}
+          onReset={() => setCrtParams({ ...CRT_DEFAULTS })}
+          onClose={() => setCrtPanelOpen(false)}
+        />
+      )}
     </div>
   )
 }
