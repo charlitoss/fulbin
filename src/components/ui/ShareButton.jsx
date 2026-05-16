@@ -67,10 +67,23 @@ Anotate acá: ${shareUrl}`
     }
   }
   
-  const shareWhatsApp = () => {
-    const message = encodeURIComponent(getWhatsAppMessage())
-    window.open(`https://wa.me/?text=${message}`, '_blank')
+  const shareWhatsApp = async () => {
+    const text = getWhatsAppMessage()
     setShowMenu(false)
+
+    // Mobile: use native share sheet — no extra tab, hands off straight to WhatsApp
+    if (navigator.share) {
+      try {
+        await navigator.share({ text })
+        return
+      } catch (err) {
+        // User cancelled or share failed — fall through to wa.me
+        if (err?.name === 'AbortError') return
+      }
+    }
+
+    // Desktop fallback: open WhatsApp Web in a new tab
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
   }
   
   return (

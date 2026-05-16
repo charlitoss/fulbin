@@ -72,6 +72,10 @@ function App() {
   }, [crtParams])
 
   useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [route])
+
+  useEffect(() => {
     const handleHashChange = () => {
       setRoute(window.location.hash || '#/')
     }
