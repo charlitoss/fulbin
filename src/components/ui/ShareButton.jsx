@@ -67,23 +67,16 @@ Anotate acá: ${shareUrl}`
     }
   }
   
-  const shareWhatsApp = async () => {
+  const shareWhatsApp = () => {
     const text = getWhatsAppMessage()
     setShowMenu(false)
-
-    // Mobile: use native share sheet — no extra tab, hands off straight to WhatsApp
-    if (navigator.share) {
-      try {
-        await navigator.share({ text })
-        return
-      } catch (err) {
-        // User cancelled or share failed — fall through to wa.me
-        if (err?.name === 'AbortError') return
-      }
-    }
-
-    // Desktop fallback: open WhatsApp Web in a new tab
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
+    const encoded = encodeURIComponent(text)
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+    // whatsapp:// preserves the full prefilled text on iOS where wa.me sometimes drops everything but the URL
+    const target = isMobile
+      ? `whatsapp://send?text=${encoded}`
+      : `https://api.whatsapp.com/send?text=${encoded}`
+    window.open(target, '_blank')
   }
   
   return (
