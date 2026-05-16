@@ -7,12 +7,12 @@ export const PHYSICAL_STATES = {
 };
 
 export const PLAYER_COUNTS = [
-  { total: 10, perTeam: 5, format: '5v5' },
-  { total: 12, perTeam: 6, format: '6v6' },
-  { total: 14, perTeam: 7, format: '7v7' },
-  { total: 16, perTeam: 8, format: '8v8' },
-  { total: 18, perTeam: 9, format: '9v9' },
-  { total: 22, perTeam: 11, format: '11v11' }
+  { total: 10, perTeam: 5, format: '5 vs 5' },
+  { total: 12, perTeam: 6, format: '6 vs 6' },
+  { total: 14, perTeam: 7, format: '7 vs 7' },
+  { total: 16, perTeam: 8, format: '8 vs 8' },
+  { total: 18, perTeam: 9, format: '9 vs 9' },
+  { total: 22, perTeam: 11, format: '11 vs 11' }
 ];
 
 export const ROLES = {

@@ -10,6 +10,7 @@ function EditableMatchHeader({ match, onAddPlayer, onPlayersPerTeamChange }) {
   const [editingField, setEditingField] = useState(null)
   const [editValue, setEditValue] = useState('')
   const pickerInputRef = useRef(null)
+  const titleInputRef = useRef(null)
 
   // Open the native picker as soon as the field enters edit mode
   useEffect(() => {
@@ -17,6 +18,14 @@ function EditableMatchHeader({ match, onAddPlayer, onPlayersPerTeamChange }) {
       pickerInputRef.current.showPicker?.()
     }
   }, [editingField])
+
+  // Auto-resize the title textarea (fallback for browsers without field-sizing: content)
+  useEffect(() => {
+    if (editingField !== 'nombre' || !titleInputRef.current) return
+    const el = titleInputRef.current
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }, [editingField, editValue])
 
   const saveDateTime = async (datetimeLocalValue) => {
     if (!datetimeLocalValue) {
@@ -95,7 +104,8 @@ function EditableMatchHeader({ match, onAddPlayer, onPlayersPerTeamChange }) {
   }
   
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault()
       saveEdit()
     } else if (e.key === 'Escape') {
       cancelEdit()
@@ -219,13 +229,15 @@ function EditableMatchHeader({ match, onAddPlayer, onPlayersPerTeamChange }) {
       return (
         <div className="editable-title editing">
           <img src="/soccer-ball.png" alt="" className="title-ball" />
-          <input
-            type="text"
+          <textarea
+            ref={titleInputRef}
+            rows={1}
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Nombre del partido"
             autoFocus
+            maxLength={80}
             className="editable-title-input"
           />
           <button className="edit-action-btn save" onClick={saveEdit}>

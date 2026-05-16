@@ -156,7 +156,7 @@ function TeamPanel({
             <Edit2 size={12} className="edit-icon-inline" />
           </h3>
         )}
-        <span className="team-panel-count">{players.length}</span>
+        <span className="count-chip">{players.length}</span>
       </div>
       
       <div className="team-panel-list">

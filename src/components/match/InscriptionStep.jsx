@@ -176,7 +176,7 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
           )}
           {isQuotaComplete && (
             <p className="progress-message complete">
-              Somos {confirmedCount}! Armemos los equipos
+              Somos {confirmedCount}! Se juega
             </p>
           )}
         </div>
@@ -218,25 +218,25 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
           </p>
         </div>
         <div className="player-list compact-list">
-          {sortedHinchada.length === 0 ? (
-            <EmptySlot index={0} onClick={() => openJoinModal('hinchada')} />
-          ) : (
-            sortedHinchada.map((registration, index) => {
-              const player = players[registration.jugadorId]
-              if (!player) return null
-              return (
-                <PlayerCard
-                  key={registration.jugadorId}
-                  player={player}
-                  registration={registration}
-                  onRemove={handleRemovePlayer}
-                  index={index}
-                  compact={true}
-                  showState={false}
-                />
-              )
-            })
-          )}
+          {sortedHinchada.map((registration, index) => {
+            const player = players[registration.jugadorId]
+            if (!player) return null
+            return (
+              <PlayerCard
+                key={registration.jugadorId}
+                player={player}
+                registration={registration}
+                onRemove={handleRemovePlayer}
+                index={index}
+                compact={true}
+                showState={false}
+              />
+            )
+          })}
+          <EmptySlot
+            index={sortedHinchada.length}
+            onClick={() => openJoinModal('hinchada')}
+          />
         </div>
       </div>
 

@@ -90,8 +90,8 @@ export default function LandingPage({ onNavigate }) {
                     className={`count-option ${formData.cantidadJugadores === option.total ? 'selected' : ''}`}
                     onClick={() => handleChange('cantidadJugadores', option.total)}
                   >
-                    <span className="count-number">{option.total}</span>
                     <span className="count-format">{option.format}</span>
+                    <span className="count-number">{option.total}</span>
                   </button>
                 ))}
               </div>

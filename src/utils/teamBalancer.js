@@ -79,39 +79,34 @@ export function calculateEffectiveLevel(player, registration, role = null) {
 }
 
 /**
- * Get default position coordinates based on role and team
+ * Field is rendered landscape: blanco = left half (x: 0-50), oscuro = right
+ * half (x: 50-100). Each role sits at a fixed depth (X) and players in the
+ * same role are spread evenly along the short axis (Y).
+ *
+ * Combined with the role distribution from getIdealDistribution, this yields
+ * traditional formations: 1-1-2-1 (5), 1-2-2-1 (6), 1-2-3-1 (7), 1-3-3-1 (8),
+ * 1-3-3-2 (9), 1-4-4-2 (11).
  */
-function getDefaultPosition(role, team, index, playersPerTeam) {
-  // Field is 100x100, team blanco is top half (y: 0-50), team oscuro is bottom (y: 50-100)
+const FORMATION_DEPTH = {
+  arquero: 5,
+  defensor: 18,
+  medio: 33,
+  delantero: 45,
+}
+
+function spreadAlongY(index, total) {
+  if (total <= 1) return 50
+  const pad = 18
+  const step = (100 - pad * 2) / (total - 1)
+  return pad + step * index
+}
+
+export function getDefaultPosition(role, team, index, totalInRole = 1) {
+  const depth = FORMATION_DEPTH[role] ?? FORMATION_DEPTH.medio
   const isBlanco = team === 'blanco'
-  const baseY = isBlanco ? 25 : 75
-  
-  const positions = {
-    arquero: { x: 50, y: isBlanco ? 8 : 92 },
-    defensor: [
-      { x: 20, y: baseY - 10 },
-      { x: 40, y: baseY - 10 },
-      { x: 60, y: baseY - 10 },
-      { x: 80, y: baseY - 10 },
-    ],
-    medio: [
-      { x: 25, y: baseY },
-      { x: 50, y: baseY },
-      { x: 75, y: baseY },
-    ],
-    delantero: [
-      { x: 30, y: baseY + 12 },
-      { x: 50, y: baseY + 15 },
-      { x: 70, y: baseY + 12 },
-    ]
-  }
-  
-  if (role === 'arquero') {
-    return positions.arquero
-  }
-  
-  const rolePositions = positions[role] || positions.medio
-  return rolePositions[index % rolePositions.length]
+  const x = isBlanco ? depth : 100 - depth
+  const y = spreadAlongY(index, totalInRole)
+  return { x, y }
 }
 
 /**
@@ -213,14 +208,23 @@ export function generateBalancedTeams(players, registrations, playersPerTeam) {
   
   // Convert to assignment format with positions
   const roleCounts = { blanco: {}, oscuro: {} }
-  
+  const roleTotals = {
+    blanco: countByRole(teamBlanco.players),
+    oscuro: countByRole(teamOscuro.players),
+  }
+
   ;[...teamBlanco.players, ...teamOscuro.players].forEach(p => {
     const team = p.team
     roleCounts[team][p.role] = (roleCounts[team][p.role] || 0)
-    
-    const position = getDefaultPosition(p.role, team, roleCounts[team][p.role], playersPerTeam)
+
+    const position = getDefaultPosition(
+      p.role,
+      team,
+      roleCounts[team][p.role],
+      roleTotals[team][p.role]
+    )
     roleCounts[team][p.role]++
-    
+
     assignments.push({
       jugadorId: p.playerId,
       equipo: team,
@@ -264,7 +268,14 @@ function determineRole(team, preferredRole, playersPerTeam) {
 /**
  * Get ideal role distribution based on team size
  */
-function getIdealDistribution(playersPerTeam) {
+function countByRole(players) {
+  return players.reduce((acc, p) => {
+    acc[p.role] = (acc[p.role] || 0) + 1
+    return acc
+  }, {})
+}
+
+export function getIdealDistribution(playersPerTeam) {
   const distributions = {
     5: { arquero: 1, defensor: 1, medio: 2, delantero: 1 },
     6: { arquero: 1, defensor: 2, medio: 2, delantero: 1 },

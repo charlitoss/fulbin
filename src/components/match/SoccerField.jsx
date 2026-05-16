@@ -113,10 +113,11 @@ function SoccerField({
       }
 
       // Check if player crossed the center line during touch drag
+      // Field is landscape: blanco = left half (x < 50), oscuro = right (x >= 50)
       const assignment = teamConfig.asignaciones.find(a => a.jugadorId === currentDragging)
       if (assignment) {
         const wasInBlancoHalf = assignment.equipo === 'blanco'
-        const isNowInBlancoHalf = prev.y < 50
+        const isNowInBlancoHalf = prev.x < 50
 
         if (wasInBlancoHalf !== isNowInBlancoHalf) {
           onSwapTeam(currentDragging)
