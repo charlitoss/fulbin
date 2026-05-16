@@ -70,8 +70,13 @@ Anotate acá: ${shareUrl}`
   const shareWhatsApp = () => {
     const text = getWhatsAppMessage()
     setShowMenu(false)
-    // wa.me deep-links into the WhatsApp app on mobile and WhatsApp Web on desktop
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank')
+    const encoded = encodeURIComponent(text)
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+    // whatsapp:// preserves the full prefilled text on iOS where wa.me sometimes drops everything but the URL
+    const target = isMobile
+      ? `whatsapp://send?text=${encoded}`
+      : `https://api.whatsapp.com/send?text=${encoded}`
+    window.open(target, '_blank')
   }
   
   return (
