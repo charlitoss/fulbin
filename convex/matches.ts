@@ -101,6 +101,8 @@ export const update = mutation({
     linkCompartible: v.optional(v.string()),
     organizadorId: v.optional(v.string()),
     organizadorNombre: v.optional(v.string()),
+    iniciadoEn: v.optional(v.number()),
+    finalizadoEn: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const { matchId, ...updates } = args;
@@ -127,5 +129,41 @@ export const remove = mutation({
   args: { matchId: v.id("matches") },
   handler: async (ctx, args) => {
     await ctx.db.delete(args.matchId);
+  },
+});
+
+// Start a match: transitions pasoActual to 'jugando' and records the kickoff timestamp.
+export const startMatch = mutation({
+  args: { matchId: v.id("matches") },
+  handler: async (ctx, args) => {
+    const match = await ctx.db.get(args.matchId);
+    if (!match) throw new Error("Match not found");
+    if (match.pasoActual !== "armado_equipos") return args.matchId;
+
+    await ctx.db.patch(args.matchId, {
+      pasoActual: "jugando",
+      iniciadoEn: Date.now(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    return args.matchId;
+  },
+});
+
+// Finish a match: transitions pasoActual to 'finalizado' and records the final whistle.
+export const finishMatch = mutation({
+  args: { matchId: v.id("matches") },
+  handler: async (ctx, args) => {
+    const match = await ctx.db.get(args.matchId);
+    if (!match) throw new Error("Match not found");
+    if (match.pasoActual !== "jugando") return args.matchId;
+
+    await ctx.db.patch(args.matchId, {
+      pasoActual: "finalizado",
+      finalizadoEn: Date.now(),
+      updatedAt: new Date().toISOString(),
+    });
+
+    return args.matchId;
   },
 });

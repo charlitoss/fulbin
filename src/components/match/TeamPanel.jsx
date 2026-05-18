@@ -14,8 +14,12 @@ function TeamPanel({
   onSwapTeam, // Callback to swap player to other team
   onAddPlayer, // Prop for adding player
   onTeamNameChange, // Callback for name change
-  jugadoresPorEquipo // Number of players per team
+  jugadoresPorEquipo, // Number of players per team
+  mode = 'builder', // 'builder' | 'in-game'
+  onGoalDelta, // (jugadorId, delta) — only used in 'in-game' mode
+  readOnly = false, // when true (and mode === 'in-game'), goals are shown without +/- controls
 }) {
+  const isInGame = mode === 'in-game'
   const [isEditing, setIsEditing] = useState(false)
   const [editName, setEditName] = useState('')
   const [isDragOver, setIsDragOver] = useState(false)
@@ -92,6 +96,23 @@ function TeamPanel({
     const registration = registrations.find(r => r.jugadorId === playerId)
     const isDragging = draggingPlayerId === playerId
 
+    if (isInGame) {
+      return (
+        <PlayerCard
+          key={playerId}
+          player={player}
+          registration={registration}
+          index={index}
+          compact={true}
+          goalControls={{
+            goles: assignment.goles ?? 0,
+            onDelta: readOnly ? null : (delta) => onGoalDelta?.(playerId, delta),
+            readOnly,
+          }}
+        />
+      )
+    }
+
     return (
       <div
         key={playerId}
@@ -113,14 +134,14 @@ function TeamPanel({
   }
   
   return (
-    <div 
+    <div
       className={`team-panel team-panel-${team} ${isDragOver ? 'drag-over' : ''}`}
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
+      onDragOver={isInGame ? undefined : handleDragOver}
+      onDragLeave={isInGame ? undefined : handleDragLeave}
+      onDrop={isInGame ? undefined : handleDrop}
     >
       <div className={`team-panel-header team-${team}`}>
-        {isEditing ? (
+        {isEditing && !isInGame ? (
           <div className="team-panel-title-edit">
             <img
               src={team === 'blanco' ? '/icons/teamflag-light.svg' : '/icons/teamflag-dark.svg'}
@@ -144,7 +165,11 @@ function TeamPanel({
             </button>
           </div>
         ) : (
-          <h3 className="step-title team-panel-title" onClick={handleStartEdit} title="Click para editar">
+          <h3
+            className="step-title team-panel-title"
+            onClick={isInGame ? undefined : handleStartEdit}
+            title={isInGame ? undefined : 'Click para editar'}
+          >
             <img
               src={team === 'blanco' ? '/icons/teamflag-light.svg' : '/icons/teamflag-dark.svg'}
               alt=""
@@ -153,18 +178,18 @@ function TeamPanel({
               height="32"
             />
             {teamName}
-            <Edit2 size={12} className="edit-icon-inline" />
+            {!isInGame && <Edit2 size={12} className="edit-icon-inline" />}
           </h3>
         )}
         <span className="count-chip">{players.length}</span>
       </div>
-      
+
       <div className="team-panel-list">
         {/* Jugadores asignados */}
         {players.map((assignment, index) => renderAssignedPlayer(assignment, index))}
-        
+
         {/* Lugares vacíos */}
-        {jugadoresPorEquipo && Array.from({ length: Math.max(0, jugadoresPorEquipo - players.length) }).map((_, index) => (
+        {!isInGame && jugadoresPorEquipo && Array.from({ length: Math.max(0, jugadoresPorEquipo - players.length) }).map((_, index) => (
           <EmptySlot
             key={`empty-${index}`}
             index={players.length + index}

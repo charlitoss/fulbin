@@ -12,10 +12,12 @@ export default defineSchema({
     detallesUbicacion: v.optional(v.string()),
     cantidadJugadores: v.number(),
     jugadoresPorEquipo: v.number(),
-    pasoActual: v.string(), // 'inscripcion' | 'armado_equipos' | 'listo'
+    pasoActual: v.string(), // 'inscripcion' | 'armado_equipos' | 'jugando' | 'finalizado'
     linkCompartible: v.optional(v.string()),
     organizadorId: v.optional(v.string()),
     organizadorNombre: v.optional(v.string()),
+    iniciadoEn: v.optional(v.number()),
+    finalizadoEn: v.optional(v.number()),
     createdAt: v.string(),
     updatedAt: v.string(),
   })
@@ -62,6 +64,7 @@ export default defineSchema({
       posicion: v.optional(v.string()),
       coordenadaX: v.optional(v.number()),
       coordenadaY: v.optional(v.number()),
+      goles: v.optional(v.number()),
     })),
     formacionEquipoBlanco: v.string(),
     formacionEquipoOscuro: v.string(),

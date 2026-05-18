@@ -1,7 +1,17 @@
-import { Info } from 'lucide-react'
+import { Info, Minus, Plus } from 'lucide-react'
 import { PHYSICAL_STATES } from '../../utils/constants'
 
-function PlayerCard({ player, registration, onViewInfo, onRemove, onMove, index, compact = false, showState = true }) {
+function PlayerCard({
+  player,
+  registration,
+  onViewInfo,
+  onRemove,
+  onMove,
+  index,
+  compact = false,
+  showState = true,
+  goalControls = null,
+}) {
   const physicalState = PHYSICAL_STATES[registration?.estadoFisico] || PHYSICAL_STATES.normal
 
   // Get initials from name
@@ -36,23 +46,54 @@ function PlayerCard({ player, registration, onViewInfo, onRemove, onMove, index,
           )}
         </div>
         <div className="player-card-actions">
-          {onMove && (
-            <button
-              className="btn-icon-card btn-move-player"
-              onClick={() => onMove(player, registration)}
-              title="Cambiar de equipo"
-            >
-              <img src="/icons/moveplayer.svg" alt="" width="24" height="24" />
-            </button>
-          )}
-          {onRemove && (
-            <button
-              className="btn-icon-card"
-              onClick={() => onRemove(player, registration)}
-              title="Quitar"
-            >
-              <img src="/icons/removeplayer.svg" alt="" width="24" height="24" />
-            </button>
+          {goalControls ? (
+            goalControls.readOnly ? (
+              <div className="goal-controls goal-controls--readonly">
+                <span className="goal-count">{goalControls.goles ?? 0}</span>
+              </div>
+            ) : (
+              <div className="goal-controls">
+                <button
+                  type="button"
+                  className="goal-btn goal-btn--minus"
+                  onClick={() => goalControls.onDelta?.(-1)}
+                  disabled={(goalControls.goles ?? 0) === 0}
+                  aria-label="Quitar gol"
+                >
+                  <Minus size={14} />
+                </button>
+                <span className="goal-count">{goalControls.goles ?? 0}</span>
+                <button
+                  type="button"
+                  className="goal-btn goal-btn--plus"
+                  onClick={() => goalControls.onDelta?.(1)}
+                  aria-label="Agregar gol"
+                >
+                  <Plus size={14} />
+                </button>
+              </div>
+            )
+          ) : (
+            <>
+              {onMove && (
+                <button
+                  className="btn-icon-card btn-move-player"
+                  onClick={() => onMove(player, registration)}
+                  title="Cambiar de equipo"
+                >
+                  <img src="/icons/moveplayer.svg" alt="" width="24" height="24" />
+                </button>
+              )}
+              {onRemove && (
+                <button
+                  className="btn-icon-card"
+                  onClick={() => onRemove(player, registration)}
+                  title="Quitar"
+                >
+                  <img src="/icons/removeplayer.svg" alt="" width="24" height="24" />
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
