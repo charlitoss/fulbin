@@ -827,6 +827,12 @@ h4 { font-size: var(--type-lg); }
   background-size: 20px 20px, 3px 3px;
 }
 
+/* iOS centers date/time input values by default — force left alignment */
+.form-group input[type="date"]::-webkit-date-and-time-value,
+.form-group input[type="time"]::-webkit-date-and-time-value {
+  text-align: left;
+}
+
 .form-group input[type="date"] {
   background-image:
     url("/icons/calendario-sm.svg"),
