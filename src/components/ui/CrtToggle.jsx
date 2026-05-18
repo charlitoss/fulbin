@@ -11,7 +11,7 @@ function CrtToggle({ enabled, onToggle, onOpenSettings }) {
           aria-label="Ajustes CRT"
           title="Ajustes CRT"
         >
-          <Settings size={16} />
+          <Settings size={12} />
         </button>
       )}
       <button
@@ -22,7 +22,7 @@ function CrtToggle({ enabled, onToggle, onOpenSettings }) {
         aria-label={enabled ? 'Apagar efecto CRT' : 'Encender efecto CRT'}
         title={enabled ? 'Apagar efecto CRT' : 'Encender efecto CRT'}
       >
-        {enabled ? <Monitor size={16} /> : <MonitorOff size={16} />}
+        {enabled ? <Monitor size={12} /> : <MonitorOff size={12} />}
         <span>CRT</span>
       </button>
     </div>

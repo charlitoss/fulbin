@@ -26,26 +26,29 @@ function BalanceIndicator({ teamStats, teamConfig }) {
   const blancoFilled = Math.round((blanco.avgLevel / MAX_LEVEL) * segmentsPerSide)
   const oscuroFilled = Math.round((oscuro.avgLevel / MAX_LEVEL) * segmentsPerSide)
 
+  const totalLevel = blanco.avgLevel + oscuro.avgLevel
+  const blancoPct = totalLevel > 0 ? Math.round((blanco.avgLevel / totalLevel) * 100) : 50
+  const oscuroPct = 100 - blancoPct
+
   return (
     <div className="balance-indicator">
       <div className="balance-header">
         <span className="balance-team-label balance-team-label-left">
           <img src="/icons/teamflag-light.svg" alt="" width="16" height="16" />
           <span className="balance-team-name">{teamConfig.nombreEquipoBlanco}</span>
-          <span className="balance-team-value">{blanco.avgLevel.toFixed(1)}</span>
         </span>
         <h4 className="balance-title">
           <span className="balance-title-full">Balance de Equipos</span>
           <span className="balance-title-short">Balance</span>
         </h4>
         <span className="balance-team-label balance-team-label-right">
-          <span className="balance-team-value">{oscuro.avgLevel.toFixed(1)}</span>
           <span className="balance-team-name">{teamConfig.nombreEquipoOscuro}</span>
           <img src="/icons/teamflag-dark.svg" alt="" width="16" height="16" />
         </span>
       </div>
 
       <div className="balance-divergent-bar">
+        <span className="balance-team-value balance-team-value-left">{blancoPct}%</span>
         <div ref={sideRef} className="balance-divergent-side balance-divergent-side-left">
           {Array.from({ length: segmentsPerSide }, (_, i) => (
             <div
@@ -63,6 +66,7 @@ function BalanceIndicator({ teamStats, teamConfig }) {
             />
           ))}
         </div>
+        <span className="balance-team-value balance-team-value-right">{oscuroPct}%</span>
       </div>
     </div>
   )

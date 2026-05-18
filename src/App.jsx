@@ -5,7 +5,6 @@ import LandingPage from './components/landing/LandingPage'
 import MatchPage from './components/match/MatchPage'
 import Footer from './components/ui/Footer'
 import CrtEffect from './components/ui/CrtEffect'
-import CrtToggle from './components/ui/CrtToggle'
 import CrtControlPanel from './components/ui/CrtControlPanel'
 import { CRT_DEFAULTS, loadCrtParams, saveCrtParams } from './components/ui/crtSettings'
 
@@ -118,11 +117,10 @@ function App() {
         <img src="/LOGO.svg" alt="Fulbin" width="120" height="41" />
       </header>
       {getRouteComponent()}
-      <Footer />
-      <CrtToggle
-        enabled={crtEnabled}
-        onToggle={() => setCrtEnabled(v => !v)}
-        onOpenSettings={() => setCrtPanelOpen(v => !v)}
+      <Footer
+        crtEnabled={crtEnabled}
+        onCrtToggle={() => setCrtEnabled(v => !v)}
+        onCrtOpenSettings={() => setCrtPanelOpen(v => !v)}
       />
       {crtEnabled && <CrtEffect params={crtParams} />}
       {crtEnabled && crtPanelOpen && (
