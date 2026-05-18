@@ -4,6 +4,7 @@ import { api } from '../../../convex/_generated/api'
 import EditableMatchHeader from './EditableMatchHeader'
 import InscriptionStep from './InscriptionStep'
 import TeamBuilderStep from './TeamBuilderStep'
+import InGameStep from './InGameStep'
 import JoinMatchModal from '../player/JoinMatchModal'
 
 function MatchPage({ matchId, onNavigate }) {
@@ -20,6 +21,7 @@ function MatchPage({ matchId, onNavigate }) {
   const saveTeamConfig = useMutation(api.teamConfigurations.save)
   const removeRegistration = useMutation(api.registrations.remove)
   const startMatch = useMutation(api.matches.startMatch)
+  const finishMatch = useMutation(api.matches.finishMatch)
 
   const [isPastKickoff, setIsPastKickoff] = useState(false)
 
@@ -40,6 +42,11 @@ function MatchPage({ matchId, onNavigate }) {
     if (!match) return
     startMatch({ matchId: match._id })
   }, [match, startMatch])
+
+  const handleFinishMatch = useCallback(() => {
+    if (!match) return
+    finishMatch({ matchId: match._id })
+  }, [match, finishMatch])
   
   useEffect(() => {
     setShowJoinModal(false)  // Reset modal state on navigation
@@ -158,18 +165,22 @@ function MatchPage({ matchId, onNavigate }) {
     )
   }
   
+  const isInGame = match.pasoActual === 'jugando'
+
   return (
     <div className={`match-page match-page--${match.pasoActual}`}>
-      {/* Editable Header */}
-      <EditableMatchHeader
-        match={match}
-        onAddPlayer={handleAddPlayer}
-        onPlayersPerTeamChange={handlePlayersPerTeamChange}
-        isPastKickoff={isPastKickoff}
-        onCountdownComplete={handleCountdownComplete}
-        onStartMatch={handleStartMatch}
-      />
-      
+      {/* Editable Header — hidden during the in-game view (its own header takes over) */}
+      {!isInGame && (
+        <EditableMatchHeader
+          match={match}
+          onAddPlayer={handleAddPlayer}
+          onPlayersPerTeamChange={handlePlayersPerTeamChange}
+          isPastKickoff={isPastKickoff}
+          onCountdownComplete={handleCountdownComplete}
+          onStartMatch={handleStartMatch}
+        />
+      )}
+
       {/* Content based on current step */}
       {match.pasoActual === 'inscripcion' && (
         <InscriptionStep
@@ -177,23 +188,27 @@ function MatchPage({ matchId, onNavigate }) {
           onRegisterAddPlayerHandler={registerInscriptionAddPlayer}
         />
       )}
-      
+
       {match.pasoActual === 'armado_equipos' && (
-        <TeamBuilderStep 
+        <TeamBuilderStep
           match={match}
           onRegisterAddPlayerHandler={registerTeamBuilderAddPlayer}
         />
       )}
-      
+
+      {isInGame && (
+        <InGameStep match={match} onFinish={handleFinishMatch} />
+      )}
+
       {match.pasoActual === 'finalizado' && (
         <div className="team-builder-placeholder">
           <h2>Partido Finalizado</h2>
           <p>Este partido ya ha sido completado</p>
         </div>
       )}
-      
+
       {/* Join Match Modal - only render when NOT in inscription step (InscriptionStep has its own modal) */}
-      {match.pasoActual !== 'inscripcion' && (
+      {match.pasoActual !== 'inscripcion' && !isInGame && (
         <JoinMatchModal
           isOpen={showJoinModal}
           onClose={() => setShowJoinModal(false)}
