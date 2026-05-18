@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useQuery } from 'convex/react'
 import { api } from '../convex/_generated/api'
-import LandingPage from './components/landing/LandingPage'
+import SplashPage from './components/landing/SplashPage'
+import CreateMatchPage from './components/landing/CreateMatchPage'
 import MatchPage from './components/match/MatchPage'
 import Footer from './components/ui/Footer'
 import CrtEffect from './components/ui/CrtEffect'
@@ -90,32 +91,40 @@ function App() {
   // Parse route
   const getRouteComponent = () => {
     if (route === '#/' || route === '' || route === '#') {
-      return <LandingPage onNavigate={navigate} />
+      return <SplashPage onNavigate={navigate} />
     }
-    
+
+    if (route === '#/nuevo') {
+      return <CreateMatchPage onNavigate={navigate} />
+    }
+
     // Short code route: #/p/ABC123
     const shortCodeRoute = route.match(/^#\/p\/([A-Za-z0-9]{6})$/)
     if (shortCodeRoute) {
       const shortCode = shortCodeRoute[1]
       return <ShortCodeRedirect shortCode={shortCode} onNavigate={navigate} />
     }
-    
+
     // Match detail route: #/partido/match_123
     const matchRoute = route.match(/^#\/partido\/(.+)$/)
     if (matchRoute) {
       const matchId = matchRoute[1]
       return <MatchPage matchId={matchId} onNavigate={navigate} />
     }
-    
-    // 404 - redirect to home
-    return <LandingPage onNavigate={navigate} />
+
+    // 404 - fall back to splash
+    return <SplashPage onNavigate={navigate} />
   }
+
+  const isSplash = route === '#/' || route === '' || route === '#'
   
   return (
-    <div className="app">
-      <header className="app-logo">
-        <img src="/LOGO.svg" alt="Fulbin" width="120" height="41" />
-      </header>
+    <div className={`app${isSplash ? ' app--splash' : ''}`}>
+      {!isSplash && (
+        <header className="app-logo">
+          <img src="/LOGO.svg" alt="Fulbin" width="120" height="41" />
+        </header>
+      )}
       {getRouteComponent()}
       <Footer
         crtEnabled={crtEnabled}

@@ -4,7 +4,7 @@ import { api } from '../../../convex/_generated/api'
 import { PLAYER_COUNTS } from '../../utils/constants'
 import { getTodayString } from '../../utils/dateUtils'
 
-export default function LandingPage({ onNavigate }) {
+export default function CreateMatchPage({ onNavigate }) {
   const [formData, setFormData] = useState({
     nombre: '',
     fecha: getTodayString(),
@@ -74,6 +74,13 @@ export default function LandingPage({ onNavigate }) {
     <div className="landing-page">
       <div className="landing-hero">
         <div className="hero-form-container">
+          <button
+            type="button"
+            className="back-link"
+            onClick={() => onNavigate('#/')}
+          >
+            ← Volver
+          </button>
           <form onSubmit={handleSubmit} className="match-form hero-form">
             <h2 className="form-heading">Nuevo partido</h2>
 
