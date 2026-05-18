@@ -19,6 +19,27 @@ function MatchPage({ matchId, onNavigate }) {
   // Convex mutations
   const saveTeamConfig = useMutation(api.teamConfigurations.save)
   const removeRegistration = useMutation(api.registrations.remove)
+  const startMatch = useMutation(api.matches.startMatch)
+
+  const [isPastKickoff, setIsPastKickoff] = useState(false)
+
+  useEffect(() => {
+    if (!match?.fecha || !match?.horario) return
+    const [year, month, day] = match.fecha.split('-').map(Number)
+    const [hours, minutes] = match.horario.split(':').map(Number)
+    if ([year, month, day, hours, minutes].some(Number.isNaN)) return
+    const target = new Date(year, month - 1, day, hours, minutes, 0)
+    setIsPastKickoff(target.getTime() <= Date.now())
+  }, [match?.fecha, match?.horario])
+
+  const handleCountdownComplete = useCallback(() => {
+    setIsPastKickoff(true)
+  }, [])
+
+  const handleStartMatch = useCallback(() => {
+    if (!match) return
+    startMatch({ matchId: match._id })
+  }, [match, startMatch])
   
   useEffect(() => {
     setShowJoinModal(false)  // Reset modal state on navigation
@@ -144,6 +165,9 @@ function MatchPage({ matchId, onNavigate }) {
         match={match}
         onAddPlayer={handleAddPlayer}
         onPlayersPerTeamChange={handlePlayersPerTeamChange}
+        isPastKickoff={isPastKickoff}
+        onCountdownComplete={handleCountdownComplete}
+        onStartMatch={handleStartMatch}
       />
       
       {/* Content based on current step */}

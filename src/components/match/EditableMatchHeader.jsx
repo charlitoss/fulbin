@@ -6,7 +6,14 @@ import ShareButton from '../ui/ShareButton'
 import Countdown from '../ui/Countdown'
 import { formatDate } from '../../utils/dateUtils'
 
-function EditableMatchHeader({ match, onAddPlayer, onPlayersPerTeamChange }) {
+function EditableMatchHeader({
+  match,
+  onAddPlayer,
+  onPlayersPerTeamChange,
+  isPastKickoff = false,
+  onCountdownComplete,
+  onStartMatch,
+}) {
   const [editingField, setEditingField] = useState(null)
   const [editValue, setEditValue] = useState('')
   const pickerInputRef = useRef(null)
@@ -272,16 +279,26 @@ function EditableMatchHeader({ match, onAddPlayer, onPlayersPerTeamChange }) {
         {renderEditablePlayersPerTeam()}
         {renderEditableText('ubicacion', match.ubicacion, null, 'Ubicación')}
         {renderEditableDateTime()}
-        <Countdown targetDate={match.fecha} targetTime={match.horario} />
+        <Countdown
+          targetDate={match.fecha}
+          targetTime={match.horario}
+          onComplete={onCountdownComplete}
+        />
       </div>
 
       <div className="match-header-actions">
         <ShareButton matchId={match._id} match={match} />
-        {onAddPlayer && (
-          <button className="btn-add-player" onClick={onAddPlayer} title="Agregar jugador">
-            <span className="icon-plus" aria-hidden="true" />
-            <span>Anotarse</span>
+        {isPastKickoff && match.pasoActual === 'armado_equipos' && onStartMatch ? (
+          <button className="btn-add-player btn-start-match" onClick={onStartMatch}>
+            <span>Empezar partido</span>
           </button>
+        ) : (
+          onAddPlayer && (
+            <button className="btn-add-player" onClick={onAddPlayer} title="Agregar jugador">
+              <span className="icon-plus" aria-hidden="true" />
+              <span>Anotarse</span>
+            </button>
+          )
         )}
       </div>
     </div>

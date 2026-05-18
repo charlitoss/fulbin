@@ -4367,6 +4367,11 @@ h4 { font-size: var(--type-lg); }
   background-color: var(--acid-yellow-dim);
 }
 
+.btn-add-player.btn-start-match {
+  padding-left: var(--space-4);
+  padding-right: var(--space-4);
+}
+
 /* ============================================================
    CRT Effect
    ============================================================ */

@@ -1,8 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
-function Countdown({ targetDate, targetTime }) {
+function Countdown({ targetDate, targetTime, onComplete }) {
   const [timeLeft, setTimeLeft] = useState(null)
-  
+  const completedRef = useRef(false)
+
+  useEffect(() => {
+    completedRef.current = false
+  }, [targetDate, targetTime])
+
   useEffect(() => {
     const calculateTimeLeft = () => {
       // Validate inputs
@@ -39,16 +44,20 @@ function Countdown({ targetDate, targetTime }) {
       }
     }
     
-    // Initial calculation
-    setTimeLeft(calculateTimeLeft())
-    
-    // Update every second
-    const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft())
-    }, 1000)
-    
+    const tick = () => {
+      const next = calculateTimeLeft()
+      setTimeLeft(next)
+      if (next === null && !completedRef.current) {
+        completedRef.current = true
+        onComplete?.()
+      }
+    }
+
+    tick()
+    const timer = setInterval(tick, 1000)
+
     return () => clearInterval(timer)
-  }, [targetDate, targetTime])
+  }, [targetDate, targetTime, onComplete])
   
   if (!timeLeft) {
     return null // Don't show countdown if match has passed
