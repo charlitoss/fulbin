@@ -17,6 +17,7 @@ function TeamPanel({
   jugadoresPorEquipo, // Number of players per team
   mode = 'builder', // 'builder' | 'in-game'
   onGoalDelta, // (jugadorId, delta) — only used in 'in-game' mode
+  readOnly = false, // when true (and mode === 'in-game'), goals are shown without +/- controls
 }) {
   const isInGame = mode === 'in-game'
   const [isEditing, setIsEditing] = useState(false)
@@ -105,7 +106,8 @@ function TeamPanel({
           compact={true}
           goalControls={{
             goles: assignment.goles ?? 0,
-            onDelta: (delta) => onGoalDelta?.(playerId, delta),
+            onDelta: readOnly ? null : (delta) => onGoalDelta?.(playerId, delta),
+            readOnly,
           }}
         />
       )

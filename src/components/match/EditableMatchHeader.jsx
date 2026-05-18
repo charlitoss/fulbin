@@ -235,7 +235,7 @@ function EditableMatchHeader({
     if (editingField === 'nombre') {
       return (
         <div className="editable-title editing">
-          <img src="/soccer-ball.png" alt="" className="title-ball" />
+          <img src="/soccer-ball.svg" alt="" className="title-ball" />
           <textarea
             ref={titleInputRef}
             rows={1}
@@ -262,7 +262,7 @@ function EditableMatchHeader({
         className="editable-title"
         onClick={() => startEdit('nombre', match.nombre)}
       >
-        <img src="/soccer-ball.png" alt="" className="title-ball" />
+        <img src="/soccer-ball.svg" alt="" className="title-ball" />
         {match.nombre}
         <Edit2 size={14} className="edit-icon" />
       </h1>

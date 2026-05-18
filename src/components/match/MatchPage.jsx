@@ -166,11 +166,12 @@ function MatchPage({ matchId, onNavigate }) {
   }
   
   const isInGame = match.pasoActual === 'jugando'
+  const isFinalized = match.pasoActual === 'finalizado'
 
   return (
     <div className={`match-page match-page--${match.pasoActual}`}>
-      {/* Editable Header — hidden during the in-game view (its own header takes over) */}
-      {!isInGame && (
+      {/* Editable Header — hidden during the in-game/finalized views (they have their own header) */}
+      {!isInGame && !isFinalized && (
         <EditableMatchHeader
           match={match}
           onAddPlayer={handleAddPlayer}
@@ -200,15 +201,12 @@ function MatchPage({ matchId, onNavigate }) {
         <InGameStep match={match} onFinish={handleFinishMatch} />
       )}
 
-      {match.pasoActual === 'finalizado' && (
-        <div className="team-builder-placeholder">
-          <h2>Partido Finalizado</h2>
-          <p>Este partido ya ha sido completado</p>
-        </div>
+      {isFinalized && (
+        <InGameStep match={match} finalized />
       )}
 
       {/* Join Match Modal - only render when NOT in inscription step (InscriptionStep has its own modal) */}
-      {match.pasoActual !== 'inscripcion' && !isInGame && (
+      {match.pasoActual !== 'inscripcion' && !isInGame && !isFinalized && (
         <JoinMatchModal
           isOpen={showJoinModal}
           onClose={() => setShowJoinModal(false)}

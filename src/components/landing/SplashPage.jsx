@@ -1,5 +1,3 @@
-import { ArrowRight } from 'lucide-react'
-
 const STEPS = [
   'Crea tu partido',
   'Invita a tus amigos',
@@ -10,8 +8,6 @@ const STEPS = [
 export default function SplashPage({ onNavigate }) {
   return (
     <div className="splash-page">
-      <div className="splash-bg" aria-hidden="true" />
-
       <div className="splash-content">
         <img
           src="/LOGO.svg"
@@ -30,7 +26,7 @@ export default function SplashPage({ onNavigate }) {
           <ol className="splash-howto">
             {STEPS.map((step, index) => (
               <li key={index} className="splash-howto-item">
-                <span className="splash-howto-number">{index + 1}</span>
+                <span className="count-chip">{index + 1}</span>
                 <span className="splash-howto-label">{step}</span>
               </li>
             ))}
@@ -42,7 +38,7 @@ export default function SplashPage({ onNavigate }) {
             onClick={() => onNavigate('#/nuevo')}
           >
             <span>Nuevo Partido</span>
-            <ArrowRight size={20} />
+            <span className="btn-arrow" aria-hidden="true" />
           </button>
         </div>
       </div>

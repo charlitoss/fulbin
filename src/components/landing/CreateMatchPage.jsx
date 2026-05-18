@@ -161,12 +161,13 @@ export default function CreateMatchPage({ onNavigate }) {
               />
             </div>
 
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="btn btn-primary btn-create"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Creando...' : 'Crear Partido'}
+              <span>{isSubmitting ? 'Creando...' : 'Crear Partido'}</span>
+              {!isSubmitting && <span className="btn-arrow" aria-hidden="true" />}
             </button>
           </form>
         </div>

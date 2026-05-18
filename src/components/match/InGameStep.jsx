@@ -5,10 +5,9 @@ import TeamPanel from './TeamPanel'
 import SoccerField from './SoccerField'
 import HinchadaPanel from './HinchadaPanel'
 import InGameHeader from './InGameHeader'
-import GolOverlay from './GolOverlay'
 import PlayerCard from '../player/PlayerCard'
 
-function InGameStep({ match, onFinish }) {
+function InGameStep({ match, onFinish, finalized = false }) {
   const teamConfig = useQuery(api.teamConfigurations.getByMatch, { matchId: match._id })
   const registrationsData = useQuery(api.registrations.listByMatch, { matchId: match._id })
   const playersData = useQuery(api.players.list)
@@ -57,20 +56,25 @@ function InGameStep({ match, onFinish }) {
     [registrations]
   )
 
-  // Trigger the Gol overlay only on a net score increase.
+  // Trigger the Gol overlay only on a net score increase (live games only).
   const prevTotalsRef = useRef({ blanco: goalsBlanco, oscuro: goalsOscuro })
   const [golTrigger, setGolTrigger] = useState(null)
   useEffect(() => {
+    if (finalized) return
     const prev = prevTotalsRef.current
-    if (goalsBlanco > prev.blanco || goalsOscuro > prev.oscuro) {
-      setGolTrigger({ key: Date.now() })
+    let scoringTeam = null
+    if (goalsBlanco > prev.blanco) scoringTeam = 'blanco'
+    else if (goalsOscuro > prev.oscuro) scoringTeam = 'oscuro'
+    if (scoringTeam) {
+      setGolTrigger({ key: Date.now(), team: scoringTeam })
     }
     prevTotalsRef.current = { blanco: goalsBlanco, oscuro: goalsOscuro }
-  }, [goalsBlanco, goalsOscuro])
+  }, [goalsBlanco, goalsOscuro, finalized])
 
   const handleGoalDelta = useCallback((jugadorId, delta) => {
+    if (finalized) return
     incrementPlayerGoals({ matchId: match._id, jugadorId, delta })
-  }, [incrementPlayerGoals, match._id])
+  }, [incrementPlayerGoals, match._id, finalized])
 
   if (!teamConfig || !playersData || !registrationsData) {
     return (
@@ -88,6 +92,8 @@ function InGameStep({ match, onFinish }) {
         goalsBlanco={goalsBlanco}
         goalsOscuro={goalsOscuro}
         onFinish={onFinish}
+        finalized={finalized}
+        golTrigger={golTrigger}
       />
 
       <SoccerField
@@ -110,6 +116,7 @@ function InGameStep({ match, onFinish }) {
               jugadoresPorEquipo={match.jugadoresPorEquipo}
               mode="in-game"
               onGoalDelta={handleGoalDelta}
+              readOnly={finalized}
             />
             <TeamPanel
               team="oscuro"
@@ -119,6 +126,7 @@ function InGameStep({ match, onFinish }) {
               jugadoresPorEquipo={match.jugadoresPorEquipo}
               mode="in-game"
               onGoalDelta={handleGoalDelta}
+              readOnly={finalized}
             />
           </div>
         </div>
@@ -151,8 +159,6 @@ function InGameStep({ match, onFinish }) {
 
         <HinchadaPanel hinchada={hinchada} players={players} />
       </div>
-
-      <GolOverlay trigger={golTrigger} />
     </>
   )
 }

@@ -47,26 +47,32 @@ function PlayerCard({
         </div>
         <div className="player-card-actions">
           {goalControls ? (
-            <div className="goal-controls">
-              <button
-                type="button"
-                className="goal-btn goal-btn--minus"
-                onClick={() => goalControls.onDelta?.(-1)}
-                disabled={(goalControls.goles ?? 0) === 0}
-                aria-label="Quitar gol"
-              >
-                <Minus size={14} />
-              </button>
-              <span className="goal-count">{goalControls.goles ?? 0}</span>
-              <button
-                type="button"
-                className="goal-btn goal-btn--plus"
-                onClick={() => goalControls.onDelta?.(1)}
-                aria-label="Agregar gol"
-              >
-                <Plus size={14} />
-              </button>
-            </div>
+            goalControls.readOnly ? (
+              <div className="goal-controls goal-controls--readonly">
+                <span className="goal-count">{goalControls.goles ?? 0}</span>
+              </div>
+            ) : (
+              <div className="goal-controls">
+                <button
+                  type="button"
+                  className="goal-btn goal-btn--minus"
+                  onClick={() => goalControls.onDelta?.(-1)}
+                  disabled={(goalControls.goles ?? 0) === 0}
+                  aria-label="Quitar gol"
+                >
+                  <Minus size={14} />
+                </button>
+                <span className="goal-count">{goalControls.goles ?? 0}</span>
+                <button
+                  type="button"
+                  className="goal-btn goal-btn--plus"
+                  onClick={() => goalControls.onDelta?.(1)}
+                  aria-label="Agregar gol"
+                >
+                  <Plus size={14} />
+                </button>
+              </div>
+            )
           ) : (
             <>
               {onMove && (
