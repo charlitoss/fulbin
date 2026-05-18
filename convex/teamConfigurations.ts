@@ -26,6 +26,7 @@ export const save = mutation({
       posicion: v.optional(v.string()),
       coordenadaX: v.optional(v.number()),
       coordenadaY: v.optional(v.number()),
+      goles: v.optional(v.number()),
     }))),
     formacionEquipoBlanco: v.optional(v.string()),
     formacionEquipoOscuro: v.optional(v.string()),
@@ -107,5 +108,36 @@ export const getOrCreate = mutation({
     });
     
     return await ctx.db.get(configId);
+  },
+});
+
+// Adjust a player's goal count by ±N (server-side clamp at 0).
+export const incrementPlayerGoals = mutation({
+  args: {
+    matchId: v.id("matches"),
+    jugadorId: v.id("players"),
+    delta: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const config = await ctx.db
+      .query("teamConfigurations")
+      .withIndex("by_partidoId", (q) => q.eq("partidoId", args.matchId))
+      .first();
+
+    if (!config) throw new Error("Team configuration not found");
+
+    const asignaciones = config.asignaciones.map((a) => {
+      if (a.jugadorId !== args.jugadorId) return a;
+      const current = a.goles ?? 0;
+      return { ...a, goles: Math.max(0, current + args.delta) };
+    });
+
+    await ctx.db.patch(config._id, {
+      asignaciones,
+      version: config.version + 1,
+      updatedAt: new Date().toISOString(),
+    });
+
+    return config._id;
   },
 });
