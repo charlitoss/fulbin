@@ -132,33 +132,37 @@ function InGameStep({ match, onFinish, finalized = false }) {
         </div>
       </div>
 
+      {(suplentes.length > 0 || hinchada.length > 0) && (
       <div className="team-builder-extras-row">
-        <div className="inscription-step">
-          <div className="inscription-step-header">
-            <p className="step-title">
-              <img src="/icons/moveplayer.svg" alt="" className="step-title-icon" width="24" height="24" />
-              Suplentes
-            </p>
+        {suplentes.length > 0 && (
+          <div className="inscription-step">
+            <div className="inscription-step-header">
+              <p className="step-title">
+                <img src="/icons/moveplayer.svg" alt="" className="step-title-icon" width="24" height="24" />
+                Suplentes
+              </p>
+            </div>
+            <div className="player-list compact-list">
+              {suplentes.map((registration, index) => {
+                const player = players[registration.jugadorId]
+                if (!player) return null
+                return (
+                  <PlayerCard
+                    key={registration.jugadorId}
+                    player={player}
+                    registration={registration}
+                    index={index}
+                    compact={true}
+                  />
+                )
+              })}
+            </div>
           </div>
-          <div className="player-list compact-list">
-            {suplentes.map((registration, index) => {
-              const player = players[registration.jugadorId]
-              if (!player) return null
-              return (
-                <PlayerCard
-                  key={registration.jugadorId}
-                  player={player}
-                  registration={registration}
-                  index={index}
-                  compact={true}
-                />
-              )
-            })}
-          </div>
-        </div>
+        )}
 
         <HinchadaPanel hinchada={hinchada} players={players} />
       </div>
+      )}
     </>
   )
 }
