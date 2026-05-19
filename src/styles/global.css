@@ -2423,6 +2423,15 @@ h4 { font-size: var(--type-lg); }
   margin-right: auto;
 }
 
+/* In-game / finalized view: cap content at 820px, centered */
+.match-page--jugando > *,
+.match-page--finalizado > * {
+  max-width: 820px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* Field sits flush against the match header — cancel the .match-page gap above it */
 .match-page--armado_equipos .match-header + .soccer-field-container {
   margin-top: calc(-1 * var(--space-2));
