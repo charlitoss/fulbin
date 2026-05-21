@@ -41,6 +41,7 @@ npx playwright show-report                    # open the last HTML report
 ```
 TEST_CONVEX_URL=https://<deployment>.convex.cloud
 ALLOW_TEST_MUTATIONS=1
+E2E_SECRET=<must match the deployment's E2E_SECRET env var>
 ```
 
 - `TEST_CONVEX_URL` — the Convex deployment the tests hit. Playwright forces the
@@ -49,6 +50,10 @@ ALLOW_TEST_MUTATIONS=1
   contain "test". We currently run against the shared dev deployment because the
   Vercel-managed Convex team can't create a dedicated test project via CLI. If
   you ever provision a real `*-test` deployment, swap the URL and drop this line.
+- `E2E_SECRET` — shared secret guarding the test-only Convex mutations. Must
+  match the value set on the deployment with
+  `npx convex env set E2E_SECRET <value>`. Generate one with
+  `node -e "console.log(require('crypto').randomBytes(24).toString('hex'))"`.
 
 ## How it works
 
@@ -72,19 +77,26 @@ ALLOW_TEST_MUTATIONS=1
 
 ### Safety model (why running against the dev DB is OK)
 
-Defense in depth:
+Convex mutations are public by default — callable by anyone who knows the
+deployment URL (which ships in the client bundle). So defense in depth:
 
-1. `global-setup` won't run without explicit opt-in.
-2. Every match/player the suite creates is named `e2e-...`; all destructive
-   queries filter on that prefix.
-3. Per-test teardown deletes only the specific match the test created.
+1. **Secret gate** — every function in `convex/testing.ts` requires a `secret`
+   arg checked against the deployment's `E2E_SECRET` env var. Calls without it
+   are rejected. This is the primary control, since `wipeMatchCascade` can
+   delete any match by ID.
+2. **Prefix scoping** — the bulk sweep (`wipeAllTestData`) only touches rows
+   whose `nombre` starts with `e2e-`, and the suite only ever names test data
+   that way.
+3. **Opt-in** — `global-setup` won't run without `ALLOW_TEST_MUTATIONS=1` (or a
+   URL containing "test").
+4. **Per-test teardown** deletes only the specific match each test created.
 
 Worst case: a crashed run leaves an `e2e-*` row behind; the next run's
 `global-setup` sweeps it.
 
 The test-only Convex functions live in **`convex/testing.ts`**
 (`wipeAllTestData`, `wipeMatchCascade`, `seedPlayers`, `seedRegistrations`,
-`backdateMatchKickoff`). Destructive ones are prefix-gated.
+`backdateMatchKickoff`) — all secret-gated.
 
 ## Specs
 

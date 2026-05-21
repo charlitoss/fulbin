@@ -36,8 +36,16 @@ export default async function globalSetup(): Promise<void> {
     );
   }
 
+  const secret = process.env.E2E_SECRET;
+  if (!secret) {
+    throw new Error(
+      "E2E_SECRET is not set in .env.test. It must match the value configured " +
+        "on the Convex deployment (npx convex env set E2E_SECRET <value>).",
+    );
+  }
+
   const client = new ConvexHttpClient(url);
-  const result = await client.mutation(api.testing.wipeAllTestData, {});
+  const result = await client.mutation(api.testing.wipeAllTestData, { secret });
   // eslint-disable-next-line no-console
   console.log(
     `[e2e] global-setup: wiped ${result.matchesRemoved} match(es) and ${result.playersRemoved} player(s) from prior runs.`,

@@ -1,27 +1,41 @@
 // Test-only mutations used by Playwright E2E specs.
 //
-// Safety model: every destructive function in this file only touches rows whose
-// `nombre` begins with "e2e-". The e2e suite always creates matches and players
-// under that prefix (see e2e/helpers/match.ts), so even if these mutations are
-// invoked against a non-test deployment they cannot delete real data. The
-// Playwright-side global-setup also refuses to run unless TEST_CONVEX_URL is
-// explicitly opted in.
+// Convex mutations are PUBLIC by default — callable by anyone who knows the
+// deployment URL (which ships in the client bundle as VITE_CONVEX_URL). Since
+// some of these are destructive (wipeMatchCascade deletes any match by ID),
+// every function here requires a `secret` arg checked against the E2E_SECRET
+// deployment env var. Set it with: `npx convex env set E2E_SECRET <value>`.
+// The Playwright suite reads the same value from .env.test (gitignored) and
+// passes it on every call. Callers without the secret are rejected.
 //
-// `seedRegistrations` and `backdateMatchKickoff` accept an explicit matchId, so
-// callers with deploy-key access could in theory aim them at real matches —
-// the threat model here is "trusted developer with cloud credentials", not
-// "untrusted client", and Convex's auth already gates that.
+// Defense in depth: destructive sweeps additionally only touch rows whose
+// `nombre` begins with "e2e-", and global-setup refuses to run without an
+// explicit opt-in.
 
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 
 const TEST_NAME_PREFIX = "e2e-";
 
+function assertSecret(secret: string): void {
+  const expected = process.env.E2E_SECRET;
+  if (!expected) {
+    throw new Error(
+      "E2E_SECRET is not configured on this deployment. " +
+        "Run: npx convex env set E2E_SECRET <value>",
+    );
+  }
+  if (secret !== expected) {
+    throw new Error("Forbidden: invalid E2E secret.");
+  }
+}
+
 // Cascade-delete a single match plus its registrations and team config.
 // Called from afterEach to clean up the test that just ran.
 export const wipeMatchCascade = mutation({
-  args: { matchId: v.id("matches") },
+  args: { secret: v.string(), matchId: v.id("matches") },
   handler: async (ctx, args) => {
+    assertSecret(args.secret);
     const registrations = await ctx.db
       .query("registrations")
       .withIndex("by_partidoId", (q) => q.eq("partidoId", args.matchId))
@@ -49,8 +63,9 @@ export const wipeMatchCascade = mutation({
 // dependent rows. Called by globalSetup at the start of each run to clear
 // orphans from aborted prior runs.
 export const wipeAllTestData = mutation({
-  args: {},
-  handler: async (ctx) => {
+  args: { secret: v.string() },
+  handler: async (ctx, args) => {
+    assertSecret(args.secret);
     const allMatches = await ctx.db.query("matches").collect();
     const testMatches = allMatches.filter((m) =>
       m.nombre.startsWith(TEST_NAME_PREFIX),
@@ -95,10 +110,12 @@ export const wipeAllTestData = mutation({
 // without typing each name through the UI.
 export const seedPlayers = mutation({
   args: {
+    secret: v.string(),
     namePrefix: v.string(), // must start with "e2e-" for cleanup
     count: v.number(),
   },
   handler: async (ctx, args) => {
+    assertSecret(args.secret);
     if (!args.namePrefix.startsWith(TEST_NAME_PREFIX)) {
       throw new Error(
         `seedPlayers namePrefix must start with '${TEST_NAME_PREFIX}'`,
@@ -121,12 +138,14 @@ export const seedPlayers = mutation({
 // inscription UI 10+ times.
 export const seedRegistrations = mutation({
   args: {
+    secret: v.string(),
     matchId: v.id("matches"),
     playerIds: v.array(v.id("players")),
     estadoFisico: v.optional(v.string()),
     tipoInscripcion: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    assertSecret(args.secret);
     const estado = args.estadoFisico ?? "normal";
     const tipo = args.tipoInscripcion ?? "jugador";
     const now = new Date().toISOString();
@@ -155,8 +174,9 @@ export const seedRegistrations = mutation({
 // consistent we send a date far enough in the past that any timezone offset
 // still resolves to "before now" — using yesterday at noon.
 export const backdateMatchKickoff = mutation({
-  args: { matchId: v.id("matches") },
+  args: { secret: v.string(), matchId: v.id("matches") },
   handler: async (ctx, args) => {
+    assertSecret(args.secret);
     const match = await ctx.db.get(args.matchId);
     if (!match) throw new Error("Match not found");
 

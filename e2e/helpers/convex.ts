@@ -15,6 +15,20 @@ export function getConvexClient(): ConvexHttpClient {
   return client;
 }
 
+// Shared secret that the test-only Convex mutations require (see
+// convex/testing.ts). Read from .env.test; must match the deployment's
+// E2E_SECRET env var.
+export function getE2eSecret(): string {
+  const secret = process.env.E2E_SECRET;
+  if (!secret) {
+    throw new Error(
+      "E2E_SECRET not set in .env.test. It must match the value configured on " +
+        "the Convex deployment (npx convex env set E2E_SECRET <value>).",
+    );
+  }
+  return secret;
+}
+
 export type MatchId = Id<"matches">;
 export type PlayerId = Id<"players">;
 
@@ -59,7 +73,10 @@ export async function seedPlayers(opts: {
   count: number;
 }): Promise<PlayerId[]> {
   const convex = getConvexClient();
-  return (await convex.mutation(api.testing.seedPlayers, opts)) as PlayerId[];
+  return (await convex.mutation(api.testing.seedPlayers, {
+    secret: getE2eSecret(),
+    ...opts,
+  })) as PlayerId[];
 }
 
 export async function seedRegistrations(opts: {
@@ -69,17 +86,26 @@ export async function seedRegistrations(opts: {
   tipoInscripcion?: string;
 }): Promise<void> {
   const convex = getConvexClient();
-  await convex.mutation(api.testing.seedRegistrations, opts);
+  await convex.mutation(api.testing.seedRegistrations, {
+    secret: getE2eSecret(),
+    ...opts,
+  });
 }
 
 export async function wipeMatch(matchId: MatchId): Promise<void> {
   const convex = getConvexClient();
-  await convex.mutation(api.testing.wipeMatchCascade, { matchId });
+  await convex.mutation(api.testing.wipeMatchCascade, {
+    secret: getE2eSecret(),
+    matchId,
+  });
 }
 
 export async function backdateKickoff(matchId: MatchId): Promise<void> {
   const convex = getConvexClient();
-  await convex.mutation(api.testing.backdateMatchKickoff, { matchId });
+  await convex.mutation(api.testing.backdateMatchKickoff, {
+    secret: getE2eSecret(),
+    matchId,
+  });
 }
 
 export async function getMatch(matchId: MatchId) {
