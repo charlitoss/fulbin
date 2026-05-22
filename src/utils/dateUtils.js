@@ -80,6 +80,18 @@ export const getTodayString = () => {
 }
 
 /**
+ * Get the default match time: the next even hour after now (HH:00).
+ * E.g. 2:36 -> "04:00", 6:15 -> "08:00".
+ * @returns {string} Time in HH:00 format
+ */
+export const getDefaultHorario = () => {
+  let hour = new Date().getHours() + 1
+  if (hour % 2 !== 0) hour += 1
+  hour = hour % 24
+  return `${String(hour).padStart(2, '0')}:00`
+}
+
+/**
  * Check if a date is in the past
  * @param {string} dateStr - ISO date string (YYYY-MM-DD)
  * @returns {boolean} True if date is in the past

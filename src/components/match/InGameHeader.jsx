@@ -91,12 +91,12 @@ function InGameHeader({
           <span className="in-game-title-text">
             {finalized ? 'Partido finalizado' : 'Partido'}
           </span>
-          <span className="in-game-clock" aria-label={finalized ? 'Fecha del partido' : 'Tiempo de juego'}>
-            {finalized ? scheduledLabel : elapsed}
-          </span>
         </h1>
         {!finalized && onFinish && (
-          <button className="btn-finish" onClick={onFinish}>Finalizar partido</button>
+          <button className="btn-finish" onClick={onFinish}>
+            <span className="btn-finish__full">Finalizar partido</span>
+            <span className="btn-finish__short">Finalizar</span>
+          </button>
         )}
       </div>
 
@@ -109,7 +109,13 @@ function InGameHeader({
               {teamConfig?.nombreEquipoBlanco ?? 'Equipo Blanco'}
             </span>
           </div>
-          <span className="in-game-score-dash">–</span>
+          <div className="in-game-score-center">
+            <span className="in-game-clock" aria-label={finalized ? 'Fecha del partido' : 'Tiempo de juego'}>
+              <span className="in-game-clock-icon" aria-hidden="true" />
+              {finalized ? scheduledLabel : elapsed}
+            </span>
+            <span className="in-game-score-dash">—</span>
+          </div>
           <div className="in-game-score-team">
             <span className={`in-game-score${oscuroHighlightClass}`}>{goalsOscuro}</span>
             <span className="in-game-score-label">
