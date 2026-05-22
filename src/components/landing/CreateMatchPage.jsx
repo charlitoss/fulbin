@@ -2,13 +2,13 @@ import { useState } from 'react'
 import { useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import { PLAYER_COUNTS } from '../../utils/constants'
-import { getTodayString } from '../../utils/dateUtils'
+import { getTodayString, getDefaultHorario } from '../../utils/dateUtils'
 
 export default function CreateMatchPage({ onNavigate }) {
   const [formData, setFormData] = useState({
     nombre: '',
     fecha: getTodayString(),
-    horario: '15:00',
+    horario: getDefaultHorario(),
     ubicacion: '',
     cantidadJugadores: 12
   })
@@ -128,7 +128,6 @@ export default function CreateMatchPage({ onNavigate }) {
                   type="date"
                   value={formData.fecha}
                   onChange={(e) => handleChange('fecha', e.target.value)}
-                  onClick={(e) => e.currentTarget.showPicker?.()}
                   min={getTodayString()}
                 />
               </div>
@@ -140,9 +139,9 @@ export default function CreateMatchPage({ onNavigate }) {
                 <input
                   id="horario"
                   type="time"
+                  lang="es-AR"
                   value={formData.horario}
                   onChange={(e) => handleChange('horario', e.target.value)}
-                  onClick={(e) => e.currentTarget.showPicker?.()}
                 />
               </div>
             </div>

@@ -164,6 +164,7 @@ function EditableMatchHeader({
           <input
             ref={pickerInputRef}
             type="datetime-local"
+            lang="es-AR"
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={() => saveDateTime(editValue)}

@@ -96,15 +96,6 @@ function InGameStep({ match, onFinish, finalized = false }) {
         golTrigger={golTrigger}
       />
 
-      <SoccerField
-        teamConfig={teamConfig}
-        players={players}
-        registrations={registrations}
-        onPositionChange={() => {}}
-        onSwapTeam={() => {}}
-        onPlayerClick={() => {}}
-      />
-
       <div className="team-builder-step">
         <div className="team-builder-layout-new">
           <div className="team-builder-teams-row">
@@ -131,6 +122,15 @@ function InGameStep({ match, onFinish, finalized = false }) {
           </div>
         </div>
       </div>
+
+      <SoccerField
+        teamConfig={teamConfig}
+        players={players}
+        registrations={registrations}
+        onPositionChange={() => {}}
+        onSwapTeam={() => {}}
+        onPlayerClick={() => {}}
+      />
 
       {(suplentes.length > 0 || hinchada.length > 0) && (
       <div className="team-builder-extras-row">
