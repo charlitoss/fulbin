@@ -5127,8 +5127,8 @@ body.crt-on #root {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--space-8);
-  padding: var(--space-6) var(--space-6) var(--space-6);
+  gap: var(--space-4);
+  padding-top: var(--space-4);
   width: 100%;
   max-width: 420px;
 }
@@ -5159,8 +5159,7 @@ body.crt-on #root {
 .splash-cover {
   display: block;
   width: 100%;
-  height: auto;
-  aspect-ratio: 318 / 212;
+  aspect-ratio: 318 / 187;
   object-fit: cover;
 }
 
