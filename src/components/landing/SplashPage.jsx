@@ -24,7 +24,7 @@ export default function SplashPage({ onNavigate }) {
             aria-hidden="true"
             className="splash-cover"
             width="318"
-            height="212"
+            height="187"
           />
 
           <h1 className="splash-headline">
