@@ -4,6 +4,7 @@ import { useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import ShareButton from '../ui/ShareButton'
 import Countdown from '../ui/Countdown'
+import TimePicker from '../ui/TimePicker'
 import { formatDate } from '../../utils/dateUtils'
 
 function EditableMatchHeader({
@@ -16,10 +17,13 @@ function EditableMatchHeader({
 }) {
   const [editingField, setEditingField] = useState(null)
   const [editValue, setEditValue] = useState('')
+  // Separate state for the split fechaHorario edit mode (date input + TimePicker)
+  const [editFecha, setEditFecha] = useState('')
+  const [editHorario, setEditHorario] = useState('')
   const pickerInputRef = useRef(null)
   const titleInputRef = useRef(null)
 
-  // Open the native picker as soon as the field enters edit mode
+  // Open the native date picker as soon as the fechaHorario field enters edit mode
   useEffect(() => {
     if (editingField === 'fechaHorario' && pickerInputRef.current) {
       pickerInputRef.current.showPicker?.()
@@ -34,17 +38,16 @@ function EditableMatchHeader({
     el.style.height = `${el.scrollHeight}px`
   }, [editingField, editValue])
 
-  const saveDateTime = async (datetimeLocalValue) => {
-    if (!datetimeLocalValue) {
+  const saveDateTime = async (fecha, horario) => {
+    if (!fecha || !horario) {
       cancelEdit()
       return
     }
-    const [datePart, timePart] = datetimeLocalValue.split('T')
     try {
       await updateMatch({
         matchId: match._id,
-        fecha: datePart,
-        horario: timePart,
+        fecha,
+        horario,
       })
     } catch (err) {
       console.error('Error updating match:', err)
@@ -64,6 +67,8 @@ function EditableMatchHeader({
   const cancelEdit = () => {
     setEditingField(null)
     setEditValue('')
+    setEditFecha('')
+    setEditHorario('')
   }
   
   const saveFieldValue = async (field, rawValue) => {
@@ -156,22 +161,43 @@ function EditableMatchHeader({
     )
   }
   
-  // Render combined editable date + time as a single field
+  // Render combined editable date + time as a single field. We split into a
+  // native <input type="date"> (which has a popup picker in every browser)
+  // and our custom <TimePicker> (because Firefox has no popup for type="time").
   const renderEditableDateTime = () => {
     if (editingField === 'fechaHorario') {
       return (
-        <div className="editable-field editing">
+        <div className="editable-field editing editable-datetime">
           <input
             ref={pickerInputRef}
-            type="datetime-local"
-            lang="es-AR"
-            value={editValue}
-            onChange={(e) => setEditValue(e.target.value)}
-            onBlur={() => saveDateTime(editValue)}
+            type="date"
+            value={editFecha}
+            onChange={(e) => setEditFecha(e.target.value)}
+            onClick={(e) => e.currentTarget.showPicker?.()}
             onKeyDown={handleKeyDown}
             autoFocus
-            className="editable-input"
+            className="editable-input editable-date-input"
           />
+          <TimePicker
+            value={editHorario}
+            onChange={setEditHorario}
+            ariaLabel="Horario del partido"
+            className="editable-time-picker"
+          />
+          <button
+            className="edit-action-btn save"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => saveDateTime(editFecha, editHorario)}
+          >
+            <Check size={14} />
+          </button>
+          <button
+            className="edit-action-btn cancel"
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={cancelEdit}
+          >
+            <X size={14} />
+          </button>
         </div>
       )
     }
@@ -182,7 +208,11 @@ function EditableMatchHeader({
     return (
       <div
         className="editable-field"
-        onClick={() => startEdit('fechaHorario', `${match.fecha}T${match.horario}`)}
+        onClick={() => {
+          setEditingField('fechaHorario')
+          setEditFecha(match.fecha)
+          setEditHorario(match.horario)
+        }}
       >
         <span>{display}</span>
         <ChevronRight size={16} className="edit-icon" />
