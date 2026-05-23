@@ -861,6 +861,60 @@ h4 { font-size: var(--type-lg); }
   cursor: pointer;
 }
 
+/* Firefox renders its own native calendar dropdown indicator on type="date"
+   and exposes no pseudo-element to hide it (appearance:none doesn't strip it
+   either). To keep our custom calendario-sm.svg as the only icon, wrap the
+   input in .date-input-wrap, push the input wider than the wrapper, and clip
+   the overflow so Firefox's native indicator falls outside the visible area.
+   The wrapper owns the border/background/icon; clicks pass through the icon
+   (pointer-events:none) to the underlying input, whose onClick calls
+   showPicker() to open the native calendar popup. Scoped to Firefox so the
+   Chrome path (WebKit calendar-picker-indicator overlay) is unchanged. */
+.date-input-wrap { display: block; }
+
+@-moz-document url-prefix() {
+  .form-group .date-input-wrap {
+    position: relative;
+    overflow: hidden;
+    background-color: #0a0a0a;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-size: 3px 3px;
+    border: 2px solid rgba(255,255,255,0.10);
+    height: 48px;
+    transition: border-color var(--duration-fast), background-color var(--duration-fast);
+  }
+  .form-group .date-input-wrap:hover {
+    background-color: var(--surface-1);
+    border-color: rgba(255,255,255,0.18);
+  }
+  .form-group .date-input-wrap:focus-within {
+    border-color: rgba(30,255,180,0.50);
+  }
+  .form-group .date-input-wrap input[type="date"] {
+    width: calc(100% + 40px);
+    height: 100%;
+    border: none;
+    background: transparent;
+    padding-right: 10px;
+  }
+  .form-group .date-input-wrap input[type="date"]:hover,
+  .form-group .date-input-wrap input[type="date"]:focus {
+    background: transparent;
+    border: none;
+  }
+  .form-group .date-input-wrap::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    background: url("/icons/calendario-sm.svg") center / contain no-repeat;
+    pointer-events: none;
+  }
+}
+
 .form-group label .required {
   color: var(--semantic-error);
 }
@@ -897,6 +951,119 @@ h4 { font-size: var(--type-lg); }
 .form-group textarea:focus {
   outline: none;
   border-color: rgba(30,255,180,0.50);
+}
+
+/* --- Custom TimePicker -------------------------------------------------
+   Replaces <input type="time"> so Firefox (which has no popup picker for
+   time inputs and ignores lang="es-AR") gets a consistent 24h dropdown. */
+
+.time-picker {
+  position: relative;
+  width: 100%;
+}
+
+.time-picker-trigger {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 48px;
+  padding: 10px 44px 10px 10px;
+  background-color: #0a0a0a;
+  background-image:
+    url("/icons/horario-sm.svg"),
+    radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-repeat: no-repeat, repeat;
+  background-position: right 12px center, 0 0;
+  background-size: 20px 20px, 3px 3px;
+  border: 2px solid rgba(255,255,255,0.10);
+  border-radius: 0;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: var(--type-md);
+  text-align: left;
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--duration-fast), background-color var(--duration-fast);
+}
+
+.time-picker-trigger:hover {
+  background-color: var(--surface-1);
+  border-color: rgba(255,255,255,0.18);
+}
+
+.time-picker.is-open .time-picker-trigger,
+.time-picker-trigger:focus-visible {
+  border-color: rgba(30,255,180,0.50);
+}
+
+.time-picker-value {
+  font-variant-numeric: tabular-nums;
+}
+
+.time-picker-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  max-height: 240px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  background-color: #0a0a0a;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: 2px solid rgba(255,255,255,0.18);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  font-family: var(--font-display);
+  font-size: var(--type-md);
+  font-variant-numeric: tabular-nums;
+}
+
+.time-picker-option {
+  padding: 8px 12px;
+  color: var(--text-primary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.time-picker-option:hover {
+  background-color: var(--surface-1);
+}
+
+.time-picker-option.is-selected {
+  background-color: rgba(30,255,180,0.15);
+  color: rgba(30,255,180,0.95);
+}
+
+/* Inline edit mode in EditableMatchHeader: date input + time picker side by side */
+.editable-datetime {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.editable-datetime .editable-date-input {
+  width: auto;
+  min-width: 140px;
+}
+
+.editable-datetime .editable-time-picker {
+  width: auto;
+  min-width: 96px;
+}
+
+.editable-datetime .editable-time-picker .time-picker-trigger {
+  height: auto;
+  padding: 4px 10px;
+  background: transparent;
+  border: none;
+  font-family: var(--font-display);
+  font-size: var(--type-md);
+}
+
+.editable-datetime .editable-time-picker .time-picker-trigger:hover {
+  background: rgba(255,255,255,0.04);
 }
 
 .form-group textarea {
@@ -4983,10 +5150,18 @@ body.crt-on #root {
   border: none;
   border-radius: 0;
   box-shadow: inset 0 0 0 4px #000;
-  padding: var(--space-6);
+  padding: var(--space-4);
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
+}
+
+.splash-cover {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 318 / 212;
+  object-fit: cover;
 }
 
 .splash-headline {

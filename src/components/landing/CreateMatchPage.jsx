@@ -3,6 +3,7 @@ import { useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import { PLAYER_COUNTS } from '../../utils/constants'
 import { getTodayString, getDefaultHorario } from '../../utils/dateUtils'
+import TimePicker from '../ui/TimePicker'
 
 export default function CreateMatchPage({ onNavigate }) {
   const [formData, setFormData] = useState({
@@ -123,25 +124,27 @@ export default function CreateMatchPage({ onNavigate }) {
                 <label htmlFor="fecha">
                   Fecha <span className="required">*</span>
                 </label>
-                <input
-                  id="fecha"
-                  type="date"
-                  value={formData.fecha}
-                  onChange={(e) => handleChange('fecha', e.target.value)}
-                  min={getTodayString()}
-                />
+                <div className="date-input-wrap">
+                  <input
+                    id="fecha"
+                    type="date"
+                    value={formData.fecha}
+                    onChange={(e) => handleChange('fecha', e.target.value)}
+                    onClick={(e) => e.currentTarget.showPicker?.()}
+                    min={getTodayString()}
+                  />
+                </div>
               </div>
 
               <div className="form-group">
                 <label htmlFor="horario">
                   Horario <span className="required">*</span>
                 </label>
-                <input
+                <TimePicker
                   id="horario"
-                  type="time"
-                  lang="es-AR"
                   value={formData.horario}
-                  onChange={(e) => handleChange('horario', e.target.value)}
+                  onChange={(v) => handleChange('horario', v)}
+                  ariaLabel="Horario del partido"
                 />
               </div>
             </div>

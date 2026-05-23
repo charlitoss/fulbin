@@ -18,6 +18,15 @@ export default function SplashPage({ onNavigate }) {
         />
 
         <div className="splash-card">
+          <img
+            src="/icons/cover.jpg"
+            alt=""
+            aria-hidden="true"
+            className="splash-cover"
+            width="318"
+            height="212"
+          />
+
           <h1 className="splash-headline">
             <span>Organiza el fulbito</span>
             <span>con amigos</span>
