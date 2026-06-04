@@ -2556,7 +2556,7 @@ h4 { font-size: var(--type-lg); }
    =================================== */
 
 .team-builder-step {
-  flex: 1;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
   background-color: #060606;
@@ -3212,9 +3212,9 @@ h4 { font-size: var(--type-lg); }
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  flex: 1;
+  flex: 0 0 auto;
   min-height: 0;
-  height: 100%;
+  height: auto;
 }
 
 .team-name {
