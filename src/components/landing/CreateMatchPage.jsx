@@ -77,7 +77,7 @@ export default function CreateMatchPage({ onNavigate }) {
         <div className="hero-form-container">
           <button
             type="button"
-            className="back-link"
+            className="btn btn-secondary btn-sm hero-back"
             onClick={() => onNavigate('#/')}
           >
             ← Volver
