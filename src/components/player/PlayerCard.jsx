@@ -7,6 +7,7 @@ function PlayerCard({
   onViewInfo,
   onRemove,
   onMove,
+  onPromote,
   index,
   compact = false,
   showState = true,
@@ -82,6 +83,15 @@ function PlayerCard({
                   title="Cambiar de equipo"
                 >
                   <img src="/icons/moveplayer.svg" alt="" width="24" height="24" />
+                </button>
+              )}
+              {onPromote && (
+                <button
+                  className="btn-icon-card btn-promote-card"
+                  onClick={() => onPromote(player, registration)}
+                  title="Promover a jugador"
+                >
+                  <img src="/icons/promoteplayer.svg" alt="" width="24" height="24" />
                 </button>
               )}
               {onRemove && (

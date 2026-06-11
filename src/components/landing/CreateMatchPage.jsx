@@ -75,13 +75,6 @@ export default function CreateMatchPage({ onNavigate }) {
     <div className="landing-page">
       <div className="landing-hero">
         <div className="hero-form-container">
-          <button
-            type="button"
-            className="btn btn-secondary btn-sm hero-back"
-            onClick={() => onNavigate('#/')}
-          >
-            ← Volver
-          </button>
           <form onSubmit={handleSubmit} className="match-form hero-form">
             <h2 className="form-heading">Nuevo partido</h2>
 

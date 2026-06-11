@@ -28,12 +28,25 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
   // Convex mutations
   const updateMatch = useMutation(api.matches.update)
   const removeRegistration = useMutation(api.registrations.remove)
+  const updateRegistration = useMutation(api.registrations.update)
 
   const handleRemovePlayer = async (player) => {
     try {
       await removeRegistration({ matchId: match._id, playerId: player._id })
     } catch (err) {
       console.error('Error removing registration:', err)
+    }
+  }
+
+  const handlePromoteSuplente = async (player) => {
+    try {
+      await updateRegistration({
+        matchId: match._id,
+        playerId: player._id,
+        tipoInscripcion: 'jugador',
+      })
+    } catch (err) {
+      console.error('Error promoting suplente:', err)
     }
   }
   
@@ -199,6 +212,7 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
                 player={player}
                 registration={registration}
                 onRemove={handleRemovePlayer}
+                onPromote={!isQuotaComplete ? handlePromoteSuplente : undefined}
                 index={index}
                 compact={true}
               />

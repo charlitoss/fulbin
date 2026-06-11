@@ -19,7 +19,7 @@ function MatchPage({ matchId, onNavigate }) {
   
   // Convex mutations
   const saveTeamConfig = useMutation(api.teamConfigurations.save)
-  const removeRegistration = useMutation(api.registrations.remove)
+  const updateRegistration = useMutation(api.registrations.update)
   const startMatch = useMutation(api.matches.startMatch)
   const finishMatch = useMutation(api.matches.finishMatch)
 
@@ -88,59 +88,50 @@ function MatchPage({ matchId, onNavigate }) {
     // Data will auto-refresh via Convex
   }
   
-  // Handle when players per team is reduced - remove excess players using LIFO
+  // Handle when players per team is reduced. Instead of dropping the excess
+  // players, demote the newest-registered ones to suplentes so they stay in the
+  // match. Works both in inscription (no teams yet) and team builder.
   const handlePlayersPerTeamChange = async (newPlayersPerTeam, oldPlayersPerTeam) => {
     if (newPlayersPerTeam >= oldPlayersPerTeam) return
-    if (!teamConfig || !teamConfig.asignaciones || !registrations) return
-    
-    // Track players to remove from the match entirely
-    const playersToRemove = []
-    
-    // Process each team
-    const teams = ['blanco', 'oscuro']
-    let updatedAssignments = [...teamConfig.asignaciones]
-    
-    teams.forEach(team => {
-      const teamAssignments = updatedAssignments.filter(a => a.equipo === team)
-      
-      if (teamAssignments.length > newPlayersPerTeam) {
-        // Sort by registration timestamp DESCENDING (newest first = to be removed)
-        const sortedAssignments = teamAssignments.sort((a, b) => {
-          const regA = registrations.find(r => r.jugadorId === a.jugadorId)
-          const regB = registrations.find(r => r.jugadorId === b.jugadorId)
-          const timeA = regA?.timestamp ? new Date(regA.timestamp) : new Date(0)
-          const timeB = regB?.timestamp ? new Date(regB.timestamp) : new Date(0)
-          return timeB - timeA // Descending: newest first
-        })
-        
-        // Keep only the oldest registered players
-        const playersToKeep = sortedAssignments.slice(sortedAssignments.length - newPlayersPerTeam)
-        const playerIdsToKeep = new Set(playersToKeep.map(a => a.jugadorId))
-        
-        // Track players being removed
-        sortedAssignments.forEach(a => {
-          if (!playerIdsToKeep.has(a.jugadorId)) {
-            playersToRemove.push(a.jugadorId)
-          }
-        })
-        
-        // Filter out removed players from this team
-        updatedAssignments = updatedAssignments.filter(a => 
-          a.equipo !== team || playerIdsToKeep.has(a.jugadorId)
-        )
-      }
-    })
-    
-    // Remove registrations for players being removed from the match
-    for (const playerId of playersToRemove) {
-      await removeRegistration({ matchId, playerId })
+    if (!registrations) return
+
+    const regTime = (jugadorId) => {
+      const reg = registrations.find(r => r.jugadorId === jugadorId)
+      return reg?.timestamp ? new Date(reg.timestamp).getTime() : 0
     }
-    
-    // Save updated config
-    await saveTeamConfig({
-      partidoId: matchId,
-      asignaciones: updatedAssignments
-    })
+
+    const toDemote = []
+    const hasTeams = teamConfig?.asignaciones?.length > 0
+
+    if (hasTeams) {
+      // Team builder: trim each team to the new size, demoting the
+      // newest-registered players first so the teams stay balanced.
+      let updatedAssignments = [...teamConfig.asignaciones]
+      for (const team of ['blanco', 'oscuro']) {
+        const teamAssignments = updatedAssignments.filter(a => a.equipo === team)
+        if (teamAssignments.length > newPlayersPerTeam) {
+          const sorted = [...teamAssignments].sort((a, b) => regTime(b.jugadorId) - regTime(a.jugadorId))
+          const keep = new Set(sorted.slice(sorted.length - newPlayersPerTeam).map(a => a.jugadorId))
+          sorted.forEach(a => { if (!keep.has(a.jugadorId)) toDemote.push(a.jugadorId) })
+          updatedAssignments = updatedAssignments.filter(a => a.equipo !== team || keep.has(a.jugadorId))
+        }
+      }
+      if (toDemote.length) {
+        await saveTeamConfig({ partidoId: matchId, asignaciones: updatedAssignments })
+      }
+    } else {
+      // Inscription: demote the newest-registered jugadores beyond the new total.
+      const newCupoTotal = newPlayersPerTeam * 2
+      const jugadores = registrations
+        .filter(r => r.asistira && r.tipoInscripcion !== 'suplente' && r.tipoInscripcion !== 'hinchada')
+        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp))
+      jugadores.slice(newCupoTotal).forEach(r => toDemote.push(r.jugadorId))
+    }
+
+    // Demote the excess players to suplentes (they stay in the match).
+    for (const playerId of toDemote) {
+      await updateRegistration({ matchId, playerId, tipoInscripcion: 'suplente' })
+    }
   }
   
   if (match === undefined) {
