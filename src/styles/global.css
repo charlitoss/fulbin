@@ -865,10 +865,12 @@ h4 { font-size: var(--type-lg); }
   background-size: 20px 20px, 3px 3px;
 }
 
-/* iOS centers date/time input values by default — force left alignment */
+/* iOS centers date/time input values and wraps them to two lines when the field
+   is cramped — force left alignment and keep the value on a single line. */
 .form-group input[type="date"]::-webkit-date-and-time-value,
 .form-group input[type="time"]::-webkit-date-and-time-value {
   text-align: left;
+  white-space: nowrap;
 }
 
 .form-group input[type="date"] {
@@ -1125,6 +1127,8 @@ h4 { font-size: var(--type-lg); }
 @media (max-width: 480px) {
   .form-row {
     gap: var(--space-3);
+    /* Fecha needs more room than horario so the date fits on one line. */
+    grid-template-columns: 1.25fr 1fr;
   }
 }
 
