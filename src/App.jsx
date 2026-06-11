@@ -121,7 +121,16 @@ function App() {
   return (
     <div className={`app${isSplash ? ' app--splash' : ''}`}>
       {!isSplash && (
-        <header className="app-logo">
+        <header className={`app-logo${route === '#/nuevo' ? ' app-logo--with-back' : ''}`}>
+          {route === '#/nuevo' && (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm topbar-back"
+              onClick={() => navigate('#/')}
+            >
+              ← Volver
+            </button>
+          )}
           <img src="/LOGO.svg" alt="Fulbin" width="120" height="41" />
         </header>
       )}

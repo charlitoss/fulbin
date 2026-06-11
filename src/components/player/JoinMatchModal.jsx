@@ -374,7 +374,14 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
   const totalToRegister = 1 + friends.length + pendingFriendsCount
   const cupoLleno = spotsInfo.jugadores >= spotsInfo.cupoTotal
   const suplentesLleno = spotsInfo.suplentes >= spotsInfo.maxSuplentes
-  
+
+  // On touch devices, don't autofocus the name field: it pops the on-screen
+  // keyboard on open and hides the lower half of the form (physical state,
+  // invite-a-friend). Let users see the whole form first, then tap to focus.
+  // Desktop (fine pointer) keeps autofocus so you can type right away.
+  const autoFocusName = typeof window !== 'undefined'
+    && !window.matchMedia('(pointer: coarse)').matches
+
   return (
     <Modal
       isOpen={isOpen}
@@ -453,7 +460,7 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
             onChange={(e) => setNombre(e.target.value)}
             placeholder="Ej: Juan Pérez"
             maxLength={50}
-            autoFocus
+            autoFocus={autoFocusName}
           />
         </div>
         
