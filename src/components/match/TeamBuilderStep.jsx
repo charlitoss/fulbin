@@ -4,7 +4,6 @@ import { api } from '../../../convex/_generated/api'
 import TeamPanel from './TeamPanel'
 import SoccerField from './SoccerField'
 import BalanceIndicator from './BalanceIndicator'
-import SuplentesPanel from './SuplentesPanel'
 import HinchadaPanel from './HinchadaPanel'
 import AssignPlayerModal from './AssignPlayerModal'
 import JoinMatchModal from '../player/JoinMatchModal'
@@ -498,7 +497,7 @@ function TeamBuilderStep({ match, onRegisterAddPlayerHandler }) {
                 player={player}
                 registration={registration}
                 onRemove={handleRemoveExtraPlayer}
-                onMove={teamsHaveEmptySlots ? promoteSuplente : undefined}
+                onPromote={teamsHaveEmptySlots ? promoteSuplente : undefined}
                 index={index}
                 compact={true}
               />
