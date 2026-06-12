@@ -2,6 +2,16 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+  users: defineTable({
+    workosId: v.string(),
+    nombre: v.string(),
+    email: v.string(),
+    avatar: v.optional(v.string()),
+    createdAt: v.string(),
+    updatedAt: v.string(),
+  })
+    .index("by_workosId", ["workosId"]),
+
   matches: defineTable({
     // Using a string id field for backwards compatibility with existing routes
     codigoCorto: v.string(),
@@ -14,6 +24,9 @@ export default defineSchema({
     jugadoresPorEquipo: v.number(),
     pasoActual: v.string(), // 'inscripcion' | 'armado_equipos' | 'jugando' | 'finalizado'
     linkCompartible: v.optional(v.string()),
+    // Owner with an account. Legacy organizadorId/organizadorNombre stay as
+    // free-form strings for matches created anonymously.
+    ownerId: v.optional(v.id("users")),
     organizadorId: v.optional(v.string()),
     organizadorNombre: v.optional(v.string()),
     iniciadoEn: v.optional(v.number()),
@@ -21,7 +34,8 @@ export default defineSchema({
     createdAt: v.string(),
     updatedAt: v.string(),
   })
-    .index("by_codigoCorto", ["codigoCorto"]),
+    .index("by_codigoCorto", ["codigoCorto"])
+    .index("by_ownerId", ["ownerId"]),
 
   players: defineTable({
     nombre: v.string(),

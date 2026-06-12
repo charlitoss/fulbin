@@ -5279,3 +5279,273 @@ body.crt-on #root {
 }
 
 /* The Volver button now lives only in the topbar (.topbar-back), at all widths. */
+
+/* ============================================
+   AUTH: sign-in button, user menu, claim banner
+   ============================================ */
+
+/* Top-right auth controls on the splash page */
+.splash-auth {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: 20;
+}
+
+/* Auth controls inside the regular topbar */
+.app-logo {
+  position: relative;
+}
+
+.app-header-auth {
+  position: absolute;
+  right: var(--space-6);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+@media (max-width: 480px) {
+  .app-header-auth {
+    right: var(--space-4);
+  }
+}
+
+.auth-login-btn {
+  height: 32px;
+  padding: 3px 10px 5px;
+  font-size: var(--type-sm);
+}
+
+.auth-menu {
+  position: relative;
+}
+
+.auth-user-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 4px 10px 4px 4px;
+  background: var(--surface-2);
+  border: 1px solid var(--surface-5);
+  border-radius: 999px;
+  color: var(--gray-100);
+  font-size: var(--type-sm);
+  cursor: pointer;
+}
+
+.auth-user-chip:hover {
+  background: var(--surface-3);
+}
+
+.auth-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: block;
+  object-fit: cover;
+}
+
+.auth-avatar--initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--acid-yellow-dim);
+  color: var(--color-primary);
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.auth-user-name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .auth-user-name {
+    display: none;
+  }
+
+  .auth-user-chip {
+    padding: 4px;
+  }
+}
+
+.auth-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--space-2));
+  min-width: 160px;
+  background: var(--surface-2);
+  border: 1px solid var(--surface-5);
+  border-radius: var(--radius-sm);
+  padding: var(--space-1);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  z-index: 30;
+}
+
+.auth-dropdown-item {
+  background: none;
+  border: none;
+  color: var(--gray-100);
+  font-size: var(--type-sm);
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+}
+
+.auth-dropdown-item:hover {
+  background: var(--surface-3);
+  color: var(--color-primary);
+}
+
+/* Claim banner on unowned matches */
+.claim-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  max-width: 600px;
+  margin: 0 auto var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background: var(--acid-yellow-ultra);
+  border: 1px dashed var(--surface-5);
+  border-radius: var(--radius-sm);
+  font-size: var(--type-sm);
+  color: var(--gray-200);
+}
+
+/* ============================================
+   MIS PARTIDOS
+   ============================================ */
+
+.my-matches-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-6) var(--space-8);
+}
+
+@media (max-width: 480px) {
+  .my-matches-page {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+}
+
+.my-matches-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+.my-matches-header h2 {
+  font-size: var(--type-xl, 20px);
+  color: var(--white);
+}
+
+.my-matches-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+  background: var(--surface-1);
+  border: 1px solid var(--surface-5);
+  border-radius: var(--radius-md);
+  color: var(--gray-200);
+}
+
+.my-matches-hint {
+  font-size: var(--type-sm);
+  color: var(--gray-400);
+}
+
+.my-matches-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0;
+  margin: 0;
+}
+
+.my-match-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-2);
+  border: 1px solid var(--surface-5);
+  border-radius: var(--radius-md);
+  color: var(--gray-100);
+  text-align: left;
+  cursor: pointer;
+}
+
+.my-match-card:hover {
+  background: var(--surface-3);
+  border-color: var(--color-primary);
+}
+
+.my-match-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.my-match-name {
+  font-weight: 600;
+  color: var(--white);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.my-match-meta {
+  font-size: var(--type-sm);
+  color: var(--gray-300);
+}
+
+.my-match-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.my-match-estado {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-4);
+  color: var(--gray-200);
+}
+
+.my-match-estado--inscripcion {
+  background: var(--acid-yellow-dim);
+  color: var(--color-primary);
+}
+
+.my-match-estado--jugando {
+  background: rgba(255, 179, 0, 0.15);
+  color: var(--color-accent);
+}
+
+.my-match-codigo {
+  font-size: var(--type-sm);
+  color: var(--gray-400);
+  letter-spacing: 0.08em;
+}

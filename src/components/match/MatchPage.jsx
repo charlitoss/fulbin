@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import EditableMatchHeader from './EditableMatchHeader'
+import ClaimMatchBanner from './ClaimMatchBanner'
 import InscriptionStep from './InscriptionStep'
 import TeamBuilderStep from './TeamBuilderStep'
 import InGameStep from './InGameStep'
@@ -161,6 +162,8 @@ function MatchPage({ matchId, onNavigate }) {
 
   return (
     <div className={`match-page match-page--${match.pasoActual}`}>
+      <ClaimMatchBanner match={match} />
+
       {/* Editable Header — hidden during the in-game/finalized views (they have their own header) */}
       {!isInGame && !isFinalized && (
         <EditableMatchHeader

@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { currentUserDoc, upsertCurrentUser } from "./users";
 
 // Generate a short 6-character alphanumeric code for sharing
 function generateShortCode(): string {
@@ -72,10 +73,15 @@ export const create = mutation({
     }
 
     const now = new Date().toISOString();
-    
+
+    // Link the match to its creator when they're signed in; anonymous
+    // creation keeps working with no owner.
+    const ownerId = await upsertCurrentUser(ctx, {});
+
     const matchId = await ctx.db.insert("matches", {
       ...args,
       codigoCorto,
+      ownerId: ownerId ?? undefined,
       pasoActual: "inscripcion",
       linkCompartible: "",
       createdAt: now,
@@ -83,6 +89,45 @@ export const create = mutation({
     });
 
     return matchId;
+  },
+});
+
+// Matches owned by the signed-in user, newest first.
+export const myMatches = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await currentUserDoc(ctx);
+    if (!user) return [];
+    return await ctx.db
+      .query("matches")
+      .withIndex("by_ownerId", (q) => q.eq("ownerId", user._id))
+      .order("desc")
+      .collect();
+  },
+});
+
+// Take ownership of a match created before the user system existed (or by
+// an anonymous organizer). Only unowned matches can be claimed.
+export const claim = mutation({
+  args: { matchId: v.id("matches") },
+  handler: async (ctx, args) => {
+    const userId = await upsertCurrentUser(ctx, {});
+    if (!userId) throw new Error("Necesitás iniciar sesión para reclamar un partido");
+
+    const match = await ctx.db.get(args.matchId);
+    if (!match) throw new Error("Partido no encontrado");
+    if (match.ownerId && match.ownerId !== userId) {
+      throw new Error("Este partido ya tiene organizador");
+    }
+
+    if (!match.ownerId) {
+      await ctx.db.patch(args.matchId, {
+        ownerId: userId,
+        updatedAt: new Date().toISOString(),
+      });
+    }
+
+    return args.matchId;
   },
 });
 

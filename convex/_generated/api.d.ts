@@ -14,6 +14,7 @@ import type * as registrations from "../registrations.js";
 import type * as seed from "../seed.js";
 import type * as teamConfigurations from "../teamConfigurations.js";
 import type * as testing from "../testing.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -28,6 +29,7 @@ declare const fullApi: ApiFromModules<{
   seed: typeof seed;
   teamConfigurations: typeof teamConfigurations;
   testing: typeof testing;
+  users: typeof users;
 }>;
 
 /**

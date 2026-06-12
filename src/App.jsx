@@ -3,7 +3,9 @@ import { useQuery } from 'convex/react'
 import { api } from '../convex/_generated/api'
 import SplashPage from './components/landing/SplashPage'
 import CreateMatchPage from './components/landing/CreateMatchPage'
+import MyMatchesPage from './components/landing/MyMatchesPage'
 import MatchPage from './components/match/MatchPage'
+import AuthControls from './components/ui/AuthControls'
 import Footer from './components/ui/Footer'
 import CrtEffect from './components/ui/CrtEffect'
 import CrtControlPanel from './components/ui/CrtControlPanel'
@@ -98,6 +100,10 @@ function App() {
       return <CreateMatchPage onNavigate={navigate} />
     }
 
+    if (route === '#/mis-partidos') {
+      return <MyMatchesPage onNavigate={navigate} />
+    }
+
     // Short code route: #/p/ABC123
     const shortCodeRoute = route.match(/^#\/p\/([A-Za-z0-9]{6})$/)
     if (shortCodeRoute) {
@@ -117,12 +123,18 @@ function App() {
   }
 
   const isSplash = route === '#/' || route === '' || route === '#'
-  
+  const showBack = route === '#/nuevo' || route === '#/mis-partidos'
+
   return (
     <div className={`app${isSplash ? ' app--splash' : ''}`}>
+      {isSplash && (
+        <div className="splash-auth">
+          <AuthControls onNavigate={navigate} />
+        </div>
+      )}
       {!isSplash && (
-        <header className={`app-logo${route === '#/nuevo' ? ' app-logo--with-back' : ''}`}>
-          {route === '#/nuevo' && (
+        <header className={`app-logo${showBack ? ' app-logo--with-back' : ''}`}>
+          {showBack && (
             <button
               type="button"
               className="btn btn-secondary btn-sm topbar-back"
@@ -132,6 +144,9 @@ function App() {
             </button>
           )}
           <img src="/LOGO.svg" alt="Fulbin" width="120" height="41" />
+          <div className="app-header-auth">
+            <AuthControls onNavigate={navigate} />
+          </div>
         </header>
       )}
       {getRouteComponent()}
