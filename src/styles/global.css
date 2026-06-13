@@ -120,15 +120,16 @@
   --space-20: 80px;
 
   /* ── BORDER RADIUS ── */
-  --radius-xs: 4px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --radius-2xl: 24px;
-  --radius-3xl: 32px;
-  --radius-pill: 999px;
-  --radius-circle: 50%;
+  /* Flat / squared aesthetic: all corners are 0 across the app. */
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+  --radius-pill: 0;
+  --radius-circle: 0;
   /* Legacy mappings */
   --border-radius: var(--radius-md);
   --border-radius-sm: var(--radius-sm);
@@ -318,7 +319,7 @@ h4 { font-size: var(--type-lg); }
 
 /* Scrollbar styling for dark mode */
 ::-webkit-scrollbar { width: 6px; background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--surface-4); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--surface-4); border-radius: 0; }
 ::-webkit-scrollbar-thumb:hover { background: var(--surface-5); }
 
 /* ===================================
@@ -2217,10 +2218,13 @@ h4 { font-size: var(--type-lg); }
 .player-profile-state {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-2);
   padding: var(--space-1) var(--space-4);
-  background: var(--surface-3);
-  border-radius: var(--radius-pill);
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: 1px solid var(--surface-5);
+  border-radius: 0;
   font-size: var(--type-sm);
   color: var(--text-secondary);
 }
@@ -2300,9 +2304,16 @@ h4 { font-size: var(--type-lg); }
   align-items: center;
   justify-content: space-between;
   padding: var(--space-4);
-  background: var(--surface-3);
-  border-radius: var(--radius-md);
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: 1px solid var(--surface-5);
+  border-radius: 0;
   margin-top: var(--space-4);
+}
+
+.overall-level--efectivo {
+  margin-top: var(--space-2);
 }
 
 .overall-label {
@@ -2314,7 +2325,32 @@ h4 { font-size: var(--type-lg); }
   font-size: var(--type-2xl);
   font-family: var(--font-display);
   font-weight: 700;
-  color: var(--text-accent);
+  color: var(--color-primary);
+}
+
+/* Player info modal footer: primary actions on a row, "Bajarme" below */
+.player-modal-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.player-modal-footer-main {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.player-modal-footer-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.player-modal-leave-btn {
+  width: 100%;
 }
 
 /* ===================================
@@ -2867,7 +2903,7 @@ h4 { font-size: var(--type-lg); }
   justify-content: space-between;
   padding: 8px 10px;
   background: var(--surface-3);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  border-radius: 0;
   border-left: 3px solid transparent;
   transition: all var(--duration-fast);
 }
@@ -3000,7 +3036,7 @@ h4 { font-size: var(--type-lg); }
   border: none;
   background-color: var(--color-primary);
   color: white;
-  border-radius: 4px;
+  border-radius: 0;
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -3155,13 +3191,13 @@ h4 { font-size: var(--type-lg); }
   width: 18px;
   height: 18px;
   border: 2px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 0;
 }
 
 .checkbox-checked {
   width: 18px;
   height: 18px;
-  border-radius: 4px;
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3238,7 +3274,7 @@ h4 { font-size: var(--type-lg); }
   background: none;
   color: var(--text-muted);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 0;
   transition: all 0.15s;
 }
 
@@ -3437,7 +3473,7 @@ h4 { font-size: var(--type-lg); }
   width: 5px;
   height: 5px;
   background: #fff;
-  border-radius: 50%;
+  border-radius: 0;
   flex-shrink: 0;
 }
 
@@ -3498,7 +3534,7 @@ h4 { font-size: var(--type-lg); }
 .field-player-dot {
   width: 13px;
   height: 13px;
-  border-radius: 50%;
+  border-radius: 0;
   flex-shrink: 0;
 }
 
@@ -3884,7 +3920,7 @@ h4 { font-size: var(--type-lg); }
 
 .divergent-segment.team-oscuro {
   background: var(--text-primary);
-  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+  border-radius: 0;
 }
 
 .divergent-scale {
@@ -4004,7 +4040,7 @@ h4 { font-size: var(--type-lg); }
   gap: var(--spacing-xs);
   padding: var(--spacing-xs) var(--spacing-sm);
   background-color: var(--bg-primary);
-  border-radius: 9999px;
+  border-radius: 0;
   font-size: 0.875rem;
 }
 
@@ -4060,7 +4096,7 @@ h4 { font-size: var(--type-lg); }
 .team-color {
   width: 20px;
   height: 20px;
-  border-radius: 50%;
+  border-radius: 0;
   flex-shrink: 0;
 }
 
@@ -4251,7 +4287,7 @@ h4 { font-size: var(--type-lg); }
   background: none;
   color: var(--text-muted);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 0;
   transition: all 0.15s;
   flex-shrink: 0;
 }
@@ -4470,7 +4506,7 @@ h4 { font-size: var(--type-lg); }
   background: none;
   color: var(--text-muted);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 0;
   transition: all 0.15s;
 }
 
@@ -4753,7 +4789,7 @@ body.crt-on #root {
   background: rgba(10, 10, 10, 0.92);
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 8px;
+  border-radius: 0;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
@@ -4782,7 +4818,7 @@ body.crt-on #root {
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: #fff;
   padding: 4px;
-  border-radius: 4px;
+  border-radius: 0;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -5320,27 +5356,34 @@ body.crt-on #root {
   position: relative;
 }
 
+/* Matches the topbar "Volver" button (.btn.btn-secondary.btn-sm): dotted bg,
+   squared, gray-500 dotted border with the same drop shadow. */
 .auth-user-chip {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 4px 10px 4px 4px;
-  background: var(--surface-2);
-  border: 1px solid var(--surface-5);
-  border-radius: 999px;
-  color: var(--gray-100);
+  height: 32px;
+  padding: 3px 10px;
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: 1px dotted var(--gray-500);
+  border-radius: 0;
+  box-shadow: 0 5px 0 0 var(--gray-600);
+  color: var(--text-primary);
+  font-family: var(--font-display);
   font-size: var(--type-sm);
   cursor: pointer;
 }
 
 .auth-user-chip:hover {
-  background: var(--surface-3);
+  background-color: #222;
 }
 
 .auth-avatar {
   width: 24px;
   height: 24px;
-  border-radius: 50%;
+  border-radius: 0;
   display: block;
   object-fit: cover;
 }
@@ -5482,17 +5525,36 @@ body.crt-on #root {
   gap: var(--space-3);
   width: 100%;
   padding: var(--space-3) var(--space-4);
-  background: var(--surface-2);
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
   border: 1px solid var(--surface-5);
-  border-radius: var(--radius-md);
+  border-radius: 0;
   color: var(--gray-100);
   text-align: left;
   cursor: pointer;
 }
 
 .my-match-card:hover {
-  background: var(--surface-3);
   border-color: var(--color-primary);
+}
+
+.my-match-winner {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-primary);
+}
+
+/* Points badge on the finalized recap player cards */
+.player-points-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-primary);
+  background: var(--acid-yellow-dim);
+  padding: 1px 6px;
+  white-space: nowrap;
 }
 
 .my-match-main {
@@ -5529,7 +5591,7 @@ body.crt-on #root {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: 0;
   background: var(--surface-4);
   color: var(--gray-200);
 }
@@ -5566,7 +5628,7 @@ body.crt-on #root {
   height: 36px;
   flex-shrink: 0;
   font-size: 14px;
-  border-radius: 50%;
+  border-radius: 0;
 }
 
 .roster-nivel {
@@ -5576,7 +5638,7 @@ body.crt-on #root {
   color: var(--color-primary);
   background: var(--acid-yellow-dim);
   padding: 4px 10px;
-  border-radius: 999px;
+  border-radius: 0;
 }
 
 .roster-select {
@@ -5732,4 +5794,18 @@ body.crt-on #root {
 .typeahead-item:hover {
   background: var(--surface-3);
   color: var(--color-primary);
+}
+
+/* Clickable player card name area (opens the player modal) */
+.player-card-left--clickable:hover .player-name-compact {
+  color: var(--color-primary);
+}
+
+/* "Agregar X" row in the roster typeahead */
+.typeahead-item--add {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-primary);
+  border-top: 1px solid var(--surface-4);
 }

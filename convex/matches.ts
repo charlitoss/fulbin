@@ -232,7 +232,12 @@ async function computeResultado(ctx: QueryCtx, matchId: Id<"matches">) {
     if (a.equipo === "blanco") golesBlanco += a.goles ?? 0;
     else if (a.equipo === "oscuro") golesOscuro += a.goles ?? 0;
   }
-  return { golesBlanco, golesOscuro };
+  return {
+    golesBlanco,
+    golesOscuro,
+    nombreBlanco: config.nombreEquipoBlanco,
+    nombreOscuro: config.nombreEquipoOscuro,
+  };
 }
 
 // Finish a match: transitions pasoActual to 'finalizado', records the final
@@ -257,14 +262,16 @@ export const finishMatch = mutation({
   },
 });
 
-// Migration: snapshot resultado for matches finalized before it existed.
+// Migration: snapshot resultado for finalized matches, and add team names to
+// snapshots taken before nombreBlanco/nombreOscuro existed.
 export const backfillResultados = mutation({
   args: {},
   handler: async (ctx) => {
     const matches = await ctx.db.query("matches").collect();
     let updated = 0;
     for (const match of matches) {
-      if (match.pasoActual !== "finalizado" || match.resultado) continue;
+      if (match.pasoActual !== "finalizado") continue;
+      if (match.resultado?.nombreBlanco) continue; // already has names
       const resultado = await computeResultado(ctx, match._id);
       if (resultado) {
         await ctx.db.patch(match._id, { resultado });

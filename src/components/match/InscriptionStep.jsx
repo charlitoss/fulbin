@@ -107,11 +107,19 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
     // Data will auto-refresh via Convex
   }
   
-  const handleViewPlayerInfo = (player) => {
-    const reg = registrations.find(r => r.jugadorId === player._id)
+  const handleViewPlayerInfo = (player, registration) => {
+    const reg = registration || registrationsData?.find(r => r.jugadorId === player._id)
     setSelectedPlayer(player)
     setSelectedRegistration(reg)
     setShowPlayerInfo(true)
+  }
+
+  const handleLeaveMatch = async (playerId) => {
+    try {
+      await removeRegistration({ matchId: match._id, playerId })
+    } catch (err) {
+      console.error('Error removing registration:', err)
+    }
   }
   
   const handleContinue = async () => {
@@ -155,6 +163,7 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
                   player={player}
                   registration={registration}
                   onRemove={handleRemovePlayer}
+                  onCardClick={handleViewPlayerInfo}
                   index={index}
                   compact={true}
                 />
@@ -213,6 +222,7 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
                 registration={registration}
                 onRemove={handleRemovePlayer}
                 onPromote={!isQuotaComplete ? handlePromoteSuplente : undefined}
+                onCardClick={handleViewPlayerInfo}
                 index={index}
                 compact={true}
               />
@@ -241,6 +251,7 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
                 player={player}
                 registration={registration}
                 onRemove={handleRemovePlayer}
+                onCardClick={handleViewPlayerInfo}
                 index={index}
                 compact={true}
                 showState={false}
@@ -269,6 +280,7 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
         onClose={() => setShowPlayerInfo(false)}
         player={selectedPlayer}
         registration={selectedRegistration}
+        onLeave={handleLeaveMatch}
       />
     </>
   )

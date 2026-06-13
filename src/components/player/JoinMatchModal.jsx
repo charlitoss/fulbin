@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { X, UserPlus, Users, Clock, Eye, ArrowRight } from 'lucide-react'
+import { X, UserPlus, Users, Clock, Eye, ArrowRight, Plus } from 'lucide-react'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import Modal from '../ui/Modal'
@@ -195,6 +195,28 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
     setFriendName('')
     setSuggestFor(null)
     friendInputRef.current?.focus()
+  }
+
+  // Add a brand-new name (not in the roster) straight from the dropdown, so
+  // it's obvious you can register people who don't have a profile yet.
+  const addTypedFriend = (name) => {
+    const { newFriends, errors } = processFriendNames(name, friends)
+    if (newFriends.length > 0) setFriends(prev => [...prev, ...newFriends])
+    if (errors.length > 0) setError(errors.join('. '))
+    setFriendName('')
+    setSuggestFor(null)
+    friendInputRef.current?.focus()
+  }
+
+  // Offer "Agregar X" when the typed name matches no roster player and isn't
+  // already chosen.
+  const canAddTyped = (text) => {
+    const t = text.trim()
+    if (t.length < 2) return false
+    const n = normalize(t)
+    if (suggestionsFor(text).some(p => normalize(p.nombre) === n)) return false
+    if (normalize(nombre.trim()) === n) return false
+    return !friends.some(f => normalize(f.nombre) === n)
   }
   
   // Submit main player + friends
@@ -499,7 +521,7 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
                 className="friend-input"
                 autoComplete="off"
               />
-              {suggestFor === 'friend' && suggestionsFor(friendName).length > 0 && (
+              {suggestFor === 'friend' && (suggestionsFor(friendName).length > 0 || canAddTyped(friendName)) && (
                 <div className="typeahead-list" role="listbox">
                   {suggestionsFor(friendName).map((player) => (
                     <button
@@ -515,6 +537,19 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
                       {player.nombre}
                     </button>
                   ))}
+                  {canAddTyped(friendName) && (
+                    <button
+                      type="button"
+                      role="option"
+                      className="typeahead-item typeahead-item--add"
+                      onMouseDown={(e) => {
+                        e.preventDefault()
+                        addTypedFriend(friendName)
+                      }}
+                    >
+                      <Plus size={14} /> Agregar “{friendName.trim()}”
+                    </button>
+                  )}
                 </div>
               )}
             </div>

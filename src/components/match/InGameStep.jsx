@@ -71,6 +71,12 @@ function InGameStep({ match, onFinish, finalized = false }) {
     prevTotalsRef.current = { blanco: goalsBlanco, oscuro: goalsOscuro }
   }, [goalsBlanco, goalsOscuro, finalized])
 
+  // Points each team's players earned, shown only on the finalized recap
+  // (win 3 / draw 1 / loss 0), mirroring the tournament standings.
+  const teamPoints = (own, rival) => (own > rival ? 3 : own === rival ? 1 : 0)
+  const pointsBlanco = finalized ? teamPoints(goalsBlanco, goalsOscuro) : null
+  const pointsOscuro = finalized ? teamPoints(goalsOscuro, goalsBlanco) : null
+
   const handleGoalDelta = useCallback((jugadorId, delta) => {
     if (finalized) return
     incrementPlayerGoals({ matchId: match._id, jugadorId, delta })
@@ -108,6 +114,7 @@ function InGameStep({ match, onFinish, finalized = false }) {
               mode="in-game"
               onGoalDelta={handleGoalDelta}
               readOnly={finalized}
+              points={pointsBlanco}
             />
             <TeamPanel
               team="oscuro"
@@ -118,6 +125,7 @@ function InGameStep({ match, onFinish, finalized = false }) {
               mode="in-game"
               onGoalDelta={handleGoalDelta}
               readOnly={finalized}
+              points={pointsOscuro}
             />
           </div>
         </div>

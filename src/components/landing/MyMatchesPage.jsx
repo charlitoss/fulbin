@@ -10,6 +10,15 @@ const ESTADO_LABELS = {
   finalizado: 'Finalizado',
 }
 
+const winnerText = (r) => {
+  if (!r) return null
+  const blanco = r.nombreBlanco || 'Blanco'
+  const oscuro = r.nombreOscuro || 'Oscuro'
+  if (r.golesBlanco > r.golesOscuro) return `Ganó ${blanco}`
+  if (r.golesOscuro > r.golesBlanco) return `Ganó ${oscuro}`
+  return 'Empate'
+}
+
 function MyMatchesPage({ onNavigate }) {
   const { user, isLoading, signIn } = useAuthSession()
   const matches = useQuery(api.matches.myMatches, user ? {} : 'skip')
@@ -80,9 +89,12 @@ function MyMatchesPage({ onNavigate }) {
                     {ESTADO_LABELS[match.pasoActual] ?? match.pasoActual}
                   </span>
                   {match.resultado ? (
-                    <span className="my-match-resultado">
-                      {match.resultado.golesBlanco} — {match.resultado.golesOscuro}
-                    </span>
+                    <>
+                      <span className="my-match-resultado">
+                        {match.resultado.golesBlanco} — {match.resultado.golesOscuro}
+                      </span>
+                      <span className="my-match-winner">{winnerText(match.resultado)}</span>
+                    </>
                   ) : (
                     <span className="my-match-codigo">{match.codigoCorto}</span>
                   )}

@@ -18,6 +18,7 @@ function TeamPanel({
   mode = 'builder', // 'builder' | 'in-game'
   onGoalDelta, // (jugadorId, delta) — only used in 'in-game' mode
   readOnly = false, // when true (and mode === 'in-game'), goals are shown without +/- controls
+  points = null, // points each player on this team earned (finalized view)
 }) {
   const isInGame = mode === 'in-game'
   const [isEditing, setIsEditing] = useState(false)
@@ -109,6 +110,7 @@ function TeamPanel({
             onDelta: readOnly ? null : (delta) => onGoalDelta?.(playerId, delta),
             readOnly,
           }}
+          points={points}
         />
       )
     }
@@ -126,6 +128,7 @@ function TeamPanel({
           registration={registration}
           onMove={() => onSwapTeam(playerId)}
           onRemove={() => onUnassign(playerId)}
+          onCardClick={onViewInfo}
           index={index}
           compact={true}
         />

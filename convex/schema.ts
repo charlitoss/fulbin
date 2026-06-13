@@ -36,6 +36,8 @@ export default defineSchema({
     resultado: v.optional(v.object({
       golesBlanco: v.number(),
       golesOscuro: v.number(),
+      nombreBlanco: v.optional(v.string()),
+      nombreOscuro: v.optional(v.string()),
     })),
     createdAt: v.string(),
     updatedAt: v.string(),

@@ -8,6 +8,7 @@ import MyPlayersPage from './components/landing/MyPlayersPage'
 import StandingsPage from './components/landing/StandingsPage'
 import MatchPage from './components/match/MatchPage'
 import AuthControls from './components/ui/AuthControls'
+import { authEnabled, useAuthSession } from './auth/useAuthSession'
 import Footer from './components/ui/Footer'
 import CrtEffect from './components/ui/CrtEffect'
 import CrtControlPanel from './components/ui/CrtControlPanel'
@@ -63,6 +64,10 @@ function App() {
   const [crtParams, setCrtParams] = useState(loadCrtParams)
   const [crtPanelOpen, setCrtPanelOpen] = useState(false)
 
+  const { user } = useAuthSession()
+  const isLoggedIn = authEnabled && !!user
+  const homeRoute = isLoggedIn ? '#/mis-partidos' : '#/'
+
   useEffect(() => {
     try {
       localStorage.setItem(CRT_STORAGE_KEY, String(crtEnabled))
@@ -78,6 +83,13 @@ function App() {
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [route])
+
+  // Logged-in users land on their matches instead of the marketing splash.
+  useEffect(() => {
+    if (isLoggedIn && (route === '#/' || route === '' || route === '#')) {
+      navigate('#/mis-partidos')
+    }
+  }, [isLoggedIn, route])
 
   useEffect(() => {
     const handleHashChange = () => {
@@ -133,7 +145,19 @@ function App() {
   }
 
   const isSplash = route === '#/' || route === '' || route === '#'
-  const showBack = ['#/nuevo', '#/mis-partidos', '#/mis-jugadores', '#/tabla'].includes(route)
+  const isMatchRoute = /^#\/partido\//.test(route)
+
+  // Top-left back button: label + target depend on where you are and whether
+  // you're signed in (signed-in home is Mis partidos, not the splash).
+  let back = null
+  if (['#/nuevo', '#/mis-jugadores', '#/tabla'].includes(route)) {
+    back = { label: '← Volver', target: homeRoute }
+  } else if (route === '#/mis-partidos') {
+    back = isLoggedIn ? null : { label: '← Volver', target: '#/' }
+  } else if (isMatchRoute && isLoggedIn) {
+    back = { label: '← Mis partidos', target: '#/mis-partidos' }
+  }
+  const showBack = !!back
 
   return (
     <div className={`app${isSplash ? ' app--splash' : ''}`}>
@@ -148,9 +172,9 @@ function App() {
             <button
               type="button"
               className="btn btn-secondary btn-sm topbar-back"
-              onClick={() => navigate('#/')}
+              onClick={() => navigate(back.target)}
             >
-              ← Volver
+              {back.label}
             </button>
           )}
           <img src="/LOGO.svg" alt="Fulbin" width="120" height="41" />
