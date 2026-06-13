@@ -7,7 +7,7 @@ import HinchadaPanel from './HinchadaPanel'
 import InGameHeader from './InGameHeader'
 import PlayerCard from '../player/PlayerCard'
 
-function InGameStep({ match, onFinish, finalized = false }) {
+function InGameStep({ match, canManage = false, onFinish, finalized = false }) {
   const teamConfig = useQuery(api.teamConfigurations.getByMatch, { matchId: match._id })
   const registrationsData = useQuery(api.registrations.listByMatch, { matchId: match._id })
   const playersData = useQuery(api.players.list)
@@ -78,9 +78,12 @@ function InGameStep({ match, onFinish, finalized = false }) {
   const pointsOscuro = finalized ? teamPoints(goalsOscuro, goalsBlanco) : null
 
   const handleGoalDelta = useCallback((jugadorId, delta) => {
-    if (finalized) return
+    if (finalized || !canManage) return
     incrementPlayerGoals({ matchId: match._id, jugadorId, delta })
-  }, [incrementPlayerGoals, match._id, finalized])
+  }, [incrementPlayerGoals, match._id, finalized, canManage])
+
+  // Spectators (non-owners) and the finalized recap see scores without +/-.
+  const scoresReadOnly = finalized || !canManage
 
   if (!teamConfig || !playersData || !registrationsData) {
     return (
@@ -113,7 +116,7 @@ function InGameStep({ match, onFinish, finalized = false }) {
               jugadoresPorEquipo={match.jugadoresPorEquipo}
               mode="in-game"
               onGoalDelta={handleGoalDelta}
-              readOnly={finalized}
+              readOnly={scoresReadOnly}
               points={pointsBlanco}
             />
             <TeamPanel
@@ -124,7 +127,7 @@ function InGameStep({ match, onFinish, finalized = false }) {
               jugadoresPorEquipo={match.jugadoresPorEquipo}
               mode="in-game"
               onGoalDelta={handleGoalDelta}
-              readOnly={finalized}
+              readOnly={scoresReadOnly}
               points={pointsOscuro}
             />
           </div>

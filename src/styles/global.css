@@ -1415,6 +1415,16 @@ h4 { font-size: var(--type-lg); }
   margin-left: auto;
 }
 
+/* Spectator (non-owner) view: fields render as plain text, not clickable. */
+.editable-field--readonly,
+.editable-title--readonly {
+  cursor: default;
+}
+
+.editable-field--readonly:hover {
+  background-color: var(--surface-2);
+}
+
 .editable-field.editing {
   cursor: default;
 }

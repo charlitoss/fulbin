@@ -4,6 +4,7 @@ import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import Modal from '../ui/Modal'
 import { PHYSICAL_STATES, MAX_SUPLENTES } from '../../utils/constants'
+import { getDeviceId } from '../../utils/deviceId'
 
 const REGISTRATION_TYPES = {
   jugador: { label: 'Jugador', icon: Users, description: 'Jugar en el partido' },
@@ -272,6 +273,7 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
             nombre: trimmedName,
             estadoFisico: tipoInscripcion === 'hinchada' ? 'normal' : estadoFisico,
             tipoInscripcion: tipoInscripcion,
+            anonId: getDeviceId(),
           })
           mainPlayerId = result.playerId
         } catch (err) {
@@ -308,6 +310,7 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
             nombre: friend.nombre,
             estadoFisico: 'normal',
             tipoInscripcion: friendType,
+            anonId: getDeviceId(),
           })
         } catch (err) {
           if (String(err.message).includes('YA_INSCRITO')) {

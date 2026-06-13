@@ -4,6 +4,7 @@ import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { currentUserDoc, upsertCurrentUser } from "./users";
 import { activeTournament } from "./tournaments";
+import { assertCanManageMatch } from "./permissions";
 
 // Generate a short 6-character alphanumeric code for sharing
 function generateShortCode(): string {
@@ -179,7 +180,11 @@ export const update = mutation({
   },
   handler: async (ctx, args) => {
     const { matchId, ...updates } = args;
-    
+
+    const match = await ctx.db.get(matchId);
+    if (!match) throw new Error("Partido no encontrado");
+    await assertCanManageMatch(ctx, match);
+
     // Filter out undefined values
     const filteredUpdates: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(updates)) {
@@ -201,6 +206,9 @@ export const update = mutation({
 export const remove = mutation({
   args: { matchId: v.id("matches") },
   handler: async (ctx, args) => {
+    const match = await ctx.db.get(args.matchId);
+    if (!match) return;
+    await assertCanManageMatch(ctx, match);
     await ctx.db.delete(args.matchId);
   },
 });
@@ -211,6 +219,7 @@ export const startMatch = mutation({
   handler: async (ctx, args) => {
     const match = await ctx.db.get(args.matchId);
     if (!match) throw new Error("Match not found");
+    await assertCanManageMatch(ctx, match);
     if (match.pasoActual !== "armado_equipos") return args.matchId;
 
     await ctx.db.patch(args.matchId, {
@@ -252,6 +261,7 @@ export const finishMatch = mutation({
   handler: async (ctx, args) => {
     const match = await ctx.db.get(args.matchId);
     if (!match) throw new Error("Match not found");
+    await assertCanManageMatch(ctx, match);
     if (match.pasoActual !== "jugando") return args.matchId;
 
     const resultado = await computeResultado(ctx, args.matchId);

@@ -9,7 +9,7 @@ import { MAX_SUPLENTES } from '../../utils/constants'
 import JoinMatchModal from '../player/JoinMatchModal'
 import PlayerInfoModal from '../player/PlayerInfoModal'
 
-function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
+function InscriptionStep({ match, canManage = false, deviceId, onRegisterAddPlayerHandler }) {
   const [showJoinModal, setShowJoinModal] = useState(false)
   const [joinModalType, setJoinModalType] = useState(null)
   const [showPlayerInfo, setShowPlayerInfo] = useState(false)
@@ -32,7 +32,7 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
 
   const handleRemovePlayer = async (player) => {
     try {
-      await removeRegistration({ matchId: match._id, playerId: player._id })
+      await removeRegistration({ matchId: match._id, playerId: player._id, anonId: deviceId })
     } catch (err) {
       console.error('Error removing registration:', err)
     }
@@ -44,6 +44,7 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
         matchId: match._id,
         playerId: player._id,
         tipoInscripcion: 'jugador',
+        anonId: deviceId,
       })
     } catch (err) {
       console.error('Error promoting suplente:', err)
@@ -116,11 +117,15 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
 
   const handleLeaveMatch = async (playerId) => {
     try {
-      await removeRegistration({ matchId: match._id, playerId })
+      await removeRegistration({ matchId: match._id, playerId, anonId: deviceId })
     } catch (err) {
       console.error('Error removing registration:', err)
     }
   }
+
+  // A registration can be left by the owner, or by the device that created it.
+  const canLeave = (registration) =>
+    canManage || (!!registration?.creadoPor && registration.creadoPor === deviceId)
   
   const handleContinue = async () => {
     if (isQuotaComplete) {
@@ -162,7 +167,7 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
                   key={registration.jugadorId}
                   player={player}
                   registration={registration}
-                  onRemove={handleRemovePlayer}
+                  onRemove={canManage ? handleRemovePlayer : undefined}
                   onCardClick={handleViewPlayerInfo}
                   index={index}
                   compact={true}
@@ -182,14 +187,16 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
         </div>
 
         <div className="inscription-actions">
-          <button
-            className={`btn-continue ${isQuotaComplete ? 'ready' : ''}`}
-            onClick={handleContinue}
-            disabled={!isQuotaComplete}
-          >
-            <span>Armar equipos</span>
-            <span className="icon-arrow-right" aria-hidden="true" />
-          </button>
+          {canManage && (
+            <button
+              className={`btn-continue ${isQuotaComplete ? 'ready' : ''}`}
+              onClick={handleContinue}
+              disabled={!isQuotaComplete}
+            >
+              <span>Armar equipos</span>
+              <span className="icon-arrow-right" aria-hidden="true" />
+            </button>
+          )}
 
           {!isQuotaComplete && (
             <p className="continue-hint">
@@ -221,7 +228,7 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
                 player={player}
                 registration={registration}
                 onRemove={handleRemovePlayer}
-                onPromote={!isQuotaComplete ? handlePromoteSuplente : undefined}
+                onPromote={!isQuotaComplete && canManage ? handlePromoteSuplente : undefined}
                 onCardClick={handleViewPlayerInfo}
                 index={index}
                 compact={true}
@@ -280,7 +287,7 @@ function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
         onClose={() => setShowPlayerInfo(false)}
         player={selectedPlayer}
         registration={selectedRegistration}
-        onLeave={handleLeaveMatch}
+        onLeave={canLeave(selectedRegistration) ? handleLeaveMatch : undefined}
       />
     </>
   )

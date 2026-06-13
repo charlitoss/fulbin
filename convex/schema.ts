@@ -109,6 +109,10 @@ export default defineSchema({
     jugadorId: v.id("players"),
     estadoFisico: v.string(), // 'excelente' | 'normal' | 'cansado'
     tipoInscripcion: v.optional(v.string()), // 'jugador' | 'suplente' | 'hinchada'
+    // Anonymous device token of whoever created this registration, so a player
+    // who inscribed can remove themselves (but not others) without an account.
+    // Absent on legacy rows — those can only be removed by the match owner.
+    creadoPor: v.optional(v.string()),
     timestamp: v.string(),
     confirmado: v.boolean(),
     asistira: v.boolean(),

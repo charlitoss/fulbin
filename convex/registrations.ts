@@ -1,6 +1,7 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { DEFAULT_PROFILE } from "./players";
+import { assertCanManageMatch, canManageRegistration } from "./permissions";
 
 // List all registrations for a match
 export const listByMatch = query({
@@ -44,6 +45,9 @@ export const join = mutation({
     nombre: v.optional(v.string()),
     estadoFisico: v.string(),
     tipoInscripcion: v.optional(v.string()),
+    // Device token of whoever is inscribing, so they can later remove their
+    // own inscriptions without an account.
+    anonId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const match = await ctx.db.get(args.matchId);
@@ -81,6 +85,7 @@ export const join = mutation({
           jugadorId: playerId,
           estadoFisico: args.estadoFisico,
           tipoInscripcion: args.tipoInscripcion || "jugador",
+          creadoPor: args.anonId,
           confirmado: true,
           asistira: true,
           timestamp: new Date().toISOString(),
@@ -101,6 +106,8 @@ export const join = mutation({
       await ctx.db.patch(existingReg._id, {
         estadoFisico: args.estadoFisico,
         tipoInscripcion: args.tipoInscripcion || "jugador",
+        // Re-stamp the creator on re-join so the re-inscriber owns it.
+        creadoPor: args.anonId ?? existingReg.creadoPor,
         confirmado: true,
         asistira: true,
         timestamp: new Date().toISOString(),
@@ -113,6 +120,7 @@ export const join = mutation({
       jugadorId: playerId,
       estadoFisico: args.estadoFisico,
       tipoInscripcion: args.tipoInscripcion || "jugador",
+      creadoPor: args.anonId,
       confirmado: true,
       asistira: true,
       timestamp: new Date().toISOString(),
@@ -122,7 +130,8 @@ export const join = mutation({
   },
 });
 
-// Create a new registration
+// Create a registration directly (admin flows like promoting a suplente).
+// Owner-only on owned matches; open on ownerless ones.
 export const create = mutation({
   args: {
     partidoId: v.id("matches"),
@@ -131,16 +140,23 @@ export const create = mutation({
     tipoInscripcion: v.optional(v.string()),
     confirmado: v.boolean(),
     asistira: v.boolean(),
+    anonId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const { anonId, ...fields } = args;
+
+    const match = await ctx.db.get(args.partidoId);
+    if (!match) throw new Error("Partido no encontrado");
+    await assertCanManageMatch(ctx, match);
+
     // Check if registration already exists
     const existing = await ctx.db
       .query("registrations")
-      .withIndex("by_partidoId_jugadorId", (q) => 
+      .withIndex("by_partidoId_jugadorId", (q) =>
         q.eq("partidoId", args.partidoId).eq("jugadorId", args.jugadorId)
       )
       .first();
-    
+
     if (existing) {
       // Update existing registration
       await ctx.db.patch(existing._id, {
@@ -152,19 +168,21 @@ export const create = mutation({
       });
       return existing._id;
     }
-    
+
     // Create new registration
     const registrationId = await ctx.db.insert("registrations", {
-      ...args,
+      ...fields,
       tipoInscripcion: args.tipoInscripcion || 'jugador',
+      creadoPor: anonId,
       timestamp: new Date().toISOString(),
     });
-    
+
     return registrationId;
   },
 });
 
-// Update an existing registration
+// Update an existing registration. Match owner (or anyone on an ownerless
+// match), or the device that created the registration.
 export const update = mutation({
   args: {
     matchId: v.id("matches"),
@@ -173,21 +191,29 @@ export const update = mutation({
     tipoInscripcion: v.optional(v.string()),
     confirmado: v.optional(v.boolean()),
     asistira: v.optional(v.boolean()),
+    anonId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { matchId, playerId, ...updates } = args;
-    
+    const { matchId, playerId, anonId, ...updates } = args;
+
+    const match = await ctx.db.get(matchId);
+    if (!match) throw new Error("Partido no encontrado");
+
     const existing = await ctx.db
       .query("registrations")
-      .withIndex("by_partidoId_jugadorId", (q) => 
+      .withIndex("by_partidoId_jugadorId", (q) =>
         q.eq("partidoId", matchId).eq("jugadorId", playerId)
       )
       .first();
-    
+
     if (!existing) {
       throw new Error("Registration not found");
     }
-    
+
+    if (!(await canManageRegistration(ctx, match, existing, anonId))) {
+      throw new Error("NO_AUTORIZADO");
+    }
+
     // Filter out undefined values
     const filteredUpdates: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(updates)) {
@@ -205,23 +231,32 @@ export const update = mutation({
   },
 });
 
-// Remove a registration
+// Remove a registration. Match owner (or anyone on an ownerless match), or the
+// device that created it — so a player can leave themselves, but not others.
 export const remove = mutation({
   args: {
     matchId: v.id("matches"),
     playerId: v.id("players"),
+    anonId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    const match = await ctx.db.get(args.matchId);
+    if (!match) return;
+
     const existing = await ctx.db
       .query("registrations")
-      .withIndex("by_partidoId_jugadorId", (q) => 
+      .withIndex("by_partidoId_jugadorId", (q) =>
         q.eq("partidoId", args.matchId).eq("jugadorId", args.playerId)
       )
       .first();
-    
-    if (existing) {
-      await ctx.db.delete(existing._id);
+
+    if (!existing) return;
+
+    if (!(await canManageRegistration(ctx, match, existing, args.anonId))) {
+      throw new Error("NO_AUTORIZADO");
     }
+
+    await ctx.db.delete(existing._id);
   },
 });
 
