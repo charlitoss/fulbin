@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
-import { Pencil } from 'lucide-react'
-import { useQuery } from 'convex/react'
+import { Pencil, Trophy } from 'lucide-react'
+import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import { authEnabled, useAuthSession } from '../../auth/useAuthSession'
 import TournamentsModal from './TournamentsModal'
+import Modal from '../ui/Modal'
 
 // Individual standings across the admin's finished matches: teams change
 // every match, so points follow players (win 3, draw 1, loss 0). Results are
@@ -11,10 +12,13 @@ import TournamentsModal from './TournamentsModal'
 function StandingsPage({ onNavigate }) {
   const { user, isLoading, signIn } = useAuthSession()
   const tournaments = useQuery(api.tournaments.mine, user ? {} : 'skip')
+  const finalize = useMutation(api.tournaments.finalize)
 
   // null = "Todos"; a string = a tournament id; undefined = not yet defaulted.
   const [selected, setSelected] = useState(undefined)
   const [showManage, setShowManage] = useState(false)
+  const [showFinalize, setShowFinalize] = useState(false)
+  const [finalizing, setFinalizing] = useState(false)
 
   // Default the view to the active tournament once tournaments load.
   useEffect(() => {
@@ -32,6 +36,18 @@ function StandingsPage({ onNavigate }) {
 
   const current = selected ? (tournaments ?? []).find((t) => t._id === selected) : null
   const currentName = selected == null ? 'Todos los partidos' : current?.nombre ?? '…'
+  const leader = stats?.tabla?.[0]
+
+  const handleFinalize = async () => {
+    if (!current?._id || finalizing) return
+    setFinalizing(true)
+    try {
+      await finalize({ tournamentId: current._id })
+      setShowFinalize(false)
+    } finally {
+      setFinalizing(false)
+    }
+  }
 
   if (!authEnabled || (!isLoading && !user)) {
     return (
@@ -73,14 +89,70 @@ function StandingsPage({ onNavigate }) {
         >
           <span>{currentName}</span>
           {current?.activo && <span className="tournament-tag">Activo</span>}
+          {current?.finalizadoEn && (
+            <span className="tournament-tag tournament-tag--past">Finalizado</span>
+          )}
           <Pencil size={13} className="standings-current-edit" />
         </button>
-        {stats && (
-          <span className="standings-matches-count">
-            {stats.partidos} partido{stats.partidos === 1 ? '' : 's'}
-          </span>
-        )}
+        <div className="standings-current-right">
+          {current?.activo && (
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm standings-finalize-btn"
+              onClick={() => setShowFinalize(true)}
+            >
+              Finalizar torneo
+            </button>
+          )}
+          {stats && (
+            <span className="standings-matches-count">
+              {stats.partidos} partido{stats.partidos === 1 ? '' : 's'}
+            </span>
+          )}
+        </div>
       </div>
+
+      {/* Champion banner for a finalized season */}
+      {current?.finalizadoEn && current?.campeon && (
+        <div className="standings-champion">
+          <Trophy size={18} className="standings-champion-icon" />
+          <span className="standings-champion-label">Campeón</span>
+          <span className="standings-champion-name">{current.campeon.nombre}</span>
+          <span className="standings-champion-pts">{current.campeon.puntos} pts</span>
+        </div>
+      )}
+
+      <Modal
+        isOpen={showFinalize}
+        onClose={() => setShowFinalize(false)}
+        title="Finalizar torneo"
+        footer={
+          <>
+            <button
+              className="btn btn-secondary"
+              onClick={() => setShowFinalize(false)}
+              disabled={finalizing}
+            >
+              Cancelar
+            </button>
+            <button className="btn btn-primary" onClick={handleFinalize} disabled={finalizing}>
+              {finalizing ? 'Finalizando...' : 'Finalizar'}
+            </button>
+          </>
+        }
+      >
+        {leader ? (
+          <p>
+            Se coronará campeón a <strong>{leader.nombre}</strong> con {leader.puntos} pts.
+            El torneo quedará cerrado y la tabla congelada.
+          </p>
+        ) : (
+          <p>
+            Todavía no hay partidos finalizados, así que no se coronará campeón. Podés
+            finalizarlo igual y la tabla quedará congelada.
+          </p>
+        )}
+      </Modal>
 
       <TournamentsModal
         isOpen={showManage}

@@ -19,6 +19,27 @@ export default defineSchema({
     nombre: v.string(),
     activo: v.boolean(),
     createdAt: v.string(),
+    // Set when the admin ends the season; presence = finalized (no longer active).
+    finalizadoEn: v.optional(v.string()),
+    // Frozen winner — top of the table at the moment it was finalized.
+    campeon: v.optional(v.object({
+      playerId: v.id("players"),
+      nombre: v.string(),
+      puntos: v.number(),
+    })),
+    // Count of finished matches at finalize time (frozen alongside the table).
+    partidosFinal: v.optional(v.number()),
+    // Frozen final standings snapshot so later match edits can't shift history.
+    tablaFinal: v.optional(v.array(v.object({
+      playerId: v.id("players"),
+      nombre: v.string(),
+      pj: v.number(),
+      pg: v.number(),
+      pe: v.number(),
+      pp: v.number(),
+      goles: v.number(),
+      puntos: v.number(),
+    }))),
   })
     .index("by_ownerId", ["ownerId"]),
 
@@ -64,6 +85,9 @@ export default defineSchema({
     // Roster owner. Players created in an owned match belong to that admin's
     // roster; ownerless players are the legacy/anonymous global pool.
     ownerId: v.optional(v.id("users")),
+    // Archived players drop out of the default roster and the match quick-select
+    // but keep their history. Absent/true = active; false = archived.
+    activo: v.optional(v.boolean()),
     perfilPermanente: v.optional(v.object({
       posicionPreferida: v.string(),
       posicionesSecundarias: v.array(v.string()),

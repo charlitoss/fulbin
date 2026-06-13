@@ -17,6 +17,7 @@ function MyPlayersPage({ onNavigate }) {
   const { user, isLoading, signIn } = useAuthSession()
   const roster = useQuery(api.players.myRoster, user ? {} : 'skip')
   const [modal, setModal] = useState({ open: false, player: null })
+  const [view, setView] = useState('activos') // 'activos' | 'inactivos'
 
   if (!authEnabled || (!isLoading && !user)) {
     return (
@@ -42,6 +43,10 @@ function MyPlayersPage({ onNavigate }) {
     )
   }
 
+  const activos = roster.filter((p) => p.activo !== false)
+  const inactivos = roster.filter((p) => p.activo === false)
+  const shown = view === 'inactivos' ? inactivos : activos
+
   return (
     <div className="my-matches-page">
       <div className="my-matches-header">
@@ -65,35 +70,72 @@ function MyPlayersPage({ onNavigate }) {
           </p>
         </div>
       ) : (
-        <ul className="my-matches-list my-players-list">
-          {roster.map((player) => {
-            const perfil = player.perfilPermanente
-            return (
-              <li key={player._id}>
-                <button
-                  type="button"
-                  className="my-match-card"
-                  onClick={() => setModal({ open: true, player })}
-                >
-                  <div className="my-player-main">
-                    <span className="auth-avatar auth-avatar--initial roster-avatar">
-                      {initials(player.nombre)}
-                    </span>
-                    <div className="my-match-main">
-                      <span className="my-match-name">{player.nombre}</span>
-                      <span className="my-match-meta">
-                        {perfil?.posicionPreferida ?? 'Sin posición'}
+        <>
+          <div className="players-toggle">
+            <button
+              type="button"
+              className={`players-toggle-btn${view === 'activos' ? ' active' : ''}`}
+              onClick={() => setView('activos')}
+            >
+              Activos ({activos.length})
+            </button>
+            <button
+              type="button"
+              className={`players-toggle-btn${view === 'inactivos' ? ' active' : ''}`}
+              onClick={() => setView('inactivos')}
+            >
+              Inactivos ({inactivos.length})
+            </button>
+          </div>
+
+          {shown.length === 0 ? (
+            <div className="my-matches-empty">
+              <p>
+                {view === 'inactivos'
+                  ? 'No hay jugadores inactivos.'
+                  : 'No hay jugadores activos.'}
+              </p>
+              {view === 'inactivos' && (
+                <p className="my-matches-hint">
+                  Cuando un jugador deja de venir, archivalo desde su ficha. Su
+                  historial y sus puntos se conservan.
+                </p>
+              )}
+            </div>
+          ) : (
+            <ul className="my-matches-list my-players-list">
+              {shown.map((player) => {
+                const perfil = player.perfilPermanente
+                const inactive = player.activo === false
+                return (
+                  <li key={player._id}>
+                    <button
+                      type="button"
+                      className={`my-match-card${inactive ? ' my-match-card--inactive' : ''}`}
+                      onClick={() => setModal({ open: true, player })}
+                    >
+                      <div className="my-player-main">
+                        <span className="auth-avatar auth-avatar--initial roster-avatar">
+                          {initials(player.nombre)}
+                        </span>
+                        <div className="my-match-main">
+                          <span className="my-match-name">{player.nombre}</span>
+                          <span className="my-match-meta">
+                            {perfil?.posicionPreferida ?? 'Sin posición'}
+                            {inactive && <span className="player-inactive-tag">Inactivo</span>}
+                          </span>
+                        </div>
+                      </div>
+                      <span className="roster-nivel">
+                        {(perfil?.nivelGeneral ?? 5).toFixed(1)}
                       </span>
-                    </div>
-                  </div>
-                  <span className="roster-nivel">
-                    {(perfil?.nivelGeneral ?? 5).toFixed(1)}
-                  </span>
-                </button>
-              </li>
-            )
-          })}
-        </ul>
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </>
       )}
 
       <PlayerProfileModal

@@ -1,13 +1,15 @@
-import { useState } from 'react'
-import { Pencil, Trash2 } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Pencil, Trash2, Trophy } from 'lucide-react'
 import { useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import Modal from '../ui/Modal'
 
-// Manage tournaments (seasons): view, create, activate, rename, delete.
+// Manage tournaments (seasons): view, create, finalize (crown champion),
+// reopen, rename, delete. A season is either active or finalized.
 function TournamentsModal({ isOpen, onClose, tournaments, selectedId, onSelect }) {
   const create = useMutation(api.tournaments.create)
-  const activate = useMutation(api.tournaments.activate)
+  const finalize = useMutation(api.tournaments.finalize)
+  const reopen = useMutation(api.tournaments.reopen)
   const rename = useMutation(api.tournaments.rename)
   const remove = useMutation(api.tournaments.remove)
 
@@ -15,6 +17,20 @@ function TournamentsModal({ isOpen, onClose, tournaments, selectedId, onSelect }
   const [newName, setNewName] = useState('')
   const [editingId, setEditingId] = useState(null)
   const [editName, setEditName] = useState('')
+  const [confirming, setConfirming] = useState(null) // { id, action: 'delete' | 'finalize' }
+  const [busy, setBusy] = useState(false)
+
+  // Drop any transient prompts when the modal is dismissed.
+  useEffect(() => {
+    if (!isOpen) {
+      setCreating(false)
+      setNewName('')
+      setEditingId(null)
+      setConfirming(null)
+    }
+  }, [isOpen])
+
+  const activeT = tournaments.find((t) => t.activo)
 
   const handleCreate = async () => {
     const nombre = newName.trim()
@@ -36,9 +52,30 @@ function TournamentsModal({ isOpen, onClose, tournaments, selectedId, onSelect }
     setEditingId(null)
   }
 
+  const handleFinalize = async (t) => {
+    setBusy(true)
+    try {
+      await finalize({ tournamentId: t._id })
+    } finally {
+      setBusy(false)
+      setConfirming(null)
+    }
+  }
+
   const handleRemove = async (t) => {
-    await remove({ tournamentId: t._id })
-    if (selectedId === t._id) onSelect(null)
+    setBusy(true)
+    try {
+      await remove({ tournamentId: t._id })
+      if (selectedId === t._id) onSelect(null)
+    } finally {
+      setBusy(false)
+      setConfirming(null)
+    }
+  }
+
+  const handleReopen = async (t) => {
+    await reopen({ tournamentId: t._id })
+    onSelect(t._id)
   }
 
   const pick = (id) => {
@@ -81,6 +118,28 @@ function TournamentsModal({ isOpen, onClose, tournaments, selectedId, onSelect }
                 <button className="btn btn-primary btn-sm" onClick={saveEdit}>Guardar</button>
                 <button className="btn btn-secondary btn-sm" onClick={() => setEditingId(null)}>Cancelar</button>
               </span>
+            ) : confirming?.id === t._id ? (
+              <span className="tournament-confirm">
+                <span className="tournament-confirm-text">
+                  {confirming.action === 'delete'
+                    ? `¿Eliminar «${t.nombre}»? Sus partidos quedan en Todos.`
+                    : `¿Finalizar «${t.nombre}» y coronar al campeón?`}
+                </span>
+                <button
+                  className="btn btn-primary btn-sm"
+                  disabled={busy}
+                  onClick={() => (confirming.action === 'delete' ? handleRemove(t) : handleFinalize(t))}
+                >
+                  Sí
+                </button>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  disabled={busy}
+                  onClick={() => setConfirming(null)}
+                >
+                  No
+                </button>
+              </span>
             ) : (
               <>
                 <button
@@ -89,16 +148,30 @@ function TournamentsModal({ isOpen, onClose, tournaments, selectedId, onSelect }
                   }`}
                   onClick={() => pick(t._id)}
                 >
-                  <span>{t.nombre}</span>
+                  <span className="tournament-list-label">
+                    <span>{t.nombre}</span>
+                    {t.campeon && (
+                      <span className="tournament-champion">
+                        <Trophy size={12} /> {t.campeon.nombre}
+                      </span>
+                    )}
+                  </span>
                   {t.activo && <span className="tournament-tag">Activo</span>}
+                  {t.finalizadoEn && (
+                    <span className="tournament-tag tournament-tag--past">Finalizado</span>
+                  )}
                 </button>
                 <div className="tournament-list-actions">
-                  {!t.activo && (
+                  {t.activo ? (
                     <button
                       className="tournament-action"
-                      onClick={() => activate({ tournamentId: t._id })}
+                      onClick={() => setConfirming({ id: t._id, action: 'finalize' })}
                     >
-                      Activar
+                      Finalizar
+                    </button>
+                  ) : (
+                    <button className="tournament-action" onClick={() => handleReopen(t)}>
+                      Reabrir
                     </button>
                   )}
                   <button
@@ -110,7 +183,7 @@ function TournamentsModal({ isOpen, onClose, tournaments, selectedId, onSelect }
                   </button>
                   <button
                     className="tournament-action tournament-action--danger"
-                    onClick={() => handleRemove(t)}
+                    onClick={() => setConfirming({ id: t._id, action: 'delete' })}
                     aria-label="Eliminar"
                   >
                     <Trash2 size={14} />
@@ -123,23 +196,30 @@ function TournamentsModal({ isOpen, onClose, tournaments, selectedId, onSelect }
       </ul>
 
       {creating ? (
-        <div className="tournament-create-row">
-          <input
-            type="text"
-            value={newName}
-            onChange={(e) => setNewName(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-            placeholder="Ej: Apertura 2026"
-            autoFocus
-            maxLength={40}
-          />
-          <button className="btn btn-primary btn-sm" onClick={handleCreate}>Crear</button>
-          <button
-            className="btn btn-secondary btn-sm"
-            onClick={() => { setCreating(false); setNewName('') }}
-          >
-            Cancelar
-          </button>
+        <div className="tournament-create">
+          {activeT && (
+            <p className="tournament-create-note">
+              Se finalizará «{activeT.nombre}» y se coronará a su campeón.
+            </p>
+          )}
+          <div className="tournament-create-row">
+            <input
+              type="text"
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
+              placeholder="Ej: Apertura 2026"
+              autoFocus
+              maxLength={40}
+            />
+            <button className="btn btn-primary btn-sm" onClick={handleCreate}>Crear</button>
+            <button
+              className="btn btn-secondary btn-sm"
+              onClick={() => { setCreating(false); setNewName('') }}
+            >
+              Cancelar
+            </button>
+          </div>
         </div>
       ) : (
         <button

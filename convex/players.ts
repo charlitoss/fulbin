@@ -113,7 +113,7 @@ export const availableForMatch = query({
     const registered = new Set(regs.filter((r) => r.asistira).map((r) => r.jugadorId));
 
     return roster
-      .filter((p) => !registered.has(p._id))
+      .filter((p) => p.activo !== false && !registered.has(p._id))
       .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"))
       .map((p) => ({
         _id: p._id,
@@ -152,6 +152,24 @@ export const createInRoster = mutation({
       ownerId: user._id,
       perfilPermanente: args.perfilPermanente ?? DEFAULT_PROFILE,
     });
+  },
+});
+
+// Archive or reactivate a roster player. Archived players (activo === false)
+// drop out of the default roster and the match quick-select but keep their
+// history and standings points. Use this when delete is blocked by CON_HISTORIAL.
+export const setPlayerActive = mutation({
+  args: { playerId: v.id("players"), activo: v.boolean() },
+  handler: async (ctx, args) => {
+    const user = await currentUserDoc(ctx);
+    if (!user) throw new Error("Necesitás iniciar sesión");
+
+    const player = await ctx.db.get(args.playerId);
+    if (!player) throw new Error("Jugador no encontrado");
+    if (player.ownerId !== user._id) throw new Error("Este jugador no es de tu plantel");
+
+    await ctx.db.patch(args.playerId, { activo: args.activo });
+    return args.playerId;
   },
 });
 

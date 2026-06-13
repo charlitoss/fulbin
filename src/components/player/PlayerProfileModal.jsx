@@ -34,6 +34,9 @@ function PlayerProfileModal({ isOpen, onClose, player, hideDelete = false }) {
   const createInRoster = useMutation(api.players.createInRoster)
   const updatePlayer = useMutation(api.players.update)
   const removeFromRoster = useMutation(api.players.removeFromRoster)
+  const setPlayerActive = useMutation(api.players.setPlayerActive)
+
+  const archived = player?.activo === false
 
   useEffect(() => {
     if (!isOpen) return
@@ -91,10 +94,23 @@ function PlayerProfileModal({ isOpen, onClose, player, hideDelete = false }) {
       onClose()
     } catch (err) {
       if (String(err.message).includes('CON_HISTORIAL')) {
-        setError('No se puede eliminar: ya jugó partidos. Su historial se conserva.')
+        setError('No se puede eliminar: ya jugó partidos. Archivalo en su lugar — su historial y sus puntos se conservan.')
       } else {
         setError('No se pudo eliminar. Intentá de nuevo.')
       }
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleToggleActive = async () => {
+    setError('')
+    setSaving(true)
+    try {
+      await setPlayerActive({ playerId: player._id, activo: archived })
+      onClose()
+    } catch (err) {
+      setError('No se pudo actualizar. Intentá de nuevo.')
     } finally {
       setSaving(false)
     }
@@ -107,24 +123,36 @@ function PlayerProfileModal({ isOpen, onClose, player, hideDelete = false }) {
       onSubmit={handleSave}
       title={player ? 'Editar jugador' : 'Agregar jugador'}
       footer={
-        <>
+        <div className="player-profile-footer">
           {player && !hideDelete && (
-            <button
-              type="button"
-              className="btn btn-secondary btn-danger-text"
-              onClick={handleDelete}
-              disabled={saving}
-            >
-              Eliminar
-            </button>
+            <div className="ppf-group">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleToggleActive}
+                disabled={saving}
+              >
+                {archived ? 'Reactivar' : 'Archivar'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary btn-danger-text"
+                onClick={handleDelete}
+                disabled={saving}
+              >
+                Eliminar
+              </button>
+            </div>
           )}
-          <button className="btn btn-secondary" onClick={onClose} disabled={saving}>
-            Cancelar
-          </button>
-          <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
-            {saving ? 'Guardando...' : 'Guardar'}
-          </button>
-        </>
+          <div className="ppf-group">
+            <button className="btn btn-secondary" onClick={onClose} disabled={saving}>
+              Cancelar
+            </button>
+            <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
+              {saving ? 'Guardando...' : 'Guardar'}
+            </button>
+          </div>
+        </div>
       }
     >
       <div className="player-profile-form">
