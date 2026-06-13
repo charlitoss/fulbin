@@ -31,13 +31,17 @@ export const getByMatchAndPlayer = query({
   },
 });
 
-// Register a person by name: find-or-create the player, then register them.
-// Player lookup is scoped to the match owner's roster so different groups
-// never share profiles; unowned matches keep using the legacy ownerless pool.
+// Register a person: either a roster player picked by id, or a free-form
+// name (find-or-create). Name lookup is scoped to the match owner's roster so
+// different groups never share profiles; unowned matches keep using the
+// legacy ownerless pool.
 export const join = mutation({
   args: {
     matchId: v.id("matches"),
-    nombre: v.string(),
+    // Either a roster player picked from the list...
+    playerId: v.optional(v.id("players")),
+    // ...or a free-form name resolved against the match's player pool.
+    nombre: v.optional(v.string()),
     estadoFisico: v.string(),
     tipoInscripcion: v.optional(v.string()),
   },
@@ -45,44 +49,63 @@ export const join = mutation({
     const match = await ctx.db.get(args.matchId);
     if (!match) throw new Error("Partido no encontrado");
 
-    const nombre = args.nombre.trim();
-    if (nombre.length < 2) {
-      throw new Error("El nombre debe tener al menos 2 caracteres");
-    }
-
-    const pool = await ctx.db
-      .query("players")
-      .withIndex("by_ownerId", (q) => q.eq("ownerId", match.ownerId))
-      .collect();
-    const existing = pool.find(
-      (p) => p.nombre.toLowerCase() === nombre.toLowerCase()
-    );
-
-    let playerId = existing?._id;
-    if (!playerId) {
-      playerId = await ctx.db.insert("players", {
-        nombre,
-        ownerId: match.ownerId,
-        perfilPermanente: DEFAULT_PROFILE,
-      });
+    let existing;
+    if (args.playerId) {
+      const picked = await ctx.db.get(args.playerId);
+      if (!picked || picked.ownerId !== match.ownerId) {
+        throw new Error("Ese jugador no pertenece al plantel de este partido");
+      }
+      existing = picked;
     } else {
-      const existingReg = await ctx.db
-        .query("registrations")
-        .withIndex("by_partidoId_jugadorId", (q) =>
-          q.eq("partidoId", args.matchId).eq("jugadorId", playerId!)
-        )
-        .first();
-      if (existingReg) {
-        if (existingReg.asistira) throw new Error("YA_INSCRITO");
-        await ctx.db.patch(existingReg._id, {
+      const nombre = (args.nombre ?? "").trim();
+      if (nombre.length < 2) {
+        throw new Error("El nombre debe tener al menos 2 caracteres");
+      }
+
+      const pool = await ctx.db
+        .query("players")
+        .withIndex("by_ownerId", (q) => q.eq("ownerId", match.ownerId))
+        .collect();
+      existing = pool.find(
+        (p) => p.nombre.toLowerCase() === nombre.toLowerCase()
+      );
+
+      if (!existing) {
+        const playerId = await ctx.db.insert("players", {
+          nombre,
+          ownerId: match.ownerId,
+          perfilPermanente: DEFAULT_PROFILE,
+        });
+        const registrationId = await ctx.db.insert("registrations", {
+          partidoId: args.matchId,
+          jugadorId: playerId,
           estadoFisico: args.estadoFisico,
           tipoInscripcion: args.tipoInscripcion || "jugador",
           confirmado: true,
           asistira: true,
           timestamp: new Date().toISOString(),
         });
-        return { playerId, registrationId: existingReg._id, reused: true };
+        return { playerId, registrationId, reused: false };
       }
+    }
+
+    const playerId = existing._id;
+    const existingReg = await ctx.db
+      .query("registrations")
+      .withIndex("by_partidoId_jugadorId", (q) =>
+        q.eq("partidoId", args.matchId).eq("jugadorId", playerId)
+      )
+      .first();
+    if (existingReg) {
+      if (existingReg.asistira) throw new Error("YA_INSCRITO");
+      await ctx.db.patch(existingReg._id, {
+        estadoFisico: args.estadoFisico,
+        tipoInscripcion: args.tipoInscripcion || "jugador",
+        confirmado: true,
+        asistira: true,
+        timestamp: new Date().toISOString(),
+      });
+      return { playerId, registrationId: existingReg._id, reused: true };
     }
 
     const registrationId = await ctx.db.insert("registrations", {

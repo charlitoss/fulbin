@@ -31,8 +31,13 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   
+  // Players from the organizer's roster who aren't registered yet (empty for
+  // unowned matches) — offered as one-tap chips.
+  const [selectedRoster, setSelectedRoster] = useState([])
+
   // Convex queries
   const registrations = useQuery(api.registrations.listByMatch, isOpen && matchId ? { matchId } : "skip")
+  const rosterAvailable = useQuery(api.players.availableForMatch, isOpen && matchId ? { matchId } : "skip")
 
   // Convex mutations. The server resolves names against the match owner's
   // roster (find-or-create) and rejects duplicates with YA_INSCRITO.
@@ -163,6 +168,14 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
   const handleRemoveFriend = (id) => {
     setFriends(friends.filter(f => f.id !== id))
   }
+
+  const toggleRosterPlayer = (player) => {
+    setSelectedRoster(prev =>
+      prev.some(p => p._id === player._id)
+        ? prev.filter(p => p._id !== player._id)
+        : [...prev, player]
+    )
+  }
   
   // Submit main player + friends
   const handleSubmit = async () => {
@@ -183,18 +196,22 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
       }
     }
     
+    // Roster selections only count outside hinchada mode (the section is
+    // hidden there); a main name is optional when there are selections.
+    const rosterToRegister = tipoInscripcion !== 'hinchada' ? selectedRoster : []
+
     // Validate main player name
     const trimmedName = nombre.trim()
-    if (!trimmedName) {
-      setError('Por favor ingresa tu nombre')
+    if (!trimmedName && rosterToRegister.length === 0) {
+      setError('Ingresá tu nombre o elegí jugadores del plantel')
       return
     }
-    
-    if (trimmedName.length < 2) {
+
+    if (trimmedName && trimmedName.length < 2) {
       setError('El nombre debe tener al menos 2 caracteres')
       return
     }
-    
+
     // Check availability for selected type
     if (!isTypeAvailable(tipoInscripcion)) {
       setError(`No hay más lugares disponibles como ${REGISTRATION_TYPES[tipoInscripcion].label.toLowerCase()}`)
@@ -209,38 +226,51 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
 
       // 1. Register main player (server resolves the player by name)
       let mainPlayerId
-      try {
-        const result = await joinMatch({
-          matchId,
-          nombre: trimmedName,
-          estadoFisico: tipoInscripcion === 'hinchada' ? 'normal' : estadoFisico,
-          tipoInscripcion: tipoInscripcion,
-        })
-        mainPlayerId = result.playerId
-      } catch (err) {
-        if (String(err.message).includes('YA_INSCRITO')) {
-          setError('Ya estás inscrito en este partido')
-          setIsSubmitting(false)
-          return
+      if (trimmedName) {
+        try {
+          const result = await joinMatch({
+            matchId,
+            nombre: trimmedName,
+            estadoFisico: tipoInscripcion === 'hinchada' ? 'normal' : estadoFisico,
+            tipoInscripcion: tipoInscripcion,
+          })
+          mainPlayerId = result.playerId
+        } catch (err) {
+          if (String(err.message).includes('YA_INSCRITO')) {
+            setError('Ya estás inscrito en este partido')
+            setIsSubmitting(false)
+            return
+          }
+          throw err
         }
-        throw err
       }
 
       // Track how many jugador spots we've used (1 for main player if they're jugador)
-      let jugadorSpotsUsed = tipoInscripcion === 'jugador' ? 1 : 0
+      let jugadorSpotsUsed = trimmedName && tipoInscripcion === 'jugador' ? 1 : 0
 
-      // 2. Register friends - overflow goes to suplentes if registering as jugador
-      const friendErrors = []
-      for (let i = 0; i < finalFriends.length; i++) {
-        const friend = finalFriends[i]
+      // 2. Register roster picks + friends - overflow goes to suplentes if
+      // registering as jugador. Skip roster picks that duplicate typed names.
+      const typedNames = new Set(
+        [trimmedName, ...finalFriends.map(f => f.nombre)]
+          .filter(Boolean)
+          .map(n => n.toLowerCase())
+      )
+      const others = [
+        ...rosterToRegister
+          .filter(p => !typedNames.has(p.nombre.toLowerCase()))
+          .map(p => ({ playerId: p._id, nombre: p.nombre })),
+        ...finalFriends.map(f => ({ nombre: f.nombre })),
+      ]
 
-        // Determine registration type for this friend
-        let friendType = tipoInscripcion
+      const joinErrors = []
+      for (const person of others) {
+        // Determine registration type for this person
+        let personType = tipoInscripcion
         if (tipoInscripcion === 'jugador') {
           // Check if we still have jugador spots
           if (jugadorSpotsUsed >= availableJugadorSpots) {
             // Overflow to suplente
-            friendType = 'suplente'
+            personType = 'suplente'
           } else {
             jugadorSpotsUsed++
           }
@@ -249,21 +279,21 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
         try {
           await joinMatch({
             matchId,
-            nombre: friend.nombre,
+            ...(person.playerId ? { playerId: person.playerId } : { nombre: person.nombre }),
             estadoFisico: 'normal',
-            tipoInscripcion: friendType,
+            tipoInscripcion: personType,
           })
         } catch (err) {
           if (String(err.message).includes('YA_INSCRITO')) {
-            friendErrors.push(`"${friend.nombre}" ya está inscrito`)
+            joinErrors.push(`"${person.nombre}" ya está inscrito`)
           } else {
             throw err
           }
         }
       }
 
-      if (friendErrors.length > 0) {
-        setError(friendErrors.join('. '))
+      if (joinErrors.length > 0) {
+        setError(joinErrors.join('. '))
         setIsSubmitting(false)
         return
       }
@@ -274,6 +304,7 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
       setTipoInscripcion('jugador')
       setFriendName('')
       setFriends([])
+      setSelectedRoster([])
       setIsSubmitting(false)
       
       if (onJoined) {
@@ -295,6 +326,7 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
     setTipoInscripcion('jugador')
     setFriendName('')
     setFriends([])
+    setSelectedRoster([])
     setError('')
     onClose()
   }
@@ -307,10 +339,11 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
   }
   
   // Count pending friends in the input field (comma-separated names)
-  const pendingFriendsCount = friendName.trim() 
-    ? friendName.split(',').map(n => n.trim()).filter(n => n.length > 0).length 
+  const pendingFriendsCount = friendName.trim()
+    ? friendName.split(',').map(n => n.trim()).filter(n => n.length > 0).length
     : 0
-  const totalToRegister = 1 + friends.length + pendingFriendsCount
+  const rosterCount = tipoInscripcion !== 'hinchada' ? selectedRoster.length : 0
+  const totalToRegister = (nombre.trim() ? 1 : 0) + rosterCount + friends.length + pendingFriendsCount
   const cupoLleno = spotsInfo.jugadores >= spotsInfo.cupoTotal
   const suplentesLleno = spotsInfo.suplentes >= spotsInfo.maxSuplentes
 
@@ -344,7 +377,7 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
             <span>
               {isSubmitting
                 ? 'Inscribiendo...'
-                : (friends.length > 0 || pendingFriendsCount > 0)
+                : totalToRegister > 1
                   ? `Confirmar (${totalToRegister})`
                   : 'Confirmar'
               }
@@ -421,6 +454,29 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
           </div>
         )}
         
+        {/* Roster quick-select - players the organizer already manages */}
+        {tipoInscripcion !== 'hinchada' && rosterAvailable?.length > 0 && (
+          <div className="form-group roster-picker">
+            <label>Del plantel</label>
+            <div className="roster-chips">
+              {rosterAvailable.map((player) => {
+                const selected = selectedRoster.some(p => p._id === player._id)
+                return (
+                  <button
+                    key={player._id}
+                    type="button"
+                    className={`roster-chip${selected ? ' selected' : ''}`}
+                    onClick={() => toggleRosterPlayer(player)}
+                  >
+                    {player.nombre}
+                  </button>
+                )
+              })}
+            </div>
+            <span className="hint">Tocá los jugadores que querés anotar</span>
+          </div>
+        )}
+
         {/* Friends section - only for jugador and suplente */}
         {tipoInscripcion !== 'hinchada' && (
           <div className="friends-section form-group">

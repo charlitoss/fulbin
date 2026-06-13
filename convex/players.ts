@@ -61,6 +61,37 @@ export const myRoster = query({
   },
 });
 
+// Roster players of the match's owner who aren't registered yet — the
+// quick-select list in the join modal. Anyone with the match link can see
+// it (the link is the group's trust boundary). Empty for unowned matches.
+export const availableForMatch = query({
+  args: { matchId: v.id("matches") },
+  handler: async (ctx, args) => {
+    const match = await ctx.db.get(args.matchId);
+    if (!match?.ownerId) return [];
+
+    const roster = await ctx.db
+      .query("players")
+      .withIndex("by_ownerId", (q) => q.eq("ownerId", match.ownerId))
+      .collect();
+    const regs = await ctx.db
+      .query("registrations")
+      .withIndex("by_partidoId", (q) => q.eq("partidoId", args.matchId))
+      .collect();
+    const registered = new Set(regs.filter((r) => r.asistira).map((r) => r.jugadorId));
+
+    return roster
+      .filter((p) => !registered.has(p._id))
+      .sort((a, b) => a.nombre.localeCompare(b.nombre, "es"))
+      .map((p) => ({
+        _id: p._id,
+        nombre: p.nombre,
+        posicion: p.perfilPermanente?.posicionPreferida,
+        nivel: p.perfilPermanente?.nivelGeneral,
+      }));
+  },
+});
+
 // Create a player in the signed-in admin's roster.
 export const createInRoster = mutation({
   args: {
