@@ -83,6 +83,17 @@ function AuthControls({ onNavigate }) {
             role="menuitem"
             onClick={() => {
               setMenuOpen(false)
+              onNavigate('#/tabla')
+            }}
+          >
+            Tabla de posiciones
+          </button>
+          <button
+            type="button"
+            className="auth-dropdown-item"
+            role="menuitem"
+            onClick={() => {
+              setMenuOpen(false)
               signOut()
             }}
           >

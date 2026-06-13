@@ -1,5 +1,7 @@
 import { query, mutation } from "./_generated/server";
+import type { QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
+import type { Id } from "./_generated/dataModel";
 import { currentUserDoc, upsertCurrentUser } from "./users";
 
 // Generate a short 6-character alphanumeric code for sharing
@@ -216,7 +218,25 @@ export const startMatch = mutation({
   },
 });
 
-// Finish a match: transitions pasoActual to 'finalizado' and records the final whistle.
+// Sum the per-player goals in a team configuration into a team-level score.
+async function computeResultado(ctx: QueryCtx, matchId: Id<"matches">) {
+  const config = await ctx.db
+    .query("teamConfigurations")
+    .withIndex("by_partidoId", (q) => q.eq("partidoId", matchId))
+    .first();
+  if (!config) return undefined;
+
+  let golesBlanco = 0;
+  let golesOscuro = 0;
+  for (const a of config.asignaciones) {
+    if (a.equipo === "blanco") golesBlanco += a.goles ?? 0;
+    else if (a.equipo === "oscuro") golesOscuro += a.goles ?? 0;
+  }
+  return { golesBlanco, golesOscuro };
+}
+
+// Finish a match: transitions pasoActual to 'finalizado', records the final
+// whistle and snapshots the score.
 export const finishMatch = mutation({
   args: { matchId: v.id("matches") },
   handler: async (ctx, args) => {
@@ -224,12 +244,33 @@ export const finishMatch = mutation({
     if (!match) throw new Error("Match not found");
     if (match.pasoActual !== "jugando") return args.matchId;
 
+    const resultado = await computeResultado(ctx, args.matchId);
+
     await ctx.db.patch(args.matchId, {
       pasoActual: "finalizado",
       finalizadoEn: Date.now(),
+      resultado,
       updatedAt: new Date().toISOString(),
     });
 
     return args.matchId;
+  },
+});
+
+// Migration: snapshot resultado for matches finalized before it existed.
+export const backfillResultados = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const matches = await ctx.db.query("matches").collect();
+    let updated = 0;
+    for (const match of matches) {
+      if (match.pasoActual !== "finalizado" || match.resultado) continue;
+      const resultado = await computeResultado(ctx, match._id);
+      if (resultado) {
+        await ctx.db.patch(match._id, { resultado });
+        updated++;
+      }
+    }
+    return { updated, total: matches.length };
   },
 });

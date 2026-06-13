@@ -5619,3 +5619,78 @@ body.crt-on #root {
   color: #ef4444;
   margin-right: auto;
 }
+
+/* ============================================
+   TABLA DE POSICIONES
+   ============================================ */
+
+.standings-matches-count {
+  font-size: var(--type-sm);
+  color: var(--gray-400);
+}
+
+.standings-table-wrap {
+  background: var(--surface-1);
+  border: 1px solid var(--surface-5);
+  border-radius: var(--radius-md);
+  overflow-x: auto;
+}
+
+.standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--type-sm);
+}
+
+.standings-table th,
+.standings-table td {
+  padding: var(--space-2) var(--space-2);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.standings-table thead th {
+  color: var(--gray-400);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--surface-5);
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
+}
+
+.standings-table tbody tr + tr td {
+  border-top: 1px solid var(--surface-3);
+}
+
+.standings-table .standings-pos {
+  color: var(--gray-400);
+  width: 32px;
+}
+
+.standings-table .standings-name {
+  text-align: left;
+  color: var(--white);
+  font-weight: 600;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.standings-table .standings-puntos {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.standings-top .standings-pos {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.my-match-resultado {
+  font-size: var(--type-sm);
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: 0.05em;
+}

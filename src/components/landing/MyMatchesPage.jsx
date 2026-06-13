@@ -79,7 +79,13 @@ function MyMatchesPage({ onNavigate }) {
                   <span className={`my-match-estado my-match-estado--${match.pasoActual}`}>
                     {ESTADO_LABELS[match.pasoActual] ?? match.pasoActual}
                   </span>
-                  <span className="my-match-codigo">{match.codigoCorto}</span>
+                  {match.resultado ? (
+                    <span className="my-match-resultado">
+                      {match.resultado.golesBlanco} — {match.resultado.golesOscuro}
+                    </span>
+                  ) : (
+                    <span className="my-match-codigo">{match.codigoCorto}</span>
+                  )}
                 </div>
               </button>
             </li>

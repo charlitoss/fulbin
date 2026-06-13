@@ -31,6 +31,12 @@ export default defineSchema({
     organizadorNombre: v.optional(v.string()),
     iniciadoEn: v.optional(v.number()),
     finalizadoEn: v.optional(v.number()),
+    // Final score snapshot, taken from the team configuration at the final
+    // whistle so later edits to teams can't rewrite history.
+    resultado: v.optional(v.object({
+      golesBlanco: v.number(),
+      golesOscuro: v.number(),
+    })),
     createdAt: v.string(),
     updatedAt: v.string(),
   })
