@@ -193,7 +193,8 @@ function App() {
             onClick={() => navigate('#/mis-partidos')}
             aria-label="Inicio"
           >
-            <img src="/LOGO.svg" alt="Fulbin" className="app-nav-logo" width="100" height="34" />
+            <img src="/LOGO.svg" alt="Fulbin" className="app-nav-logo app-nav-logo--full" width="100" height="34" />
+            <img src="/Symbol%20LOGO.svg" alt="Fulbin" className="app-nav-logo app-nav-logo--symbol" width="32" height="32" />
           </button>
           <nav>
             <ul className="app-nav-links">

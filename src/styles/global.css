@@ -5525,7 +5525,7 @@ body.crt-on #root {
   gap: var(--space-4);
   max-width: 600px;
   margin: 0 auto;
-  padding: var(--space-4) var(--space-6) var(--space-3);
+  padding: var(--space-4) 0;
 }
 
 .app-nav-brand {
@@ -5542,6 +5542,13 @@ body.crt-on #root {
   width: 100px;
   height: auto;
   display: block;
+}
+
+/* The compact symbol logo only shows at mobile breakpoints. */
+.app-nav-logo--symbol {
+  display: none;
+  width: 32px;
+  height: 32px;
 }
 
 .app-nav-links {
@@ -5595,8 +5602,12 @@ body.crt-on #root {
     padding: var(--space-3) var(--space-4);
   }
 
-  .app-nav-brand {
+  .app-nav-logo--full {
     display: none;
+  }
+
+  .app-nav-logo--symbol {
+    display: block;
   }
 }
 
