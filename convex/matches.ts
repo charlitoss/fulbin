@@ -125,6 +125,27 @@ export const claim = mutation({
         ownerId: userId,
         updatedAt: new Date().toISOString(),
       });
+
+      // Absorb the match's ownerless players into the claimer's roster so
+      // their history carries over. Skip names already on the roster to
+      // avoid duplicates — those players stay in the legacy pool.
+      const roster = await ctx.db
+        .query("players")
+        .withIndex("by_ownerId", (q) => q.eq("ownerId", userId))
+        .collect();
+      const rosterNames = new Set(roster.map((p) => p.nombre.toLowerCase()));
+
+      const regs = await ctx.db
+        .query("registrations")
+        .withIndex("by_partidoId", (q) => q.eq("partidoId", args.matchId))
+        .collect();
+      for (const reg of regs) {
+        const player = await ctx.db.get(reg.jugadorId);
+        if (player && !player.ownerId && !rosterNames.has(player.nombre.toLowerCase())) {
+          await ctx.db.patch(player._id, { ownerId: userId });
+          rosterNames.add(player.nombre.toLowerCase());
+        }
+      }
     }
 
     return args.matchId;

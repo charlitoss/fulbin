@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { DEFAULT_PROFILE } from "./players";
 
 // List all registrations for a match
 export const listByMatch = query({
@@ -27,6 +28,74 @@ export const getByMatchAndPlayer = query({
       )
       .first();
     return registration;
+  },
+});
+
+// Register a person by name: find-or-create the player, then register them.
+// Player lookup is scoped to the match owner's roster so different groups
+// never share profiles; unowned matches keep using the legacy ownerless pool.
+export const join = mutation({
+  args: {
+    matchId: v.id("matches"),
+    nombre: v.string(),
+    estadoFisico: v.string(),
+    tipoInscripcion: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const match = await ctx.db.get(args.matchId);
+    if (!match) throw new Error("Partido no encontrado");
+
+    const nombre = args.nombre.trim();
+    if (nombre.length < 2) {
+      throw new Error("El nombre debe tener al menos 2 caracteres");
+    }
+
+    const pool = await ctx.db
+      .query("players")
+      .withIndex("by_ownerId", (q) => q.eq("ownerId", match.ownerId))
+      .collect();
+    const existing = pool.find(
+      (p) => p.nombre.toLowerCase() === nombre.toLowerCase()
+    );
+
+    let playerId = existing?._id;
+    if (!playerId) {
+      playerId = await ctx.db.insert("players", {
+        nombre,
+        ownerId: match.ownerId,
+        perfilPermanente: DEFAULT_PROFILE,
+      });
+    } else {
+      const existingReg = await ctx.db
+        .query("registrations")
+        .withIndex("by_partidoId_jugadorId", (q) =>
+          q.eq("partidoId", args.matchId).eq("jugadorId", playerId!)
+        )
+        .first();
+      if (existingReg) {
+        if (existingReg.asistira) throw new Error("YA_INSCRITO");
+        await ctx.db.patch(existingReg._id, {
+          estadoFisico: args.estadoFisico,
+          tipoInscripcion: args.tipoInscripcion || "jugador",
+          confirmado: true,
+          asistira: true,
+          timestamp: new Date().toISOString(),
+        });
+        return { playerId, registrationId: existingReg._id, reused: true };
+      }
+    }
+
+    const registrationId = await ctx.db.insert("registrations", {
+      partidoId: args.matchId,
+      jugadorId: playerId,
+      estadoFisico: args.estadoFisico,
+      tipoInscripcion: args.tipoInscripcion || "jugador",
+      confirmado: true,
+      asistira: true,
+      timestamp: new Date().toISOString(),
+    });
+
+    return { playerId, registrationId, reused: Boolean(existing) };
   },
 });
 

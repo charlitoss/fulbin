@@ -72,6 +72,17 @@ function AuthControls({ onNavigate }) {
             role="menuitem"
             onClick={() => {
               setMenuOpen(false)
+              onNavigate('#/mis-jugadores')
+            }}
+          >
+            Mis jugadores
+          </button>
+          <button
+            type="button"
+            className="auth-dropdown-item"
+            role="menuitem"
+            onClick={() => {
+              setMenuOpen(false)
               signOut()
             }}
           >

@@ -40,6 +40,9 @@ export default defineSchema({
   players: defineTable({
     nombre: v.string(),
     avatar: v.optional(v.string()),
+    // Roster owner. Players created in an owned match belong to that admin's
+    // roster; ownerless players are the legacy/anonymous global pool.
+    ownerId: v.optional(v.id("users")),
     perfilPermanente: v.optional(v.object({
       posicionPreferida: v.string(),
       posicionesSecundarias: v.array(v.string()),
@@ -53,7 +56,8 @@ export default defineSchema({
       }),
       nivelGeneral: v.number(),
     })),
-  }),
+  })
+    .index("by_ownerId", ["ownerId"]),
 
   registrations: defineTable({
     partidoId: v.id("matches"),
@@ -65,7 +69,8 @@ export default defineSchema({
     asistira: v.boolean(),
   })
     .index("by_partidoId", ["partidoId"])
-    .index("by_partidoId_jugadorId", ["partidoId", "jugadorId"]),
+    .index("by_partidoId_jugadorId", ["partidoId", "jugadorId"])
+    .index("by_jugadorId", ["jugadorId"]),
 
   teamConfigurations: defineTable({
     partidoId: v.id("matches"),

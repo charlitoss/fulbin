@@ -5549,3 +5549,73 @@ body.crt-on #root {
   color: var(--gray-400);
   letter-spacing: 0.08em;
 }
+
+/* ============================================
+   MIS JUGADORES (roster)
+   ============================================ */
+
+.my-player-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.roster-avatar {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  font-size: 14px;
+  border-radius: 50%;
+}
+
+.roster-nivel {
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: var(--type-sm);
+  color: var(--color-primary);
+  background: var(--acid-yellow-dim);
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.roster-select {
+  width: 100%;
+  background: var(--surface-4);
+  border: 1px solid var(--surface-5);
+  border-radius: var(--radius-sm);
+  color: var(--gray-100);
+  padding: 10px 12px;
+  font-size: var(--type-base, 15px);
+  font-family: inherit;
+}
+
+.attribute-slider-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 28px;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.attribute-slider-label {
+  font-size: var(--type-sm);
+  color: var(--gray-200);
+}
+
+.attribute-slider-row input[type="range"] {
+  width: 100%;
+  accent-color: var(--color-primary);
+}
+
+.attribute-slider-value {
+  text-align: right;
+  font-weight: 700;
+  font-size: var(--type-sm);
+  color: var(--color-primary);
+}
+
+.btn-danger-text {
+  color: #ef4444;
+  margin-right: auto;
+}

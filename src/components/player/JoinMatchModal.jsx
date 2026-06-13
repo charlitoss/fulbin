@@ -33,21 +33,11 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
   
   // Convex queries
   const registrations = useQuery(api.registrations.listByMatch, isOpen && matchId ? { matchId } : "skip")
-  const playersData = useQuery(api.players.list)
-  
-  // Convex mutations
-  const createPlayer = useMutation(api.players.create)
-  const createRegistration = useMutation(api.registrations.create)
-  
-  // Convert players array to object for easy lookup
-  const allPlayers = useMemo(() => {
-    if (!playersData) return {}
-    return playersData.reduce((acc, player) => {
-      acc[player._id] = player
-      return acc
-    }, {})
-  }, [playersData])
-  
+
+  // Convex mutations. The server resolves names against the match owner's
+  // roster (find-or-create) and rejects duplicates with YA_INSCRITO.
+  const joinMatch = useMutation(api.registrations.join)
+
   // Calculate available spots - always count from registrations
   const spotsInfo = useMemo(() => {
     if (!registrations || !match) {
@@ -131,26 +121,12 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
       
       const alreadyInList = currentFriends.some(f => f.nombre.toLowerCase() === name.toLowerCase()) ||
         newFriends.some(f => f.nombre.toLowerCase() === name.toLowerCase())
-      
+
       if (alreadyInList) {
         errors.push(`"${name}" ya está en la lista`)
         continue
       }
-      
-      const existingPlayer = Object.values(allPlayers).find(
-        p => p.nombre.toLowerCase() === name.toLowerCase()
-      )
-      
-      if (existingPlayer && registrations) {
-        const alreadyRegistered = registrations.some(
-          r => r.jugadorId === existingPlayer._id
-        )
-        if (alreadyRegistered) {
-          errors.push(`"${name}" ya está inscrito en el partido`)
-          continue
-        }
-      }
-      
+
       newFriends.push({
         id: `${Date.now()}_${Math.random().toString(36).substr(2, 5)}_${newFriends.length}`,
         nombre: name
@@ -219,21 +195,6 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
       return
     }
     
-    // Check if main player already registered
-    const existingMainPlayer = Object.values(allPlayers).find(
-      p => p.nombre.toLowerCase() === trimmedName.toLowerCase()
-    )
-    
-    if (existingMainPlayer && registrations) {
-      const alreadyRegistered = registrations.some(
-        r => r.jugadorId === existingMainPlayer._id
-      )
-      if (alreadyRegistered) {
-        setError('Ya estás inscrito en este partido')
-        return
-      }
-    }
-    
     // Check availability for selected type
     if (!isTypeAvailable(tipoInscripcion)) {
       setError(`No hay más lugares disponibles como ${REGISTRATION_TYPES[tipoInscripcion].label.toLowerCase()}`)
@@ -245,68 +206,34 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
     try {
       // Calculate how many spots are available for jugadores
       const availableJugadorSpots = spotsInfo.cupoTotal - spotsInfo.jugadores
-      
-      // 1. Register main player
-      let mainPlayerId = existingMainPlayer?._id
-      
-      if (!mainPlayerId) {
-        mainPlayerId = await createPlayer({
+
+      // 1. Register main player (server resolves the player by name)
+      let mainPlayerId
+      try {
+        const result = await joinMatch({
+          matchId,
           nombre: trimmedName,
-          perfilPermanente: {
-            posicionPreferida: 'Mediocampista',
-            posicionesSecundarias: [],
-            atributos: {
-              velocidad: 5,
-              tecnica: 5,
-              resistencia: 5,
-              defensa: 5,
-              ataque: 5,
-              pase: 5
-            },
-            nivelGeneral: 5
-          }
+          estadoFisico: tipoInscripcion === 'hinchada' ? 'normal' : estadoFisico,
+          tipoInscripcion: tipoInscripcion,
         })
+        mainPlayerId = result.playerId
+      } catch (err) {
+        if (String(err.message).includes('YA_INSCRITO')) {
+          setError('Ya estás inscrito en este partido')
+          setIsSubmitting(false)
+          return
+        }
+        throw err
       }
-      
-      // Main player always gets their selected type
-      await createRegistration({
-        partidoId: matchId,
-        jugadorId: mainPlayerId,
-        estadoFisico: tipoInscripcion === 'hinchada' ? 'normal' : estadoFisico,
-        tipoInscripcion: tipoInscripcion,
-        confirmado: true,
-        asistira: true
-      })
-      
+
       // Track how many jugador spots we've used (1 for main player if they're jugador)
       let jugadorSpotsUsed = tipoInscripcion === 'jugador' ? 1 : 0
-      
+
       // 2. Register friends - overflow goes to suplentes if registering as jugador
+      const friendErrors = []
       for (let i = 0; i < finalFriends.length; i++) {
         const friend = finalFriends[i]
-        let friendPlayerId = Object.values(allPlayers).find(
-          p => p.nombre.toLowerCase() === friend.nombre.toLowerCase()
-        )?._id
-        
-        if (!friendPlayerId) {
-          friendPlayerId = await createPlayer({
-            nombre: friend.nombre,
-            perfilPermanente: {
-              posicionPreferida: 'Mediocampista',
-              posicionesSecundarias: [],
-              atributos: {
-                velocidad: 5,
-                tecnica: 5,
-                resistencia: 5,
-                defensa: 5,
-                ataque: 5,
-                pase: 5
-              },
-              nivelGeneral: 5
-            }
-          })
-        }
-        
+
         // Determine registration type for this friend
         let friendType = tipoInscripcion
         if (tipoInscripcion === 'jugador') {
@@ -318,17 +245,29 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
             jugadorSpotsUsed++
           }
         }
-        
-        await createRegistration({
-          partidoId: matchId,
-          jugadorId: friendPlayerId,
-          estadoFisico: 'normal',
-          tipoInscripcion: friendType,
-          confirmado: true,
-          asistira: true
-        })
+
+        try {
+          await joinMatch({
+            matchId,
+            nombre: friend.nombre,
+            estadoFisico: 'normal',
+            tipoInscripcion: friendType,
+          })
+        } catch (err) {
+          if (String(err.message).includes('YA_INSCRITO')) {
+            friendErrors.push(`"${friend.nombre}" ya está inscrito`)
+          } else {
+            throw err
+          }
+        }
       }
-      
+
+      if (friendErrors.length > 0) {
+        setError(friendErrors.join('. '))
+        setIsSubmitting(false)
+        return
+      }
+
       // Reset and close
       setNombre('')
       setEstadoFisico('normal')

@@ -4,6 +4,7 @@ import { api } from '../convex/_generated/api'
 import SplashPage from './components/landing/SplashPage'
 import CreateMatchPage from './components/landing/CreateMatchPage'
 import MyMatchesPage from './components/landing/MyMatchesPage'
+import MyPlayersPage from './components/landing/MyPlayersPage'
 import MatchPage from './components/match/MatchPage'
 import AuthControls from './components/ui/AuthControls'
 import Footer from './components/ui/Footer'
@@ -104,6 +105,10 @@ function App() {
       return <MyMatchesPage onNavigate={navigate} />
     }
 
+    if (route === '#/mis-jugadores') {
+      return <MyPlayersPage onNavigate={navigate} />
+    }
+
     // Short code route: #/p/ABC123
     const shortCodeRoute = route.match(/^#\/p\/([A-Za-z0-9]{6})$/)
     if (shortCodeRoute) {
@@ -123,7 +128,7 @@ function App() {
   }
 
   const isSplash = route === '#/' || route === '' || route === '#'
-  const showBack = route === '#/nuevo' || route === '#/mis-partidos'
+  const showBack = route === '#/nuevo' || route === '#/mis-partidos' || route === '#/mis-jugadores'
 
   return (
     <div className={`app${isSplash ? ' app--splash' : ''}`}>
