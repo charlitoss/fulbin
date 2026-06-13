@@ -76,6 +76,17 @@ function App() {
   const isLoggedIn = authEnabled && !!user
   const homeRoute = isLoggedIn ? '#/mis-partidos' : '#/'
 
+  // On match routes, size the nav to the match content card so the logo/chip
+  // align with it (820px normally, 960px in the team builder); 600px elsewhere.
+  const matchRouteId = (route.match(/^#\/partido\/(.+)$/) || [])[1]
+  const navMatch = useQuery(
+    api.matches.getById,
+    isLoggedIn && matchRouteId ? { matchId: matchRouteId } : 'skip'
+  )
+  const navMaxWidth = matchRouteId
+    ? (navMatch?.pasoActual === 'armado_equipos' ? 960 : 820)
+    : 600
+
   useEffect(() => {
     try {
       localStorage.setItem(CRT_STORAGE_KEY, String(crtEnabled))
@@ -175,7 +186,7 @@ function App() {
       )}
 
       {!isSplash && isLoggedIn && (
-        <header className="app-nav">
+        <header className="app-nav" style={{ maxWidth: navMaxWidth }}>
           <button
             type="button"
             className="app-nav-brand"

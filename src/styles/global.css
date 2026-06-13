@@ -5548,13 +5548,17 @@ body.crt-on #root {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  flex: 1;
   min-width: 0;
   overflow-x: auto;
   scrollbar-width: none;
   list-style: none;
   margin: 0;
   padding: 0;
+}
+
+/* Logo + menu group on the left; chip pushed to the right. */
+.app-nav .auth-menu {
+  margin-left: auto;
 }
 
 .app-nav-links li {
@@ -6013,46 +6017,6 @@ body.crt-on #root {
    TOURNAMENT SWITCHER (Tabla)
    ============================================ */
 
-.tournament-switcher {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-4);
-}
-
-.tournament-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  background: #000;
-  border: 1px solid var(--surface-5);
-  border-radius: 0;
-  color: var(--gray-300);
-  font-family: var(--font-display);
-  font-size: var(--type-sm);
-  padding: 5px 12px;
-  cursor: pointer;
-}
-
-.tournament-chip:hover {
-  color: var(--white);
-}
-
-/* Active season: green text + tag. Past seasons stay dim. */
-.tournament-chip.is-active {
-  color: var(--color-primary);
-}
-
-.tournament-chip.is-past {
-  color: var(--gray-400);
-}
-
-/* Currently viewed: full primary border. */
-.tournament-chip.selected {
-  border-color: var(--color-primary);
-}
-
 .tournament-tag {
   font-size: 9px;
   font-weight: 700;
@@ -6063,24 +6027,130 @@ body.crt-on #root {
   padding: 1px 5px;
 }
 
-.tournament-chip--add {
-  color: var(--gray-400);
-  border-style: dashed;
+/* Tabla: active/selected season line under the heading */
+.standings-current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
 }
 
-.tournament-create {
+.standings-current-name {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-primary);
+  font-family: var(--font-display);
+  font-size: var(--type-md);
 }
 
-.tournament-create input {
+.standings-current-edit {
+  color: var(--gray-400);
+}
+
+.standings-current-name:hover .standings-current-edit {
+  color: var(--color-primary);
+}
+
+/* Torneos manage modal list */
+.tournament-list {
+  list-style: none;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.tournament-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--surface-3);
+}
+
+.tournament-list-name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: none;
+  border: none;
+  padding: var(--space-1) 0;
+  cursor: pointer;
+  color: var(--gray-100);
+  font-family: var(--font-display);
+  font-size: var(--type-base);
+  text-align: left;
+  flex: 1;
+  min-width: 0;
+}
+
+.tournament-list-name.selected {
+  color: var(--color-primary);
+}
+
+.tournament-list-name.is-past {
+  color: var(--gray-400);
+}
+
+.tournament-list-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.tournament-action {
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: 1px solid var(--surface-5);
+  border-radius: 0;
+  color: var(--gray-300);
+  font-family: var(--font-display);
+  font-size: var(--type-xs);
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.tournament-action:hover {
+  color: var(--white);
+  border-color: var(--gray-400);
+}
+
+.tournament-action--danger:hover {
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+.tournament-edit,
+.tournament-create-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.tournament-edit input,
+.tournament-create-row input {
+  flex: 1;
+  min-width: 0;
   background: var(--surface-4);
   border: 1px solid var(--surface-5);
   border-radius: 0;
   color: var(--gray-100);
   font-family: inherit;
   font-size: var(--type-sm);
-  padding: 5px 10px;
-  max-width: 180px;
+  padding: 6px 10px;
+}
+
+.tournament-add-btn {
+  width: 100%;
 }

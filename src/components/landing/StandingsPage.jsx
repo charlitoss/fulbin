@@ -1,20 +1,20 @@
 import { useState, useEffect } from 'react'
-import { useQuery, useMutation } from 'convex/react'
+import { Pencil } from 'lucide-react'
+import { useQuery } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import { authEnabled, useAuthSession } from '../../auth/useAuthSession'
+import TournamentsModal from './TournamentsModal'
 
 // Individual standings across the admin's finished matches: teams change
-// every match, so points follow players (win 3, draw 1, loss 0). Results can
-// be scoped to a tournament (e.g. Apertura / Clausura) or viewed across all.
+// every match, so points follow players (win 3, draw 1, loss 0). Results are
+// scoped to the active tournament; manage seasons via the Torneos modal.
 function StandingsPage({ onNavigate }) {
   const { user, isLoading, signIn } = useAuthSession()
   const tournaments = useQuery(api.tournaments.mine, user ? {} : 'skip')
-  const createTournament = useMutation(api.tournaments.create)
 
   // null = "Todos"; a string = a tournament id; undefined = not yet defaulted.
   const [selected, setSelected] = useState(undefined)
-  const [creating, setCreating] = useState(false)
-  const [newName, setNewName] = useState('')
+  const [showManage, setShowManage] = useState(false)
 
   // Default the view to the active tournament once tournaments load.
   useEffect(() => {
@@ -29,6 +29,9 @@ function StandingsPage({ onNavigate }) {
     api.stats.myStats,
     user ? { tournamentId: selectedId } : 'skip'
   )
+
+  const current = selected ? (tournaments ?? []).find((t) => t._id === selected) : null
+  const currentName = selected == null ? 'Todos los partidos' : current?.nombre ?? '…'
 
   if (!authEnabled || (!isLoading && !user)) {
     return (
@@ -46,21 +49,32 @@ function StandingsPage({ onNavigate }) {
     )
   }
 
-  const handleCreate = async () => {
-    const nombre = newName.trim()
-    if (nombre.length < 2) return
-    const id = await createTournament({ nombre })
-    setSelected(id)
-    setNewName('')
-    setCreating(false)
-  }
-
   const loading = isLoading || stats === undefined || stats === null || tournaments === undefined
 
   return (
     <div className="my-matches-page">
       <div className="my-matches-header">
         <h2>Tabla de posiciones</h2>
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          onClick={() => setShowManage(true)}
+        >
+          Torneos
+        </button>
+      </div>
+
+      {/* Active / selected tournament — click to manage seasons */}
+      <div className="standings-current">
+        <button
+          type="button"
+          className="standings-current-name"
+          onClick={() => setShowManage(true)}
+        >
+          <span>{currentName}</span>
+          {current?.activo && <span className="tournament-tag">Activo</span>}
+          <Pencil size={13} className="standings-current-edit" />
+        </button>
         {stats && (
           <span className="standings-matches-count">
             {stats.partidos} partido{stats.partidos === 1 ? '' : 's'}
@@ -68,60 +82,13 @@ function StandingsPage({ onNavigate }) {
         )}
       </div>
 
-      {/* Tournament switcher */}
-      <div className="tournament-switcher">
-        <button
-          type="button"
-          className={`tournament-chip${selected === null ? ' selected' : ''}`}
-          onClick={() => setSelected(null)}
-        >
-          Todos
-        </button>
-        {(tournaments ?? []).map((t) => (
-          <button
-            key={t._id}
-            type="button"
-            className={`tournament-chip${selected === t._id ? ' selected' : ''} ${
-              t.activo ? 'is-active' : 'is-past'
-            }`}
-            onClick={() => setSelected(t._id)}
-          >
-            <span>{t.nombre}</span>
-            {t.activo && <span className="tournament-tag">Activo</span>}
-          </button>
-        ))}
-        {creating ? (
-          <span className="tournament-create">
-            <input
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
-              placeholder="Ej: Apertura 2026"
-              maxLength={40}
-              autoFocus
-            />
-            <button type="button" className="btn btn-primary btn-sm" onClick={handleCreate}>
-              Crear
-            </button>
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => { setCreating(false); setNewName('') }}
-            >
-              Cancelar
-            </button>
-          </span>
-        ) : (
-          <button
-            type="button"
-            className="tournament-chip tournament-chip--add"
-            onClick={() => setCreating(true)}
-          >
-            + Nuevo torneo
-          </button>
-        )}
-      </div>
+      <TournamentsModal
+        isOpen={showManage}
+        onClose={() => setShowManage(false)}
+        tournaments={tournaments ?? []}
+        selectedId={selected ?? null}
+        onSelect={setSelected}
+      />
 
       {loading ? (
         <div className="loading">Cargando...</div>

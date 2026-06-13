@@ -57,6 +57,43 @@ export const create = mutation({
   },
 });
 
+// Rename a tournament.
+export const rename = mutation({
+  args: { tournamentId: v.id("tournaments"), nombre: v.string() },
+  handler: async (ctx, args) => {
+    const user = await currentUserDoc(ctx);
+    if (!user) throw new Error("Necesitás iniciar sesión");
+    const t = await ctx.db.get(args.tournamentId);
+    if (!t || t.ownerId !== user._id) throw new Error("Ese torneo no es tuyo");
+    const nombre = args.nombre.trim();
+    if (nombre.length < 2) throw new Error("El nombre debe tener al menos 2 caracteres");
+    await ctx.db.patch(args.tournamentId, { nombre });
+    return args.tournamentId;
+  },
+});
+
+// Delete a tournament; its matches fall back to "Todos" (tournamentId cleared).
+export const remove = mutation({
+  args: { tournamentId: v.id("tournaments") },
+  handler: async (ctx, args) => {
+    const user = await currentUserDoc(ctx);
+    if (!user) throw new Error("Necesitás iniciar sesión");
+    const t = await ctx.db.get(args.tournamentId);
+    if (!t || t.ownerId !== user._id) throw new Error("Ese torneo no es tuyo");
+
+    const matches = await ctx.db
+      .query("matches")
+      .withIndex("by_ownerId", (q) => q.eq("ownerId", user._id))
+      .collect();
+    for (const m of matches) {
+      if (m.tournamentId === args.tournamentId) {
+        await ctx.db.patch(m._id, { tournamentId: undefined });
+      }
+    }
+    await ctx.db.delete(args.tournamentId);
+  },
+});
+
 // Make a tournament the active one again (e.g. reopen a season).
 export const activate = mutation({
   args: { tournamentId: v.id("tournaments") },
