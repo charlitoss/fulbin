@@ -5695,31 +5695,41 @@ body.crt-on #root {
   letter-spacing: 0.05em;
 }
 
-/* Roster quick-select chips in the join modal */
-.roster-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
+/* Roster typeahead in the join modal */
+.typeahead-wrap {
+  position: relative;
 }
 
-.roster-chip {
-  background: var(--surface-4);
+.typeahead-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background: var(--surface-2);
   border: 1px solid var(--surface-5);
-  border-radius: 999px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-1);
+}
+
+.typeahead-item {
+  background: none;
+  border: none;
   color: var(--gray-100);
   font-size: var(--type-sm);
   font-family: inherit;
-  padding: 6px 14px;
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-xs);
   cursor: pointer;
 }
 
-.roster-chip:hover {
-  border-color: var(--gray-400);
-}
-
-.roster-chip.selected {
-  background: var(--acid-yellow-dim);
-  border-color: var(--color-primary);
+.typeahead-item:hover {
+  background: var(--surface-3);
   color: var(--color-primary);
-  font-weight: 600;
 }
