@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { authEnabled, useAuthSession } from '../../auth/useAuthSession'
+import { Menu, MenuItem, MenuHeader } from './Menu'
 
 // Sign-in button / signed-in user menu. Renders nothing until WorkOS is
 // configured, so the anonymous-only app is unaffected.
@@ -55,23 +56,20 @@ function AuthControls({ onNavigate }) {
         <span className={`auth-chevron${menuOpen ? ' auth-chevron--open' : ''}`} aria-hidden="true">›</span>
       </button>
       {menuOpen && (
-        <div className="auth-dropdown" role="menu">
-          <div className="auth-dropdown-user">
+        <Menu className="auth-dropdown">
+          <MenuHeader>
             <span className="auth-dropdown-name">{displayName}</span>
             {user.email && <span className="auth-dropdown-email">{user.email}</span>}
-          </div>
-          <button
-            type="button"
-            className="auth-dropdown-item"
-            role="menuitem"
+          </MenuHeader>
+          <MenuItem
             onClick={() => {
               setMenuOpen(false)
               signOut()
             }}
           >
             Cerrar sesión
-          </button>
-        </div>
+          </MenuItem>
+        </Menu>
       )}
     </div>
   )

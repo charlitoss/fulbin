@@ -18,8 +18,8 @@ const CRT_STORAGE_KEY = 'fulbin:crt-enabled'
 
 // Visible top nav for signed-in users.
 const NAV_LINKS = [
-  { label: 'Mis partidos', route: '#/mis-partidos' },
-  { label: 'Mis jugadores', route: '#/mis-jugadores' },
+  { label: 'Partidos', route: '#/mis-partidos' },
+  { label: 'Jugadores', route: '#/mis-jugadores' },
   { label: 'Tabla', route: '#/tabla' },
 ]
 
@@ -179,17 +179,20 @@ function App() {
           >
             <img src="/LOGO.svg" alt="Fulbin" className="app-nav-logo" width="100" height="34" />
           </button>
-          <nav className="app-nav-links">
-            {NAV_LINKS.map((item) => (
-              <button
-                key={item.route}
-                type="button"
-                className={`app-nav-link${route === item.route ? ' active' : ''}`}
-                onClick={() => navigate(item.route)}
-              >
-                {item.label}
-              </button>
-            ))}
+          <nav>
+            <ul className="app-nav-links">
+              {NAV_LINKS.map((item) => (
+                <li key={item.route}>
+                  <button
+                    type="button"
+                    className={`app-nav-link${route === item.route ? ' active' : ''}`}
+                    onClick={() => navigate(item.route)}
+                  >
+                    {item.label}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </nav>
           <AuthControls onNavigate={navigate} />
         </header>

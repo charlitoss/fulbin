@@ -5362,28 +5362,28 @@ body.crt-on #root {
   z-index: var(--z-overlay);
 }
 
-/* Figma auth-user-chip: dotted near-black bg, dashed gray-600 border,
-   offset drop shadow, square pixel-initial avatar, name, chevron. */
+/* Matches the topbar "Volver" / secondary button: dotted bg, squared,
+   gray-500 dotted border with the same drop shadow. */
 .auth-user-chip {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  height: 31px;
-  padding: 3px 10px 3px 4px;
-  background-color: #0a0a0a;
+  height: 32px;
+  padding: 3px 10px 3px 6px;
+  background-color: #060606;
   background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
   background-size: 3px 3px;
-  border: 1px dashed var(--gray-600);
+  border: 1px dotted var(--gray-500);
   border-radius: 0;
-  box-shadow: -2px 5px 0 0 var(--gray-600);
-  color: var(--white);
+  box-shadow: 0 5px 0 0 var(--gray-600);
+  color: var(--text-primary);
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: var(--type-sm);
   cursor: pointer;
 }
 
 .auth-user-chip:hover {
-  background-color: #161616;
+  background-color: #222;
 }
 
 .auth-avatar {
@@ -5415,9 +5415,9 @@ body.crt-on #root {
 }
 
 .auth-chevron {
-  font-size: 20px;
+  font-size: 18px;
   line-height: 1;
-  color: var(--white);
+  color: var(--gray-300);
   transition: transform var(--duration-fast) var(--ease-in-out);
 }
 
@@ -5431,30 +5431,67 @@ body.crt-on #root {
   }
 }
 
+/* ============================================
+   MENU (reusable dropdown — matches .share-menu)
+   ============================================ */
+
+.menu {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-1);
+  display: flex;
+  flex-direction: column;
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: none;
+  border-radius: 0;
+  box-shadow: inset 0 0 0 4px #000, var(--shadow-lg);
+}
+
+.menu-li {
+  list-style: none;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background-color: transparent;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--type-base);
+  color: var(--text-primary);
+  text-align: left;
+  transition: background-color 0.15s;
+}
+
+.menu-item:hover {
+  background-color: var(--surface-1);
+}
+
+.menu-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  margin-bottom: var(--space-1);
+  border-bottom: 1px solid var(--surface-4);
+}
+
+/* Auth dropdown: just the Menu's position + sizing */
 .auth-dropdown {
   position: absolute;
   right: 0;
   top: calc(100% + var(--space-2));
-  min-width: 180px;
-  background-color: #0a0a0a;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
-  background-size: 3px 3px;
-  border: 1px dashed var(--gray-600);
-  border-radius: 0;
-  padding: var(--space-1);
-  display: flex;
-  flex-direction: column;
-  box-shadow: -2px 5px 0 0 var(--gray-600);
+  min-width: 200px;
   z-index: var(--z-toast);
-}
-
-.auth-dropdown-user {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: var(--space-2) var(--space-3);
-  border-bottom: 1px dashed var(--surface-5);
-  margin-bottom: var(--space-1);
 }
 
 .auth-dropdown-name {
@@ -5468,23 +5505,6 @@ body.crt-on #root {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.auth-dropdown-item {
-  background: none;
-  border: none;
-  color: var(--gray-100);
-  font-family: var(--font-display);
-  font-size: var(--type-sm);
-  text-align: left;
-  padding: var(--space-2) var(--space-3);
-  border-radius: 0;
-  cursor: pointer;
-}
-
-.auth-dropdown-item:hover {
-  background: var(--surface-3);
-  color: var(--color-primary);
 }
 
 /* ============================================
@@ -5526,6 +5546,13 @@ body.crt-on #root {
   min-width: 0;
   overflow-x: auto;
   scrollbar-width: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.app-nav-links li {
+  list-style: none;
 }
 
 .app-nav-links::-webkit-scrollbar {
@@ -5604,9 +5631,15 @@ body.crt-on #root {
   margin-bottom: var(--space-4);
 }
 
-.my-matches-header h2 {
+/* Page headings: solid black background, matching .form-heading. */
+.my-matches-header h2,
+.my-matches-empty h2 {
+  display: inline-block;
+  font-family: var(--font-display);
   font-size: var(--type-xl, 20px);
-  color: var(--white);
+  color: var(--text-primary);
+  background: #000;
+  padding: 2px 8px;
 }
 
 .my-matches-empty {
@@ -5702,10 +5735,32 @@ body.crt-on #root {
 
 .my-match-side {
   display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-4);
+  flex-shrink: 0;
+}
+
+.my-match-side-stack {
+  display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: var(--space-1);
-  flex-shrink: 0;
+}
+
+/* Big final score, Geist display font, pinned to the right end of the card */
+.my-match-score {
+  font-family: var(--font-display);
+  font-size: var(--type-2xl);
+  font-weight: 700;
+  color: var(--white);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.my-match-count {
+  font-size: var(--type-sm);
+  color: var(--gray-300);
 }
 
 .my-match-estado {
@@ -5810,13 +5865,11 @@ body.crt-on #root {
    ============================================ */
 
 .standings-matches-count {
+  font-family: var(--font-display);
   font-size: var(--type-sm);
   color: var(--gray-200);
-  background-color: #060606;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
-  background-size: 3px 3px;
-  border: 1px solid var(--surface-5);
-  padding: 4px 10px;
+  background: #000;
+  padding: 4px 8px;
 }
 
 .standings-table-wrap {

@@ -85,18 +85,22 @@ function MyMatchesPage({ onNavigate }) {
                   </span>
                 </div>
                 <div className="my-match-side">
-                  <span className={`my-match-estado my-match-estado--${match.pasoActual}`}>
-                    {ESTADO_LABELS[match.pasoActual] ?? match.pasoActual}
-                  </span>
-                  {match.resultado ? (
-                    <>
-                      <span className="my-match-resultado">
-                        {match.resultado.golesBlanco} — {match.resultado.golesOscuro}
-                      </span>
+                  <div className="my-match-side-stack">
+                    <span className={`my-match-estado my-match-estado--${match.pasoActual}`}>
+                      {ESTADO_LABELS[match.pasoActual] ?? match.pasoActual}
+                    </span>
+                    {match.resultado ? (
                       <span className="my-match-winner">{winnerText(match.resultado)}</span>
-                    </>
-                  ) : (
-                    <span className="my-match-codigo">{match.codigoCorto}</span>
+                    ) : (
+                      <span className="my-match-count">
+                        {match.jugadoresPorEquipo}vs{match.jugadoresPorEquipo}
+                      </span>
+                    )}
+                  </div>
+                  {match.resultado && (
+                    <span className="my-match-score">
+                      {match.resultado.golesBlanco} — {match.resultado.golesOscuro}
+                    </span>
                   )}
                 </div>
               </button>
