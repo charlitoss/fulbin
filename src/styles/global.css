@@ -4785,6 +4785,7 @@ body.crt-on #root {
   right: 16px;
   z-index: 10000;
   width: 280px;
+  max-width: calc(100vw - 32px);
   max-height: calc(100vh - 32px);
   background: rgba(10, 10, 10, 0.92);
   color: #fff;
@@ -5398,8 +5399,9 @@ body.crt-on #root {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #060606;
-  background-image: radial-gradient(circle, rgba(255,255,255,0.10) 1px, transparent 1px);
+  /* Same green dotted pattern as the match countdown. */
+  background-color: transparent;
+  background-image: radial-gradient(circle, rgba(30,255,180,0.30) 1px, transparent 1px);
   background-size: 3px 3px;
   color: var(--color-primary);
   font-family: 'Press Start 2P', var(--font-display);
@@ -5517,7 +5519,7 @@ body.crt-on #root {
   display: flex;
   align-items: center;
   gap: var(--space-4);
-  max-width: 960px;
+  max-width: 600px;
   margin: 0 auto;
   padding: var(--space-4) var(--space-6) var(--space-3);
 }
@@ -5560,13 +5562,12 @@ body.crt-on #root {
 }
 
 .app-nav-link {
-  background: none;
-  border: none;
-  border-bottom: 2px solid transparent;
+  background: #000;
+  border: 1px solid transparent;
   color: var(--gray-300);
   font-family: var(--font-display);
   font-size: var(--type-sm);
-  padding: 4px 6px 6px;
+  padding: 4px 10px;
   white-space: nowrap;
   cursor: pointer;
 }
@@ -5577,7 +5578,7 @@ body.crt-on #root {
 
 .app-nav-link.active {
   color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
+  border-color: var(--color-primary);
 }
 
 @media (max-width: 560px) {
@@ -5710,7 +5711,9 @@ body.crt-on #root {
 
 .player-points-badge--zero {
   color: var(--gray-300);
-  background: var(--surface-4);
+  background-color: var(--surface-4);
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
 }
 
 .my-match-main {
