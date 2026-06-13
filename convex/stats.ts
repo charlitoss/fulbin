@@ -1,4 +1,5 @@
 import { query } from "./_generated/server";
+import { v } from "convex/values";
 import { currentUserDoc } from "./users";
 import type { Id } from "./_generated/dataModel";
 
@@ -7,9 +8,10 @@ const PUNTOS = { win: 3, draw: 1, loss: 0 };
 // Per-player standings across the signed-in admin's finished matches.
 // Players (not teams) accumulate points: teams change every match, so the
 // tournament follows individuals — win 3, draw 1, loss 0.
+// With tournamentId, only that season's matches count; without it, all do.
 export const myStats = query({
-  args: {},
-  handler: async (ctx) => {
+  args: { tournamentId: v.optional(v.id("tournaments")) },
+  handler: async (ctx, args) => {
     const user = await currentUserDoc(ctx);
     if (!user) return null;
 
@@ -17,7 +19,11 @@ export const myStats = query({
       .query("matches")
       .withIndex("by_ownerId", (q) => q.eq("ownerId", user._id))
       .collect();
-    const finished = matches.filter((m) => m.pasoActual === "finalizado");
+    const finished = matches.filter(
+      (m) =>
+        m.pasoActual === "finalizado" &&
+        (!args.tournamentId || m.tournamentId === args.tournamentId)
+    );
 
     type Row = {
       playerId: Id<"players">;

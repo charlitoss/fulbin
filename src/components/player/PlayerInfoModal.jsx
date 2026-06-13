@@ -58,24 +58,19 @@ function PlayerInfoModal({ isOpen, onClose, player, registration, assignment, on
       onClose={onClose}
       title="Información del Jugador"
       footer={
-        <div className="player-modal-footer">
-          <div className="player-modal-footer-main">
-            {assignment && onSwapTeam && (
-              <button
-                className="btn btn-secondary player-modal-footer-btn"
-                onClick={handleSwapTeam}
-              >
-                <ArrowLeftRight size={16} />
-                Mover a {otherTeamLabel}
-              </button>
-            )}
-            <button className="btn btn-primary player-modal-footer-btn" onClick={onClose}>
-              Cerrar
+        <div className="player-modal-footer-main">
+          {assignment && onSwapTeam && (
+            <button
+              className="btn btn-secondary player-modal-footer-btn"
+              onClick={handleSwapTeam}
+            >
+              <ArrowLeftRight size={16} />
+              Mover a {otherTeamLabel}
             </button>
-          </div>
+          )}
           {canLeave && (
             <button
-              className="btn btn-secondary btn-danger-text player-modal-leave-btn"
+              className="btn btn-secondary btn-danger-text player-modal-footer-btn"
               onClick={handleLeave}
             >
               Bajarme del partido

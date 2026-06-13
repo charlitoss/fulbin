@@ -7,10 +7,20 @@ export default defineSchema({
     nombre: v.string(),
     email: v.string(),
     avatar: v.optional(v.string()),
+    // The user's own player profile (so the balancer can include them).
+    playerId: v.optional(v.id("players")),
     createdAt: v.string(),
     updatedAt: v.string(),
   })
     .index("by_workosId", ["workosId"]),
+
+  tournaments: defineTable({
+    ownerId: v.id("users"),
+    nombre: v.string(),
+    activo: v.boolean(),
+    createdAt: v.string(),
+  })
+    .index("by_ownerId", ["ownerId"]),
 
   matches: defineTable({
     // Using a string id field for backwards compatibility with existing routes
@@ -27,6 +37,9 @@ export default defineSchema({
     // Owner with an account. Legacy organizadorId/organizadorNombre stay as
     // free-form strings for matches created anonymously.
     ownerId: v.optional(v.id("users")),
+    // Season this match counts toward (the owner's active tournament at
+    // creation time). Null matches show under "Todos".
+    tournamentId: v.optional(v.id("tournaments")),
     organizadorId: v.optional(v.string()),
     organizadorNombre: v.optional(v.string()),
     iniciadoEn: v.optional(v.number()),

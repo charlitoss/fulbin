@@ -24,7 +24,7 @@ const DEFAULT_ATTRS = {
 
 // Create/edit a roster player: name, preferred position and attributes.
 // nivelGeneral is derived from the attributes.
-function PlayerProfileModal({ isOpen, onClose, player }) {
+function PlayerProfileModal({ isOpen, onClose, player, hideDelete = false }) {
   const [nombre, setNombre] = useState('')
   const [posicion, setPosicion] = useState(POSITIONS.MEDIOCAMPISTA)
   const [atributos, setAtributos] = useState(DEFAULT_ATTRS)
@@ -108,7 +108,7 @@ function PlayerProfileModal({ isOpen, onClose, player }) {
       title={player ? 'Editar jugador' : 'Agregar jugador'}
       footer={
         <>
-          {player && (
+          {player && !hideDelete && (
             <button
               type="button"
               className="btn btn-secondary btn-danger-text"

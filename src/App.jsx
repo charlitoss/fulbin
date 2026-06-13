@@ -6,6 +6,7 @@ import CreateMatchPage from './components/landing/CreateMatchPage'
 import MyMatchesPage from './components/landing/MyMatchesPage'
 import MyPlayersPage from './components/landing/MyPlayersPage'
 import StandingsPage from './components/landing/StandingsPage'
+import MyProfilePage from './components/landing/MyProfilePage'
 import MatchPage from './components/match/MatchPage'
 import AuthControls from './components/ui/AuthControls'
 import { authEnabled, useAuthSession } from './auth/useAuthSession'
@@ -131,6 +132,10 @@ function App() {
 
     if (route === '#/tabla') {
       return <StandingsPage onNavigate={navigate} />
+    }
+
+    if (route === '#/mi-perfil') {
+      return <MyProfilePage onNavigate={navigate} />
     }
 
     // Short code route: #/p/ABC123

@@ -3,6 +3,7 @@ import type { QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
 import { currentUserDoc, upsertCurrentUser } from "./users";
+import { activeTournament } from "./tournaments";
 
 // Generate a short 6-character alphanumeric code for sharing
 function generateShortCode(): string {
@@ -80,10 +81,14 @@ export const create = mutation({
     // creation keeps working with no owner.
     const ownerId = await upsertCurrentUser(ctx, {});
 
+    // Count the match toward the owner's active tournament, if any.
+    const tournament = ownerId ? await activeTournament(ctx, ownerId) : null;
+
     const matchId = await ctx.db.insert("matches", {
       ...args,
       codigoCorto,
       ownerId: ownerId ?? undefined,
+      tournamentId: tournament?._id,
       pasoActual: "inscripcion",
       linkCompartible: "",
       createdAt: now,

@@ -15,6 +15,7 @@ import type * as seed from "../seed.js";
 import type * as stats from "../stats.js";
 import type * as teamConfigurations from "../teamConfigurations.js";
 import type * as testing from "../testing.js";
+import type * as tournaments from "../tournaments.js";
 import type * as users from "../users.js";
 
 import type {
@@ -31,6 +32,7 @@ declare const fullApi: ApiFromModules<{
   stats: typeof stats;
   teamConfigurations: typeof teamConfigurations;
   testing: typeof testing;
+  tournaments: typeof tournaments;
   users: typeof users;
 }>;
 

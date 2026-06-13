@@ -64,6 +64,14 @@ function AuthControls({ onNavigate }) {
           <MenuItem
             onClick={() => {
               setMenuOpen(false)
+              onNavigate('#/mi-perfil')
+            }}
+          >
+            Mi perfil de jugador
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              setMenuOpen(false)
               signOut()
             }}
           >

@@ -61,6 +61,38 @@ export const myRoster = query({
   },
 });
 
+// The signed-in user's own player profile (linked via users.playerId),
+// creating one in their roster on first access. Returns the player id.
+export const ensureMyProfile = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const user = await currentUserDoc(ctx);
+    if (!user) throw new Error("Necesitás iniciar sesión");
+
+    if (user.playerId) {
+      const existing = await ctx.db.get(user.playerId);
+      if (existing) return existing._id;
+    }
+
+    const playerId = await ctx.db.insert("players", {
+      nombre: user.nombre,
+      ownerId: user._id,
+      perfilPermanente: DEFAULT_PROFILE,
+    });
+    await ctx.db.patch(user._id, { playerId });
+    return playerId;
+  },
+});
+
+// The signed-in user's self player id (or null), for the profile page.
+export const myProfileId = query({
+  args: {},
+  handler: async (ctx) => {
+    const user = await currentUserDoc(ctx);
+    return user?.playerId ?? null;
+  },
+});
+
 // Roster players of the match's owner who aren't registered yet — the
 // quick-select list in the join modal. Anyone with the match link can see
 // it (the link is the group's trust boundary). Empty for unowned matches.

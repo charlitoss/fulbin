@@ -65,7 +65,7 @@ function MyPlayersPage({ onNavigate }) {
           </p>
         </div>
       ) : (
-        <ul className="my-matches-list">
+        <ul className="my-matches-list my-players-list">
           {roster.map((player) => {
             const perfil = player.perfilPermanente
             return (
