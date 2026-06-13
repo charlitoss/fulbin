@@ -61,7 +61,7 @@ function StandingsPage({ onNavigate }) {
                 <th title="Empatados">E</th>
                 <th title="Perdidos">P</th>
                 <th title="Goles">⚽</th>
-                <th title="Puntos">Pts</th>
+                <th className="standings-th-pts" title="Puntos">Pts</th>
               </tr>
             </thead>
             <tbody>

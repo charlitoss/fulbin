@@ -52,42 +52,14 @@ function AuthControls({ onNavigate }) {
           </span>
         )}
         <span className="auth-user-name">{displayName}</span>
+        <span className={`auth-chevron${menuOpen ? ' auth-chevron--open' : ''}`} aria-hidden="true">›</span>
       </button>
       {menuOpen && (
         <div className="auth-dropdown" role="menu">
-          <button
-            type="button"
-            className="auth-dropdown-item"
-            role="menuitem"
-            onClick={() => {
-              setMenuOpen(false)
-              onNavigate('#/mis-partidos')
-            }}
-          >
-            Mis partidos
-          </button>
-          <button
-            type="button"
-            className="auth-dropdown-item"
-            role="menuitem"
-            onClick={() => {
-              setMenuOpen(false)
-              onNavigate('#/mis-jugadores')
-            }}
-          >
-            Mis jugadores
-          </button>
-          <button
-            type="button"
-            className="auth-dropdown-item"
-            role="menuitem"
-            onClick={() => {
-              setMenuOpen(false)
-              onNavigate('#/tabla')
-            }}
-          >
-            Tabla de posiciones
-          </button>
+          <div className="auth-dropdown-user">
+            <span className="auth-dropdown-name">{displayName}</span>
+            {user.email && <span className="auth-dropdown-email">{user.email}</span>}
+          </div>
           <button
             type="button"
             className="auth-dropdown-item"

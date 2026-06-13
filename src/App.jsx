@@ -16,6 +16,13 @@ import { CRT_DEFAULTS, loadCrtParams, saveCrtParams } from './components/ui/crtS
 
 const CRT_STORAGE_KEY = 'fulbin:crt-enabled'
 
+// Visible top nav for signed-in users.
+const NAV_LINKS = [
+  { label: 'Mis partidos', route: '#/mis-partidos' },
+  { label: 'Mis jugadores', route: '#/mis-jugadores' },
+  { label: 'Tabla', route: '#/tabla' },
+]
+
 // Component to handle short code redirect
 function ShortCodeRedirect({ shortCode, onNavigate }) {
   const match = useQuery(api.matches.getByShortCode, { shortCode: shortCode.toUpperCase() })
@@ -145,17 +152,12 @@ function App() {
   }
 
   const isSplash = route === '#/' || route === '' || route === '#'
-  const isMatchRoute = /^#\/partido\//.test(route)
 
-  // Top-left back button: label + target depend on where you are and whether
-  // you're signed in (signed-in home is Mis partidos, not the splash).
+  // Anonymous users keep the simple "← Volver" back button on sub-pages;
+  // signed-in users navigate via the always-visible top nav instead.
   let back = null
-  if (['#/nuevo', '#/mis-jugadores', '#/tabla'].includes(route)) {
-    back = { label: '← Volver', target: homeRoute }
-  } else if (route === '#/mis-partidos') {
-    back = isLoggedIn ? null : { label: '← Volver', target: '#/' }
-  } else if (isMatchRoute && isLoggedIn) {
-    back = { label: '← Mis partidos', target: '#/mis-partidos' }
+  if (!isLoggedIn && ['#/nuevo', '#/mis-partidos', '#/mis-jugadores', '#/tabla'].includes(route)) {
+    back = { label: '← Volver', target: '#/' }
   }
   const showBack = !!back
 
@@ -166,7 +168,34 @@ function App() {
           <AuthControls onNavigate={navigate} />
         </div>
       )}
-      {!isSplash && (
+
+      {!isSplash && isLoggedIn && (
+        <header className="app-nav">
+          <button
+            type="button"
+            className="app-nav-brand"
+            onClick={() => navigate('#/mis-partidos')}
+            aria-label="Inicio"
+          >
+            <img src="/LOGO.svg" alt="Fulbin" className="app-nav-logo" width="100" height="34" />
+          </button>
+          <nav className="app-nav-links">
+            {NAV_LINKS.map((item) => (
+              <button
+                key={item.route}
+                type="button"
+                className={`app-nav-link${route === item.route ? ' active' : ''}`}
+                onClick={() => navigate(item.route)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+          <AuthControls onNavigate={navigate} />
+        </header>
+      )}
+
+      {!isSplash && !isLoggedIn && (
         <header className={`app-logo${showBack ? ' app-logo--with-back' : ''}`}>
           {showBack && (
             <button

@@ -5356,28 +5356,34 @@ body.crt-on #root {
   position: relative;
 }
 
-/* Matches the topbar "Volver" button (.btn.btn-secondary.btn-sm): dotted bg,
-   squared, gray-500 dotted border with the same drop shadow. */
+/* Keep the chip (and its dropdown) above the sticky in-game scoreboard. */
+.auth-menu {
+  position: relative;
+  z-index: var(--z-overlay);
+}
+
+/* Figma auth-user-chip: dotted near-black bg, dashed gray-600 border,
+   offset drop shadow, square pixel-initial avatar, name, chevron. */
 .auth-user-chip {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  height: 32px;
-  padding: 3px 10px;
-  background-color: #060606;
+  height: 31px;
+  padding: 3px 10px 3px 4px;
+  background-color: #0a0a0a;
   background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
   background-size: 3px 3px;
-  border: 1px dotted var(--gray-500);
+  border: 1px dashed var(--gray-600);
   border-radius: 0;
-  box-shadow: 0 5px 0 0 var(--gray-600);
-  color: var(--text-primary);
+  box-shadow: -2px 5px 0 0 var(--gray-600);
+  color: var(--white);
   font-family: var(--font-display);
-  font-size: var(--type-sm);
+  font-size: 13px;
   cursor: pointer;
 }
 
 .auth-user-chip:hover {
-  background-color: #222;
+  background-color: #161616;
 }
 
 .auth-avatar {
@@ -5392,10 +5398,13 @@ body.crt-on #root {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--acid-yellow-dim);
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.10) 1px, transparent 1px);
+  background-size: 3px 3px;
   color: var(--color-primary);
-  font-weight: 700;
+  font-family: 'Press Start 2P', var(--font-display);
   font-size: 13px;
+  line-height: 1;
 }
 
 .auth-user-name {
@@ -5405,13 +5414,20 @@ body.crt-on #root {
   white-space: nowrap;
 }
 
+.auth-chevron {
+  font-size: 20px;
+  line-height: 1;
+  color: var(--white);
+  transition: transform var(--duration-fast) var(--ease-in-out);
+}
+
+.auth-chevron--open {
+  transform: rotate(90deg);
+}
+
 @media (max-width: 480px) {
   .auth-user-name {
     display: none;
-  }
-
-  .auth-user-chip {
-    padding: 4px;
   }
 }
 
@@ -5419,31 +5435,133 @@ body.crt-on #root {
   position: absolute;
   right: 0;
   top: calc(100% + var(--space-2));
-  min-width: 160px;
-  background: var(--surface-2);
-  border: 1px solid var(--surface-5);
-  border-radius: var(--radius-sm);
+  min-width: 180px;
+  background-color: #0a0a0a;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: 1px dashed var(--gray-600);
+  border-radius: 0;
   padding: var(--space-1);
   display: flex;
   flex-direction: column;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-  z-index: 30;
+  box-shadow: -2px 5px 0 0 var(--gray-600);
+  z-index: var(--z-toast);
+}
+
+.auth-dropdown-user {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px dashed var(--surface-5);
+  margin-bottom: var(--space-1);
+}
+
+.auth-dropdown-name {
+  color: var(--white);
+  font-size: var(--type-sm);
+}
+
+.auth-dropdown-email {
+  color: var(--gray-400);
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .auth-dropdown-item {
   background: none;
   border: none;
   color: var(--gray-100);
+  font-family: var(--font-display);
   font-size: var(--type-sm);
   text-align: left;
   padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-xs);
+  border-radius: 0;
   cursor: pointer;
 }
 
 .auth-dropdown-item:hover {
   background: var(--surface-3);
   color: var(--color-primary);
+}
+
+/* ============================================
+   TOP NAV (signed-in users)
+   ============================================ */
+
+.app-nav {
+  position: relative;
+  z-index: var(--z-overlay);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  max-width: 960px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-6) var(--space-3);
+}
+
+.app-nav-brand {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.app-nav-logo {
+  width: 100px;
+  height: auto;
+  display: block;
+}
+
+.app-nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.app-nav-links::-webkit-scrollbar {
+  display: none;
+}
+
+.app-nav-link {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--gray-300);
+  font-family: var(--font-display);
+  font-size: var(--type-sm);
+  padding: 4px 6px 6px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.app-nav-link:hover {
+  color: var(--white);
+}
+
+.app-nav-link.active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+@media (max-width: 560px) {
+  .app-nav {
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .app-nav-brand {
+    display: none;
+  }
 }
 
 /* Claim banner on unowned matches */
@@ -5555,6 +5673,11 @@ body.crt-on #root {
   background: var(--acid-yellow-dim);
   padding: 1px 6px;
   white-space: nowrap;
+}
+
+.player-points-badge--zero {
+  color: var(--gray-300);
+  background: var(--surface-4);
 }
 
 .my-match-main {
@@ -5688,13 +5811,20 @@ body.crt-on #root {
 
 .standings-matches-count {
   font-size: var(--type-sm);
-  color: var(--gray-400);
+  color: var(--gray-200);
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: 1px solid var(--surface-5);
+  padding: 4px 10px;
 }
 
 .standings-table-wrap {
-  background: var(--surface-1);
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
   border: 1px solid var(--surface-5);
-  border-radius: var(--radius-md);
+  border-radius: 0;
   overflow-x: auto;
 }
 
@@ -5720,6 +5850,10 @@ body.crt-on #root {
   border-bottom: 1px solid var(--surface-5);
   padding-top: var(--space-3);
   padding-bottom: var(--space-3);
+}
+
+.standings-table thead th.standings-th-pts {
+  color: var(--color-primary);
 }
 
 .standings-table tbody tr + tr td {

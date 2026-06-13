@@ -51,7 +51,10 @@ function PlayerCard({
             />
           )}
           {typeof points === 'number' && (
-            <span className="player-points-badge" title="Puntos del partido">
+            <span
+              className={`player-points-badge${points > 0 ? '' : ' player-points-badge--zero'}`}
+              title="Puntos del partido"
+            >
               {points > 0 ? `+${points}` : points} pts
             </span>
           )}
