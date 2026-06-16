@@ -7,7 +7,7 @@ import HinchadaPanel from './HinchadaPanel'
 import InGameHeader from './InGameHeader'
 import PlayerCard from '../player/PlayerCard'
 
-function InGameStep({ match, canManage = false, onFinish, finalized = false }) {
+function InGameStep({ match, onFinish, finalized = false }) {
   const teamConfig = useQuery(api.teamConfigurations.getByMatch, { matchId: match._id })
   const registrationsData = useQuery(api.registrations.listByMatch, { matchId: match._id })
   const playersData = useQuery(api.players.list)
@@ -71,19 +71,10 @@ function InGameStep({ match, canManage = false, onFinish, finalized = false }) {
     prevTotalsRef.current = { blanco: goalsBlanco, oscuro: goalsOscuro }
   }, [goalsBlanco, goalsOscuro, finalized])
 
-  // Points each team's players earned, shown only on the finalized recap
-  // (win 3 / draw 1 / loss 0), mirroring the tournament standings.
-  const teamPoints = (own, rival) => (own > rival ? 3 : own === rival ? 1 : 0)
-  const pointsBlanco = finalized ? teamPoints(goalsBlanco, goalsOscuro) : null
-  const pointsOscuro = finalized ? teamPoints(goalsOscuro, goalsBlanco) : null
-
   const handleGoalDelta = useCallback((jugadorId, delta) => {
-    if (finalized || !canManage) return
+    if (finalized) return
     incrementPlayerGoals({ matchId: match._id, jugadorId, delta })
-  }, [incrementPlayerGoals, match._id, finalized, canManage])
-
-  // Spectators (non-owners) and the finalized recap see scores without +/-.
-  const scoresReadOnly = finalized || !canManage
+  }, [incrementPlayerGoals, match._id, finalized])
 
   if (!teamConfig || !playersData || !registrationsData) {
     return (
@@ -116,8 +107,7 @@ function InGameStep({ match, canManage = false, onFinish, finalized = false }) {
               jugadoresPorEquipo={match.jugadoresPorEquipo}
               mode="in-game"
               onGoalDelta={handleGoalDelta}
-              readOnly={scoresReadOnly}
-              points={pointsBlanco}
+              readOnly={finalized}
             />
             <TeamPanel
               team="oscuro"
@@ -127,8 +117,7 @@ function InGameStep({ match, canManage = false, onFinish, finalized = false }) {
               jugadoresPorEquipo={match.jugadoresPorEquipo}
               mode="in-game"
               onGoalDelta={handleGoalDelta}
-              readOnly={scoresReadOnly}
-              points={pointsOscuro}
+              readOnly={finalized}
             />
           </div>
         </div>

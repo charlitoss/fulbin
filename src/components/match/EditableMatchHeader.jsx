@@ -9,7 +9,6 @@ import { formatDate } from '../../utils/dateUtils'
 
 function EditableMatchHeader({
   match,
-  canEdit = true,
   onAddPlayer,
   onPlayersPerTeamChange,
   isPastKickoff = false,
@@ -127,14 +126,6 @@ function EditableMatchHeader({
   
   // Render editable field
   const renderEditableText = (field, value, icon, placeholder) => {
-    if (!canEdit) {
-      return (
-        <div className="editable-field editable-field--readonly">
-          {icon}
-          <span>{value || placeholder}</span>
-        </div>
-      )
-    }
     if (editingField === field) {
       return (
         <div className="editable-field editing">
@@ -174,14 +165,6 @@ function EditableMatchHeader({
   // native <input type="date"> (which has a popup picker in every browser)
   // and our custom <TimePicker> (because Firefox has no popup for type="time").
   const renderEditableDateTime = () => {
-    if (!canEdit) {
-      const monthNum = match.fecha ? Number(match.fecha.split('-')[1]) : ''
-      return (
-        <div className="editable-field editable-field--readonly">
-          <span>{`${dateInfo.dayShort} ${dateInfo.day}/${monthNum} ${match.horario}`}</span>
-        </div>
-      )
-    }
     if (editingField === 'fechaHorario') {
       return (
         <div className="editable-field editing editable-datetime">
@@ -262,13 +245,6 @@ function EditableMatchHeader({
   
   // Render editable players per team - direct dropdown
   const renderEditablePlayersPerTeam = () => {
-    if (!canEdit) {
-      return (
-        <div className="editable-field editable-field--readonly">
-          <span>{match.jugadoresPorEquipo} vs {match.jugadoresPorEquipo}</span>
-        </div>
-      )
-    }
     return (
       <div className="editable-field player-count-select">
         <select
@@ -287,14 +263,6 @@ function EditableMatchHeader({
   
   // Render editable title
   const renderEditableTitle = () => {
-    if (!canEdit) {
-      return (
-        <h1 className="editable-title editable-title--readonly">
-          <img src="/soccer-ball.svg" alt="" className="title-ball" />
-          {match.nombre}
-        </h1>
-      )
-    }
     if (editingField === 'nombre') {
       return (
         <div className="editable-title editing">

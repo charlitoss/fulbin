@@ -9,16 +9,11 @@
  */
 
 import type * as matches from "../matches.js";
-import type * as permissions from "../permissions.js";
 import type * as players from "../players.js";
 import type * as registrations from "../registrations.js";
 import type * as seed from "../seed.js";
-import type * as standings from "../standings.js";
-import type * as stats from "../stats.js";
 import type * as teamConfigurations from "../teamConfigurations.js";
 import type * as testing from "../testing.js";
-import type * as tournaments from "../tournaments.js";
-import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -28,16 +23,11 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   matches: typeof matches;
-  permissions: typeof permissions;
   players: typeof players;
   registrations: typeof registrations;
   seed: typeof seed;
-  standings: typeof standings;
-  stats: typeof stats;
   teamConfigurations: typeof teamConfigurations;
   testing: typeof testing;
-  tournaments: typeof tournaments;
-  users: typeof users;
 }>;
 
 /**

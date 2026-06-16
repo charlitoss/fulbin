@@ -5,7 +5,6 @@ function PlayerCard({
   player,
   registration,
   onViewInfo,
-  onCardClick,
   onRemove,
   onMove,
   onPromote,
@@ -13,12 +12,8 @@ function PlayerCard({
   compact = false,
   showState = true,
   goalControls = null,
-  points = null,
 }) {
   const physicalState = PHYSICAL_STATES[registration?.estadoFisico] || PHYSICAL_STATES.normal
-  const cardClickProps = onCardClick
-    ? { onClick: () => onCardClick(player, registration), style: { cursor: 'pointer' } }
-    : {}
 
   // Get initials from name
   const getInitials = (name) => {
@@ -35,7 +30,7 @@ function PlayerCard({
   if (compact) {
     return (
       <div className="player-card compact">
-        <div className={`player-card-left${onCardClick ? ' player-card-left--clickable' : ''}`} {...cardClickProps}>
+        <div className="player-card-left">
           {typeof index === 'number' && (
             <span className="player-index">{index + 1}.</span>
           )}
@@ -49,14 +44,6 @@ function PlayerCard({
               width="24"
               height="24"
             />
-          )}
-          {typeof points === 'number' && (
-            <span
-              className={`player-points-badge${points > 0 ? '' : ' player-points-badge--zero'}`}
-              title="Puntos del partido"
-            >
-              {points > 0 ? `+${points}` : points} pts
-            </span>
           )}
         </div>
         <div className="player-card-actions">

@@ -9,7 +9,7 @@ import { MAX_SUPLENTES } from '../../utils/constants'
 import JoinMatchModal from '../player/JoinMatchModal'
 import PlayerInfoModal from '../player/PlayerInfoModal'
 
-function InscriptionStep({ match, canManage = false, deviceId, onRegisterAddPlayerHandler }) {
+function InscriptionStep({ match, onRegisterAddPlayerHandler }) {
   const [showJoinModal, setShowJoinModal] = useState(false)
   const [joinModalType, setJoinModalType] = useState(null)
   const [showPlayerInfo, setShowPlayerInfo] = useState(false)
@@ -32,7 +32,7 @@ function InscriptionStep({ match, canManage = false, deviceId, onRegisterAddPlay
 
   const handleRemovePlayer = async (player) => {
     try {
-      await removeRegistration({ matchId: match._id, playerId: player._id, anonId: deviceId })
+      await removeRegistration({ matchId: match._id, playerId: player._id })
     } catch (err) {
       console.error('Error removing registration:', err)
     }
@@ -44,7 +44,6 @@ function InscriptionStep({ match, canManage = false, deviceId, onRegisterAddPlay
         matchId: match._id,
         playerId: player._id,
         tipoInscripcion: 'jugador',
-        anonId: deviceId,
       })
     } catch (err) {
       console.error('Error promoting suplente:', err)
@@ -108,24 +107,12 @@ function InscriptionStep({ match, canManage = false, deviceId, onRegisterAddPlay
     // Data will auto-refresh via Convex
   }
   
-  const handleViewPlayerInfo = (player, registration) => {
-    const reg = registration || registrationsData?.find(r => r.jugadorId === player._id)
+  const handleViewPlayerInfo = (player) => {
+    const reg = registrations.find(r => r.jugadorId === player._id)
     setSelectedPlayer(player)
     setSelectedRegistration(reg)
     setShowPlayerInfo(true)
   }
-
-  const handleLeaveMatch = async (playerId) => {
-    try {
-      await removeRegistration({ matchId: match._id, playerId, anonId: deviceId })
-    } catch (err) {
-      console.error('Error removing registration:', err)
-    }
-  }
-
-  // A registration can be left by the owner, or by the device that created it.
-  const canLeave = (registration) =>
-    canManage || (!!registration?.creadoPor && registration.creadoPor === deviceId)
   
   const handleContinue = async () => {
     if (isQuotaComplete) {
@@ -167,8 +154,7 @@ function InscriptionStep({ match, canManage = false, deviceId, onRegisterAddPlay
                   key={registration.jugadorId}
                   player={player}
                   registration={registration}
-                  onRemove={canManage ? handleRemovePlayer : undefined}
-                  onCardClick={handleViewPlayerInfo}
+                  onRemove={handleRemovePlayer}
                   index={index}
                   compact={true}
                 />
@@ -187,16 +173,14 @@ function InscriptionStep({ match, canManage = false, deviceId, onRegisterAddPlay
         </div>
 
         <div className="inscription-actions">
-          {canManage && (
-            <button
-              className={`btn-continue ${isQuotaComplete ? 'ready' : ''}`}
-              onClick={handleContinue}
-              disabled={!isQuotaComplete}
-            >
-              <span>Armar equipos</span>
-              <span className="icon-arrow-right" aria-hidden="true" />
-            </button>
-          )}
+          <button
+            className={`btn-continue ${isQuotaComplete ? 'ready' : ''}`}
+            onClick={handleContinue}
+            disabled={!isQuotaComplete}
+          >
+            <span>Armar equipos</span>
+            <span className="icon-arrow-right" aria-hidden="true" />
+          </button>
 
           {!isQuotaComplete && (
             <p className="continue-hint">
@@ -228,8 +212,7 @@ function InscriptionStep({ match, canManage = false, deviceId, onRegisterAddPlay
                 player={player}
                 registration={registration}
                 onRemove={handleRemovePlayer}
-                onPromote={!isQuotaComplete && canManage ? handlePromoteSuplente : undefined}
-                onCardClick={handleViewPlayerInfo}
+                onPromote={!isQuotaComplete ? handlePromoteSuplente : undefined}
                 index={index}
                 compact={true}
               />
@@ -258,7 +241,6 @@ function InscriptionStep({ match, canManage = false, deviceId, onRegisterAddPlay
                 player={player}
                 registration={registration}
                 onRemove={handleRemovePlayer}
-                onCardClick={handleViewPlayerInfo}
                 index={index}
                 compact={true}
                 showState={false}
@@ -287,7 +269,6 @@ function InscriptionStep({ match, canManage = false, deviceId, onRegisterAddPlay
         onClose={() => setShowPlayerInfo(false)}
         player={selectedPlayer}
         registration={selectedRegistration}
-        onLeave={canLeave(selectedRegistration) ? handleLeaveMatch : undefined}
       />
     </>
   )

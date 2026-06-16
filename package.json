@@ -13,8 +13,6 @@
     "test:e2e:mobile": "playwright test --project=webkit-mobile-iphone"
   },
   "dependencies": {
-    "@convex-dev/workos": "^0.0.3",
-    "@workos-inc/authkit-react": "^0.16.1",
     "convex": "^1.31.7",
     "lucide-react": "^0.263.1",
     "react": "^18.2.0",

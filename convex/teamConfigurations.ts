@@ -1,6 +1,5 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { assertCanManageMatch } from "./permissions";
 
 // Get team configuration for a match
 export const getByMatch = query({
@@ -36,11 +35,7 @@ export const save = mutation({
   handler: async (ctx, args) => {
     const { partidoId, ...updates } = args;
     const now = new Date().toISOString();
-
-    const match = await ctx.db.get(partidoId);
-    if (!match) throw new Error("Partido no encontrado");
-    await assertCanManageMatch(ctx, match);
-
+    
     // Check if config exists
     const existing = await ctx.db
       .query("teamConfigurations")
@@ -124,10 +119,6 @@ export const incrementPlayerGoals = mutation({
     delta: v.number(),
   },
   handler: async (ctx, args) => {
-    const match = await ctx.db.get(args.matchId);
-    if (!match) throw new Error("Partido no encontrado");
-    await assertCanManageMatch(ctx, match);
-
     const config = await ctx.db
       .query("teamConfigurations")
       .withIndex("by_partidoId", (q) => q.eq("partidoId", args.matchId))
