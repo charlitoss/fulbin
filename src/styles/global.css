@@ -120,15 +120,16 @@
   --space-20: 80px;
 
   /* ── BORDER RADIUS ── */
-  --radius-xs: 4px;
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
-  --radius-xl: 20px;
-  --radius-2xl: 24px;
-  --radius-3xl: 32px;
-  --radius-pill: 999px;
-  --radius-circle: 50%;
+  /* Flat / squared aesthetic: all corners are 0 across the app. */
+  --radius-xs: 0;
+  --radius-sm: 0;
+  --radius-md: 0;
+  --radius-lg: 0;
+  --radius-xl: 0;
+  --radius-2xl: 0;
+  --radius-3xl: 0;
+  --radius-pill: 0;
+  --radius-circle: 0;
   /* Legacy mappings */
   --border-radius: var(--radius-md);
   --border-radius-sm: var(--radius-sm);
@@ -318,7 +319,7 @@ h4 { font-size: var(--type-lg); }
 
 /* Scrollbar styling for dark mode */
 ::-webkit-scrollbar { width: 6px; background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--surface-4); border-radius: 3px; }
+::-webkit-scrollbar-thumb { background: var(--surface-4); border-radius: 0; }
 ::-webkit-scrollbar-thumb:hover { background: var(--surface-5); }
 
 /* ===================================
@@ -1414,6 +1415,16 @@ h4 { font-size: var(--type-lg); }
   margin-left: auto;
 }
 
+/* Spectator (non-owner) view: fields render as plain text, not clickable. */
+.editable-field--readonly,
+.editable-title--readonly {
+  cursor: default;
+}
+
+.editable-field--readonly:hover {
+  background-color: var(--surface-2);
+}
+
 .editable-field.editing {
   cursor: default;
 }
@@ -2196,9 +2207,13 @@ h4 { font-size: var(--type-lg); }
 .player-profile-avatar {
   width: 80px;
   height: 80px;
-  border-radius: var(--radius-circle);
-  background: var(--acid-yellow);
-  color: var(--text-inverse);
+  border-radius: 0;
+  /* Same green dotted pattern as the match countdown / auth avatar. */
+  background-color: transparent;
+  background-image: radial-gradient(circle, rgba(30,255,180,0.30) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: 1px solid var(--surface-5);
+  color: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2217,10 +2232,13 @@ h4 { font-size: var(--type-lg); }
 .player-profile-state {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: var(--space-2);
   padding: var(--space-1) var(--space-4);
-  background: var(--surface-3);
-  border-radius: var(--radius-pill);
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: 1px solid var(--surface-5);
+  border-radius: 0;
   font-size: var(--type-sm);
   color: var(--text-secondary);
 }
@@ -2300,9 +2318,16 @@ h4 { font-size: var(--type-lg); }
   align-items: center;
   justify-content: space-between;
   padding: var(--space-4);
-  background: var(--surface-3);
-  border-radius: var(--radius-md);
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: 1px solid var(--surface-5);
+  border-radius: 0;
   margin-top: var(--space-4);
+}
+
+.overall-level--efectivo {
+  margin-top: var(--space-2);
 }
 
 .overall-label {
@@ -2314,7 +2339,32 @@ h4 { font-size: var(--type-lg); }
   font-size: var(--type-2xl);
   font-family: var(--font-display);
   font-weight: 700;
-  color: var(--text-accent);
+  color: var(--color-primary);
+}
+
+/* Player info modal footer: primary actions on a row, "Bajarme" below */
+.player-modal-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.player-modal-footer-main {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.player-modal-footer-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.player-modal-leave-btn {
+  width: 100%;
 }
 
 /* ===================================
@@ -2867,7 +2917,7 @@ h4 { font-size: var(--type-lg); }
   justify-content: space-between;
   padding: 8px 10px;
   background: var(--surface-3);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  border-radius: 0;
   border-left: 3px solid transparent;
   transition: all var(--duration-fast);
 }
@@ -3000,7 +3050,7 @@ h4 { font-size: var(--type-lg); }
   border: none;
   background-color: var(--color-primary);
   color: white;
-  border-radius: 4px;
+  border-radius: 0;
   cursor: pointer;
   transition: all 0.15s;
 }
@@ -3155,13 +3205,13 @@ h4 { font-size: var(--type-lg); }
   width: 18px;
   height: 18px;
   border: 2px solid var(--border-color);
-  border-radius: 4px;
+  border-radius: 0;
 }
 
 .checkbox-checked {
   width: 18px;
   height: 18px;
-  border-radius: 4px;
+  border-radius: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -3238,7 +3288,7 @@ h4 { font-size: var(--type-lg); }
   background: none;
   color: var(--text-muted);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 0;
   transition: all 0.15s;
 }
 
@@ -3437,7 +3487,7 @@ h4 { font-size: var(--type-lg); }
   width: 5px;
   height: 5px;
   background: #fff;
-  border-radius: 50%;
+  border-radius: 0;
   flex-shrink: 0;
 }
 
@@ -3498,7 +3548,7 @@ h4 { font-size: var(--type-lg); }
 .field-player-dot {
   width: 13px;
   height: 13px;
-  border-radius: 50%;
+  border-radius: 0;
   flex-shrink: 0;
 }
 
@@ -3884,7 +3934,7 @@ h4 { font-size: var(--type-lg); }
 
 .divergent-segment.team-oscuro {
   background: var(--text-primary);
-  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+  border-radius: 0;
 }
 
 .divergent-scale {
@@ -4004,7 +4054,7 @@ h4 { font-size: var(--type-lg); }
   gap: var(--spacing-xs);
   padding: var(--spacing-xs) var(--spacing-sm);
   background-color: var(--bg-primary);
-  border-radius: 9999px;
+  border-radius: 0;
   font-size: 0.875rem;
 }
 
@@ -4060,7 +4110,7 @@ h4 { font-size: var(--type-lg); }
 .team-color {
   width: 20px;
   height: 20px;
-  border-radius: 50%;
+  border-radius: 0;
   flex-shrink: 0;
 }
 
@@ -4251,7 +4301,7 @@ h4 { font-size: var(--type-lg); }
   background: none;
   color: var(--text-muted);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 0;
   transition: all 0.15s;
   flex-shrink: 0;
 }
@@ -4470,7 +4520,7 @@ h4 { font-size: var(--type-lg); }
   background: none;
   color: var(--text-muted);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 0;
   transition: all 0.15s;
 }
 
@@ -4749,11 +4799,12 @@ body.crt-on #root {
   right: 16px;
   z-index: 10000;
   width: 280px;
+  max-width: calc(100vw - 32px);
   max-height: calc(100vh - 32px);
   background: rgba(10, 10, 10, 0.92);
   color: #fff;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  border-radius: 8px;
+  border-radius: 0;
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
@@ -4782,7 +4833,7 @@ body.crt-on #root {
   border: 1px solid rgba(255, 255, 255, 0.15);
   color: #fff;
   padding: 4px;
-  border-radius: 4px;
+  border-radius: 0;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -5279,3 +5330,1024 @@ body.crt-on #root {
 }
 
 /* The Volver button now lives only in the topbar (.topbar-back), at all widths. */
+
+/* ============================================
+   AUTH: sign-in button, user menu, claim banner
+   ============================================ */
+
+/* Top-right auth controls on the splash page */
+.splash-auth {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: 20;
+}
+
+/* Auth controls inside the regular topbar */
+.app-logo {
+  position: relative;
+}
+
+.app-header-auth {
+  position: absolute;
+  right: var(--space-6);
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+@media (max-width: 480px) {
+  .app-header-auth {
+    right: var(--space-4);
+  }
+}
+
+.auth-login-btn {
+  height: 32px;
+  padding: 3px 10px 5px;
+  font-size: var(--type-sm);
+}
+
+.auth-menu {
+  position: relative;
+}
+
+/* Keep the chip (and its dropdown) above the sticky in-game scoreboard. */
+.auth-menu {
+  position: relative;
+  z-index: var(--z-overlay);
+}
+
+/* Matches the topbar "Volver" / secondary button: dotted bg, squared,
+   gray-500 dotted border with the same drop shadow. */
+.auth-user-chip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 32px;
+  padding: 3px 10px 3px 6px;
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: 1px dotted var(--gray-500);
+  border-radius: 0;
+  box-shadow: 0 5px 0 0 var(--gray-600);
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: var(--type-sm);
+  cursor: pointer;
+}
+
+.auth-user-chip:hover {
+  background-color: #222;
+}
+
+.auth-avatar {
+  width: 24px;
+  height: 24px;
+  border-radius: 0;
+  display: block;
+  object-fit: cover;
+}
+
+.auth-avatar--initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Same green dotted pattern as the match countdown. */
+  background-color: transparent;
+  background-image: radial-gradient(circle, rgba(30,255,180,0.30) 1px, transparent 1px);
+  background-size: 3px 3px;
+  color: var(--color-primary);
+  font-family: 'Press Start 2P', var(--font-display);
+  font-size: 13px;
+  line-height: 1;
+}
+
+.auth-user-name {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.auth-chevron {
+  font-size: 18px;
+  line-height: 1;
+  color: var(--gray-300);
+  transition: transform var(--duration-fast) var(--ease-in-out);
+}
+
+.auth-chevron--open {
+  transform: rotate(90deg);
+}
+
+@media (max-width: 480px) {
+  .auth-user-name {
+    display: none;
+  }
+}
+
+/* ============================================
+   MENU (reusable dropdown — matches .share-menu)
+   ============================================ */
+
+.menu {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-1);
+  display: flex;
+  flex-direction: column;
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: none;
+  border-radius: 0;
+  box-shadow: inset 0 0 0 4px #000, var(--shadow-lg);
+}
+
+.menu-li {
+  list-style: none;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  background-color: transparent;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: none;
+  border-radius: 0;
+  cursor: pointer;
+  font-family: var(--font-display);
+  font-size: var(--type-base);
+  color: var(--text-primary);
+  text-align: left;
+  transition: background-color 0.15s;
+}
+
+.menu-item:hover {
+  background-color: var(--surface-1);
+}
+
+.menu-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  margin-bottom: var(--space-1);
+  border-bottom: 1px solid var(--surface-4);
+}
+
+/* Auth dropdown: just the Menu's position + sizing */
+.auth-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + var(--space-2));
+  min-width: 200px;
+  z-index: var(--z-toast);
+}
+
+.auth-dropdown-name {
+  color: var(--white);
+  font-size: var(--type-sm);
+}
+
+.auth-dropdown-email {
+  color: var(--gray-400);
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ============================================
+   TOP NAV (signed-in users)
+   ============================================ */
+
+.app-nav {
+  position: relative;
+  z-index: var(--z-overlay);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  max-width: 600px;
+  margin: 0 auto;
+  padding: var(--space-4) 0;
+}
+
+.app-nav-brand {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.app-nav-logo {
+  width: 100px;
+  height: auto;
+  display: block;
+}
+
+/* The compact symbol logo only shows at mobile breakpoints. */
+.app-nav-logo--symbol {
+  display: none;
+  width: 32px;
+  height: 32px;
+}
+
+.app-nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Logo + menu group on the left; chip pushed to the right. */
+.app-nav .auth-menu {
+  margin-left: auto;
+}
+
+.app-nav-links li {
+  list-style: none;
+}
+
+.app-nav-links::-webkit-scrollbar {
+  display: none;
+}
+
+.app-nav-link {
+  background: #000;
+  border: 1px solid transparent;
+  color: var(--gray-300);
+  font-family: var(--font-display);
+  font-size: var(--type-sm);
+  padding: 4px 10px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.app-nav-link:hover {
+  color: var(--white);
+}
+
+.app-nav-link.active {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+@media (max-width: 560px) {
+  .app-nav {
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+  }
+
+  .app-nav-logo--full {
+    display: none;
+  }
+
+  .app-nav-logo--symbol {
+    display: block;
+  }
+}
+
+/* Claim banner on unowned matches */
+.claim-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  max-width: 600px;
+  margin: 0 auto var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  background: var(--acid-yellow-ultra);
+  border: 1px dashed var(--surface-5);
+  border-radius: var(--radius-sm);
+  font-size: var(--type-sm);
+  color: var(--gray-200);
+}
+
+/* ============================================
+   MIS PARTIDOS
+   ============================================ */
+
+.my-matches-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: var(--space-4) var(--space-6) var(--space-8);
+}
+
+@media (max-width: 480px) {
+  .my-matches-page {
+    padding-left: var(--space-4);
+    padding-right: var(--space-4);
+  }
+}
+
+.my-matches-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+}
+
+/* Page headings: solid black background, matching .form-heading. */
+.my-matches-header h2,
+.my-matches-empty h2 {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-size: var(--type-xl, 20px);
+  color: var(--text-primary);
+  background: #000;
+  padding: 2px 8px;
+}
+
+.my-matches-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  text-align: center;
+  padding: var(--space-8) var(--space-4);
+  background: var(--surface-1);
+  border: 1px solid var(--surface-5);
+  border-radius: var(--radius-md);
+  color: var(--gray-200);
+}
+
+.my-matches-hint {
+  font-size: var(--type-sm);
+  color: var(--gray-400);
+}
+
+.my-matches-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0;
+  margin: 0;
+}
+
+.my-match-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: 1px solid var(--surface-5);
+  border-radius: 0;
+  color: var(--gray-100);
+  text-align: left;
+  cursor: pointer;
+}
+
+.my-match-card:hover {
+  border-color: var(--color-primary);
+}
+
+.my-match-winner {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-primary);
+}
+
+/* Points badge on the finalized recap player cards */
+.player-points-badge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-primary);
+  background: var(--acid-yellow-dim);
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+.player-points-badge--zero {
+  color: var(--gray-300);
+  background-color: var(--surface-4);
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+}
+
+.my-match-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.my-match-name {
+  font-weight: 600;
+  color: var(--white);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.my-match-meta {
+  font-size: var(--type-sm);
+  color: var(--gray-300);
+}
+
+.my-match-side {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-4);
+  flex-shrink: 0;
+}
+
+.my-match-side-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-1);
+}
+
+/* Big final score, Geist display font, pinned to the right end of the card */
+.my-match-score {
+  font-family: var(--font-display);
+  font-size: var(--type-2xl);
+  font-weight: 700;
+  color: var(--white);
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.my-match-count {
+  font-size: var(--type-sm);
+  color: var(--gray-300);
+}
+
+.my-match-estado {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 0;
+  background: var(--surface-4);
+  color: var(--gray-200);
+}
+
+.my-match-estado--inscripcion {
+  background: var(--acid-yellow-dim);
+  color: var(--color-primary);
+}
+
+.my-match-estado--jugando {
+  background: rgba(255, 179, 0, 0.15);
+  color: var(--color-accent);
+}
+
+.my-match-codigo {
+  font-size: var(--type-sm);
+  color: var(--gray-400);
+  letter-spacing: 0.08em;
+}
+
+/* ============================================
+   MIS JUGADORES (roster)
+   ============================================ */
+
+.my-player-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.roster-avatar {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  font-size: 14px;
+  border-radius: 0;
+}
+
+.roster-nivel {
+  flex-shrink: 0;
+  font-weight: 700;
+  font-size: var(--type-sm);
+  color: var(--color-primary);
+  background: var(--acid-yellow-dim);
+  padding: 4px 10px;
+  border-radius: 0;
+}
+
+.roster-select {
+  width: 100%;
+  background: var(--surface-4);
+  border: 1px solid var(--surface-5);
+  border-radius: var(--radius-sm);
+  color: var(--gray-100);
+  padding: 10px 12px;
+  font-size: var(--type-base, 15px);
+  font-family: inherit;
+}
+
+.attribute-slider-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 28px;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.attribute-slider-label {
+  font-size: var(--type-sm);
+  color: var(--gray-200);
+}
+
+.attribute-slider-row input[type="range"] {
+  width: 100%;
+  accent-color: var(--color-primary);
+}
+
+.attribute-slider-value {
+  text-align: right;
+  font-weight: 700;
+  font-size: var(--type-sm);
+  color: var(--color-primary);
+}
+
+.btn-danger-text {
+  color: #ef4444;
+  margin-right: auto;
+}
+
+/* ============================================
+   TABLA DE POSICIONES
+   ============================================ */
+
+.standings-matches-count {
+  font-family: var(--font-display);
+  font-size: var(--type-sm);
+  color: var(--gray-200);
+  background: #000;
+  padding: 4px 8px;
+}
+
+.standings-table-wrap {
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: 1px solid var(--surface-5);
+  border-radius: 0;
+  overflow-x: auto;
+}
+
+.standings-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--type-sm);
+}
+
+.standings-table th,
+.standings-table td {
+  padding: var(--space-2) var(--space-2);
+  text-align: center;
+  white-space: nowrap;
+}
+
+.standings-table thead th {
+  color: var(--gray-400);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--surface-5);
+  padding-top: var(--space-3);
+  padding-bottom: var(--space-3);
+}
+
+.standings-table thead th.standings-th-pts {
+  color: var(--color-primary);
+}
+
+.standings-table tbody tr + tr td {
+  border-top: 1px solid var(--surface-3);
+}
+
+.standings-table .standings-pos {
+  color: var(--gray-400);
+  width: 32px;
+}
+
+.standings-table .standings-name {
+  text-align: left;
+  color: var(--white);
+  font-weight: 600;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.standings-table .standings-puntos {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.standings-top .standings-pos {
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.my-match-resultado {
+  font-size: var(--type-sm);
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: 0.05em;
+}
+
+/* Roster typeahead in the join modal */
+.typeahead-wrap {
+  position: relative;
+}
+
+.typeahead-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  background: var(--surface-2);
+  border: 1px solid var(--surface-5);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  max-height: 200px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-1);
+}
+
+.typeahead-item {
+  background: none;
+  border: none;
+  color: var(--gray-100);
+  font-size: var(--type-sm);
+  font-family: inherit;
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+}
+
+.typeahead-item:hover {
+  background: var(--surface-3);
+  color: var(--color-primary);
+}
+
+/* Clickable player card name area (opens the player modal) */
+.player-card-left--clickable:hover .player-name-compact {
+  color: var(--color-primary);
+}
+
+/* "Agregar X" row in the roster typeahead */
+.typeahead-item--add {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-primary);
+  border-top: 1px solid var(--surface-4);
+}
+
+/* Mis jugadores: tighter list spacing */
+.my-players-list {
+  gap: var(--space-1);
+}
+
+/* ============================================
+   TOURNAMENT SWITCHER (Tabla)
+   ============================================ */
+
+.tournament-tag {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-primary);
+  background: var(--acid-yellow-dim);
+  padding: 1px 5px;
+}
+
+/* Tabla: active/selected season line under the heading */
+.standings-current {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.standings-current-name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-primary);
+  font-family: var(--font-display);
+  font-size: var(--type-md);
+}
+
+.standings-current-edit {
+  color: var(--gray-400);
+}
+
+.standings-current-name:hover .standings-current-edit {
+  color: var(--color-primary);
+}
+
+/* Torneos manage modal list */
+.tournament-list {
+  list-style: none;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.tournament-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+  border-bottom: 1px solid var(--surface-3);
+}
+
+.tournament-list-name {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background: none;
+  border: none;
+  padding: var(--space-1) 0;
+  cursor: pointer;
+  color: var(--gray-100);
+  font-family: var(--font-display);
+  font-size: var(--type-base);
+  text-align: left;
+  flex: 1;
+  min-width: 0;
+}
+
+.tournament-list-name.selected {
+  color: var(--color-primary);
+}
+
+.tournament-list-name.is-past {
+  color: var(--gray-400);
+}
+
+.tournament-list-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  flex-shrink: 0;
+}
+
+.tournament-action {
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: 1px solid var(--surface-5);
+  border-radius: 0;
+  color: var(--gray-300);
+  font-family: var(--font-display);
+  font-size: var(--type-xs);
+  padding: 4px 8px;
+  cursor: pointer;
+}
+
+.tournament-action:hover {
+  color: var(--white);
+  border-color: var(--gray-400);
+}
+
+.tournament-action--danger:hover {
+  color: #ef4444;
+  border-color: #ef4444;
+}
+
+.tournament-edit,
+.tournament-create-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.tournament-edit input,
+.tournament-create-row input {
+  flex: 1;
+  min-width: 0;
+  background: var(--surface-4);
+  border: 1px solid var(--surface-5);
+  border-radius: 0;
+  color: var(--gray-100);
+  font-family: inherit;
+  font-size: var(--type-sm);
+  padding: 6px 10px;
+}
+
+.tournament-add-btn {
+  width: 100%;
+}
+
+/* ============================================
+   TOURNAMENT LIFECYCLE: finalize + champion
+   ============================================ */
+
+/* Finalized seasons get a muted tag (vs the green "Activo"). */
+.tournament-tag--past {
+  color: var(--gray-300);
+  background: #000;
+}
+
+/* standings-current can wrap on narrow screens once the finalize button appears */
+.standings-current {
+  flex-wrap: wrap;
+}
+
+.standings-current-right {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.standings-finalize-btn {
+  white-space: nowrap;
+}
+
+/* Champion banner above a finalized season's frozen table */
+.standings-champion {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: 1px solid var(--color-primary);
+  font-family: var(--font-display);
+}
+
+.standings-champion-icon {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.standings-champion-label {
+  font-size: var(--type-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--gray-300);
+}
+
+.standings-champion-name {
+  font-size: var(--type-md);
+  color: var(--white);
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.standings-champion-pts {
+  margin-left: auto;
+  font-size: var(--type-sm);
+  color: var(--color-primary);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+/* Champion subtitle under a season name in the Torneos modal */
+.tournament-list-label {
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tournament-champion {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: var(--type-xs);
+  color: var(--gray-400);
+}
+
+.tournament-champion svg {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+/* Inline confirm (delete / finalize) inside a tournament row */
+.tournament-confirm {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.tournament-confirm-text {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--type-xs);
+  color: var(--gray-200);
+  font-family: var(--font-display);
+}
+
+/* New-season form: note that the active season will be finalized */
+.tournament-create {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.tournament-create-note {
+  margin: 0;
+  font-size: var(--type-xs);
+  color: var(--gray-400);
+}
+
+/* ============================================
+   MIS JUGADORES: Activos / Inactivos
+   ============================================ */
+
+.players-toggle {
+  display: flex;
+  gap: var(--space-1);
+  margin-bottom: var(--space-3);
+}
+
+.players-toggle-btn {
+  flex: 1;
+  background: #000;
+  border: 1px solid var(--surface-5);
+  border-radius: 0;
+  color: var(--gray-300);
+  font-family: var(--font-display);
+  font-size: var(--type-sm);
+  padding: var(--space-2);
+  cursor: pointer;
+}
+
+.players-toggle-btn.active {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.my-match-card--inactive {
+  opacity: 0.55;
+}
+
+.player-inactive-tag {
+  margin-left: var(--space-2);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gray-300);
+  background: #000;
+  padding: 1px 5px;
+}
+
+/* Player profile footer: manage (archive/delete) + primary (cancel/save)
+   groups sit side-by-side on desktop and wrap to two rows on narrow modals. */
+.player-profile-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  width: 100%;
+}
+
+.player-profile-footer .ppf-group {
+  display: flex;
+  gap: var(--space-3);
+  flex: 1 1 200px;
+  min-width: 0;
+}

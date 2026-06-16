@@ -2,20 +2,31 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import EditableMatchHeader from './EditableMatchHeader'
+import ClaimMatchBanner from './ClaimMatchBanner'
 import InscriptionStep from './InscriptionStep'
 import TeamBuilderStep from './TeamBuilderStep'
 import InGameStep from './InGameStep'
 import JoinMatchModal from '../player/JoinMatchModal'
+import { getDeviceId } from '../../utils/deviceId'
 
 function MatchPage({ matchId, onNavigate }) {
+  const deviceId = getDeviceId()
   const [showJoinModal, setShowJoinModal] = useState(false)
   const teamBuilderAddPlayerRef = useRef(null)
   const inscriptionAddPlayerRef = useRef(null)
   
   // Convex queries
   const match = useQuery(api.matches.getById, { matchId })
+  const me = useQuery(api.users.current)
   const registrations = useQuery(api.registrations.listByMatch, { matchId })
   const teamConfig = useQuery(api.teamConfigurations.getByMatch, { matchId })
+
+  // Owned matches can only be managed by their owner; ownerless (anonymous)
+  // matches stay fully open. canManage gates all admin controls below.
+  const isOwner = !!me && !!match?.ownerId && me._id === match.ownerId
+  const canManage = !!match && (!match.ownerId || isOwner)
+  // Anyone may inscribe during the inscription phase; otherwise admin-only.
+  const canAddPlayer = match?.pasoActual === 'inscripcion' || canManage
   
   // Convex mutations
   const saveTeamConfig = useMutation(api.teamConfigurations.save)
@@ -130,7 +141,7 @@ function MatchPage({ matchId, onNavigate }) {
 
     // Demote the excess players to suplentes (they stay in the match).
     for (const playerId of toDemote) {
-      await updateRegistration({ matchId, playerId, tipoInscripcion: 'suplente' })
+      await updateRegistration({ matchId, playerId, tipoInscripcion: 'suplente', anonId: deviceId })
     }
   }
   
@@ -161,15 +172,18 @@ function MatchPage({ matchId, onNavigate }) {
 
   return (
     <div className={`match-page match-page--${match.pasoActual}`}>
+      <ClaimMatchBanner match={match} />
+
       {/* Editable Header — hidden during the in-game/finalized views (they have their own header) */}
       {!isInGame && !isFinalized && (
         <EditableMatchHeader
           match={match}
-          onAddPlayer={handleAddPlayer}
+          canEdit={canManage}
+          onAddPlayer={canAddPlayer ? handleAddPlayer : undefined}
           onPlayersPerTeamChange={handlePlayersPerTeamChange}
           isPastKickoff={isPastKickoff}
           onCountdownComplete={handleCountdownComplete}
-          onStartMatch={handleStartMatch}
+          onStartMatch={canManage ? handleStartMatch : undefined}
         />
       )}
 
@@ -177,6 +191,8 @@ function MatchPage({ matchId, onNavigate }) {
       {match.pasoActual === 'inscripcion' && (
         <InscriptionStep
           match={match}
+          canManage={canManage}
+          deviceId={deviceId}
           onRegisterAddPlayerHandler={registerInscriptionAddPlayer}
         />
       )}
@@ -184,12 +200,14 @@ function MatchPage({ matchId, onNavigate }) {
       {match.pasoActual === 'armado_equipos' && (
         <TeamBuilderStep
           match={match}
+          canManage={canManage}
+          deviceId={deviceId}
           onRegisterAddPlayerHandler={registerTeamBuilderAddPlayer}
         />
       )}
 
       {isInGame && (
-        <InGameStep match={match} onFinish={handleFinishMatch} />
+        <InGameStep match={match} canManage={canManage} onFinish={canManage ? handleFinishMatch : undefined} />
       )}
 
       {isFinalized && (
