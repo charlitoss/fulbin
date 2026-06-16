@@ -110,41 +110,6 @@ export function getDefaultPosition(role, team, index, totalInRole = 1) {
 }
 
 /**
- * Find the emptiest spot on a team's half of the field: the candidate grid
- * point farthest from that team's existing players. Used when a player is
- * moved to the other team so they land in open space instead of on top of
- * someone (which would hide them).
- * @param {string} team - 'blanco' | 'oscuro'
- * @param {Array} assignments - other players' assignments (exclude the mover)
- * @returns {{x: number, y: number}}
- */
-export function getEmptyFieldSpot(team, assignments) {
-  const isBlanco = team === 'blanco'
-  const xs = isBlanco ? [12, 24, 36, 46] : [88, 76, 64, 54]
-  const ys = [12, 26, 40, 54, 68, 82, 90]
-  const occupied = assignments
-    .filter(a => a.equipo === team)
-    .map(a => ({ x: a.coordenadaX ?? 50, y: a.coordenadaY ?? 50 }))
-
-  let best = { x: isBlanco ? 25 : 75, y: 50 }
-  let bestDist = -1
-  for (const x of xs) {
-    for (const y of ys) {
-      let minD = Infinity
-      for (const o of occupied) {
-        const d = Math.hypot(o.x - x, o.y - y)
-        if (d < minD) minD = d
-      }
-      if (minD > bestDist) {
-        bestDist = minD
-        best = { x, y }
-      }
-    }
-  }
-  return best
-}
-
-/**
  * Map player's preferred position to a role
  */
 function getPreferredRole(player) {

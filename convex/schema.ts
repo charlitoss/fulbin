@@ -2,47 +2,6 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-  users: defineTable({
-    workosId: v.string(),
-    nombre: v.string(),
-    email: v.string(),
-    avatar: v.optional(v.string()),
-    // The user's own player profile (so the balancer can include them).
-    playerId: v.optional(v.id("players")),
-    createdAt: v.string(),
-    updatedAt: v.string(),
-  })
-    .index("by_workosId", ["workosId"]),
-
-  tournaments: defineTable({
-    ownerId: v.id("users"),
-    nombre: v.string(),
-    activo: v.boolean(),
-    createdAt: v.string(),
-    // Set when the admin ends the season; presence = finalized (no longer active).
-    finalizadoEn: v.optional(v.string()),
-    // Frozen winner — top of the table at the moment it was finalized.
-    campeon: v.optional(v.object({
-      playerId: v.id("players"),
-      nombre: v.string(),
-      puntos: v.number(),
-    })),
-    // Count of finished matches at finalize time (frozen alongside the table).
-    partidosFinal: v.optional(v.number()),
-    // Frozen final standings snapshot so later match edits can't shift history.
-    tablaFinal: v.optional(v.array(v.object({
-      playerId: v.id("players"),
-      nombre: v.string(),
-      pj: v.number(),
-      pg: v.number(),
-      pe: v.number(),
-      pp: v.number(),
-      goles: v.number(),
-      puntos: v.number(),
-    }))),
-  })
-    .index("by_ownerId", ["ownerId"]),
-
   matches: defineTable({
     // Using a string id field for backwards compatibility with existing routes
     codigoCorto: v.string(),
@@ -55,39 +14,18 @@ export default defineSchema({
     jugadoresPorEquipo: v.number(),
     pasoActual: v.string(), // 'inscripcion' | 'armado_equipos' | 'jugando' | 'finalizado'
     linkCompartible: v.optional(v.string()),
-    // Owner with an account. Legacy organizadorId/organizadorNombre stay as
-    // free-form strings for matches created anonymously.
-    ownerId: v.optional(v.id("users")),
-    // Season this match counts toward (the owner's active tournament at
-    // creation time). Null matches show under "Todos".
-    tournamentId: v.optional(v.id("tournaments")),
     organizadorId: v.optional(v.string()),
     organizadorNombre: v.optional(v.string()),
     iniciadoEn: v.optional(v.number()),
     finalizadoEn: v.optional(v.number()),
-    // Final score snapshot, taken from the team configuration at the final
-    // whistle so later edits to teams can't rewrite history.
-    resultado: v.optional(v.object({
-      golesBlanco: v.number(),
-      golesOscuro: v.number(),
-      nombreBlanco: v.optional(v.string()),
-      nombreOscuro: v.optional(v.string()),
-    })),
     createdAt: v.string(),
     updatedAt: v.string(),
   })
-    .index("by_codigoCorto", ["codigoCorto"])
-    .index("by_ownerId", ["ownerId"]),
+    .index("by_codigoCorto", ["codigoCorto"]),
 
   players: defineTable({
     nombre: v.string(),
     avatar: v.optional(v.string()),
-    // Roster owner. Players created in an owned match belong to that admin's
-    // roster; ownerless players are the legacy/anonymous global pool.
-    ownerId: v.optional(v.id("users")),
-    // Archived players drop out of the default roster and the match quick-select
-    // but keep their history. Absent/true = active; false = archived.
-    activo: v.optional(v.boolean()),
     perfilPermanente: v.optional(v.object({
       posicionPreferida: v.string(),
       posicionesSecundarias: v.array(v.string()),
@@ -101,25 +39,19 @@ export default defineSchema({
       }),
       nivelGeneral: v.number(),
     })),
-  })
-    .index("by_ownerId", ["ownerId"]),
+  }),
 
   registrations: defineTable({
     partidoId: v.id("matches"),
     jugadorId: v.id("players"),
     estadoFisico: v.string(), // 'excelente' | 'normal' | 'cansado'
     tipoInscripcion: v.optional(v.string()), // 'jugador' | 'suplente' | 'hinchada'
-    // Anonymous device token of whoever created this registration, so a player
-    // who inscribed can remove themselves (but not others) without an account.
-    // Absent on legacy rows — those can only be removed by the match owner.
-    creadoPor: v.optional(v.string()),
     timestamp: v.string(),
     confirmado: v.boolean(),
     asistira: v.boolean(),
   })
     .index("by_partidoId", ["partidoId"])
-    .index("by_partidoId_jugadorId", ["partidoId", "jugadorId"])
-    .index("by_jugadorId", ["jugadorId"]),
+    .index("by_partidoId_jugadorId", ["partidoId", "jugadorId"]),
 
   teamConfigurations: defineTable({
     partidoId: v.id("matches"),

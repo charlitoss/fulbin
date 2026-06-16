@@ -2,7 +2,7 @@ import { ArrowLeftRight } from 'lucide-react'
 import Modal from '../ui/Modal'
 import { PHYSICAL_STATES } from '../../utils/constants'
 
-function PlayerInfoModal({ isOpen, onClose, player, registration, assignment, onSwapTeam, onLeave }) {
+function PlayerInfoModal({ isOpen, onClose, player, registration, assignment, onSwapTeam }) {
   if (!player) return null
   
   const physicalState = PHYSICAL_STATES[registration?.estadoFisico] || PHYSICAL_STATES.normal
@@ -41,41 +41,30 @@ function PlayerInfoModal({ isOpen, onClose, player, registration, assignment, on
       onClose()
     }
   }
-
-  const handleLeave = () => {
-    if (onLeave && player) {
-      onLeave(player._id || player.id)
-      onClose()
-    }
-  }
-
+  
+  const teamLabel = assignment?.equipo === 'blanco' ? 'Blanco' : 'Oscuro'
   const otherTeamLabel = assignment?.equipo === 'blanco' ? 'Oscuro' : 'Blanco'
-  const canLeave = onLeave && registration
-
+  
   return (
     <Modal
       isOpen={isOpen}
       onClose={onClose}
       title="Información del Jugador"
       footer={
-        <div className="player-modal-footer-main">
+        <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
           {assignment && onSwapTeam && (
-            <button
-              className="btn btn-secondary player-modal-footer-btn"
+            <button 
+              className="btn btn-secondary" 
               onClick={handleSwapTeam}
+              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
             >
               <ArrowLeftRight size={16} />
               Mover a {otherTeamLabel}
             </button>
           )}
-          {canLeave && (
-            <button
-              className="btn btn-secondary btn-danger-text player-modal-footer-btn"
-              onClick={handleLeave}
-            >
-              Bajarme del partido
-            </button>
-          )}
+          <button className="btn btn-primary" onClick={onClose} style={{ flex: 1 }}>
+            Cerrar
+          </button>
         </div>
       }
     >
@@ -85,13 +74,7 @@ function PlayerInfoModal({ isOpen, onClose, player, registration, assignment, on
         </div>
         <h3>{player.nombre}</h3>
         <div className="player-profile-state">
-          <img
-            src={physicalState.icon}
-            alt=""
-            className="physical-state-icon"
-            width="24"
-            height="24"
-          />
+          <span>{physicalState.emoji}</span>
           <span>{physicalState.label}</span>
         </div>
       </div>
@@ -137,9 +120,11 @@ function PlayerInfoModal({ isOpen, onClose, player, registration, assignment, on
         </div>
         
         {effectiveLevel && effectiveLevel !== profile.nivelGeneral?.toFixed(1) && (
-          <div className="overall-level overall-level--efectivo">
+          <div className="overall-level" style={{ marginTop: '8px', opacity: 0.8 }}>
             <span className="overall-label">Nivel efectivo (hoy)</span>
-            <span className="overall-value">
+            <span className="overall-value" style={{ 
+              color: physicalState.color 
+            }}>
               {effectiveLevel}/10
             </span>
           </div>

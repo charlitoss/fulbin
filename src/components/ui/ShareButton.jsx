@@ -45,27 +45,6 @@ function ShareButton({ matchId, match }) {
   }, [showMenu])
   
   const playerName = (jugadorId) => playersById[jugadorId]?.nombre || 'Jugador'
-  const byTimestamp = (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
-
-  // Suplentes + hinchada lists, shared by the inscription and team-builder steps
-  const buildBenchSections = () => {
-    const regs = registrationsData || []
-    const suplentes = regs
-      .filter(r => r.asistira && r.tipoInscripcion === 'suplente')
-      .sort(byTimestamp)
-    const hinchada = regs
-      .filter(r => r.asistira && r.tipoInscripcion === 'hinchada')
-      .sort(byTimestamp)
-
-    let section = ''
-    if (suplentes.length) {
-      section += `\n\n🔄 *Suplentes:*\n` + suplentes.map(r => `- ${playerName(r.jugadorId)}`).join('\n')
-    }
-    if (hinchada.length) {
-      section += `\n\n👀 *Hinchada:*\n` + hinchada.map(r => `- ${playerName(r.jugadorId)}`).join('\n')
-    }
-    return section
-  }
 
   // Match details block shared in every step
   const buildHeader = () => {
@@ -79,11 +58,16 @@ function ShareButton({ matchId, match }) {
 👥 ${playersFormat}`
   }
 
-  // Inscription step: list inscribed players + count, plus suplentes / hinchada if any
+  // Inscription step: list inscribed players + count, plus suplentes if any
   const buildInscriptionSection = () => {
     const regs = registrationsData || []
+    const byTimestamp = (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+
     const inscribed = regs
       .filter(r => r.asistira && r.tipoInscripcion !== 'suplente' && r.tipoInscripcion !== 'hinchada')
+      .sort(byTimestamp)
+    const suplentes = regs
+      .filter(r => r.asistira && r.tipoInscripcion === 'suplente')
       .sort(byTimestamp)
 
     let section = `\n\n✅ *Anotados (${inscribed.length}/${match.cantidadJugadores}):*\n`
@@ -91,10 +75,14 @@ function ShareButton({ matchId, match }) {
       ? inscribed.map((r, i) => `${i + 1}. ${playerName(r.jugadorId)}`).join('\n')
       : '_Todavía no hay anotados_'
 
-    return section + buildBenchSections()
+    if (suplentes.length) {
+      section += `\n\n🔄 *Suplentes:*\n` + suplentes.map(r => `- ${playerName(r.jugadorId)}`).join('\n')
+    }
+
+    return section
   }
 
-  // Team builder step: list players grouped by team, plus suplentes / hinchada if any
+  // Team builder step: list players grouped by team
   const buildTeamSection = () => {
     const assignments = teamConfig?.asignaciones || []
     const blanco = assignments.filter(a => a.equipo === 'blanco')
@@ -106,7 +94,7 @@ function ShareButton({ matchId, match }) {
       ? list.map(a => `- ${playerName(a.jugadorId)}`).join('\n')
       : '_Sin jugadores_'
 
-    return `\n\n⚪ *${blancoName}:*\n${roster(blanco)}\n\n⚫ *${oscuroName}:*\n${roster(oscuro)}` + buildBenchSections()
+    return `\n\n⚪ *${blancoName}:*\n${roster(blanco)}\n\n⚫ *${oscuroName}:*\n${roster(oscuro)}`
   }
 
   // Generate WhatsApp message, tailored to the current step of the match
