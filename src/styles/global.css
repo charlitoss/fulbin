@@ -2121,6 +2121,9 @@ h4 { font-size: var(--type-lg); }
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  /* Reserve the scrollbar gutter so opening a dropdown (e.g. the TimePicker)
+     doesn't shift the form when a scrollbar appears. */
+  scrollbar-gutter: stable;
 }
 
 .modal-footer {
@@ -2367,6 +2370,7 @@ h4 { font-size: var(--type-lg); }
 
 .player-modal-footer-main {
   display: flex;
+  flex-direction: column;
   gap: var(--space-2);
 }
 
@@ -3868,7 +3872,7 @@ h4 { font-size: var(--type-lg); }
   background-size: 3px 3px;
   color: var(--color-primary);
   padding: 2px 5px;
-  font-size: var(--type-3xs);
+  font-size: var(--type-2xs);
   letter-spacing: var(--tracking-tight);
   font-family: 'Press Start 2P', var(--font-display);
   flex-shrink: 0;
@@ -5910,7 +5914,7 @@ body.crt-on #root {
   width: 100%;
   border-collapse: collapse;
   font-family: var(--font-display);
-  font-size: var(--type-2xs);
+  font-size: var(--type-md);
 }
 
 .standings-table th,
@@ -5958,7 +5962,12 @@ body.crt-on #root {
   font-weight: 700;
 }
 
-.standings-top .standings-pos {
+/* Leader (1st place) row gets a green-tinted highlight; the rest stay grey. */
+.standings-leader td {
+  background-color: rgba(30, 255, 180, 0.12);
+}
+
+.standings-leader .standings-pos {
   color: var(--color-primary);
   font-weight: 700;
 }
@@ -6532,7 +6541,7 @@ body.crt-on #root {
 .match-card-main {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
   min-width: 0;
   flex: 1;
 }

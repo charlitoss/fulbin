@@ -143,7 +143,7 @@ function StandingsPage({ onNavigate }) {
             </thead>
             <tbody>
               {stats.tabla.map((row, index) => (
-                <tr key={row.playerId} className={index < 3 ? 'standings-top' : ''}>
+                <tr key={row.playerId} className={index === 0 ? 'standings-leader' : ''}>
                   <td className="standings-pos">{index + 1}</td>
                   <td className="standings-name">{row.nombre}</td>
                   <td>{row.pj}</td>

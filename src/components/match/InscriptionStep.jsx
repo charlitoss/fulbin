@@ -287,6 +287,9 @@ function InscriptionStep({ match, canManage = false, deviceId, onRegisterAddPlay
         onClose={() => setShowPlayerInfo(false)}
         player={selectedPlayer}
         registration={selectedRegistration}
+        matchId={match._id}
+        canManage={canManage}
+        deviceId={deviceId}
         onLeave={canLeave(selectedRegistration) ? handleLeaveMatch : undefined}
       />
     </>

@@ -210,23 +210,38 @@ export const create = mutation({
   },
 });
 
-// Update an existing player. Roster players can only be edited by their owner;
-// ownerless (anonymous) players stay editable by anyone, as before.
+// Update an existing player. Roster players can be edited by their owner; the
+// player who inscribed via this device can also edit their own profile (pass
+// anonId + matchId — checked against the registration's creator). Ownerless
+// (anonymous) players stay editable by anyone, as before.
 export const update = mutation({
   args: {
     playerId: v.id("players"),
     nombre: v.optional(v.string()),
     avatar: v.optional(v.string()),
     perfilPermanente: perfilValidator,
+    anonId: v.optional(v.string()),
+    matchId: v.optional(v.id("matches")),
   },
   handler: async (ctx, args) => {
-    const { playerId, ...updates } = args;
+    const { playerId, anonId, matchId, ...updates } = args;
 
     const player = await ctx.db.get(playerId);
     if (!player) throw new Error("Jugador no encontrado");
     if (player.ownerId) {
       const user = await currentUserDoc(ctx);
-      if (!user || user._id !== player.ownerId) {
+      const isOwner = !!user && user._id === player.ownerId;
+      let isSelf = false;
+      if (!isOwner && anonId && matchId) {
+        const reg = await ctx.db
+          .query("registrations")
+          .withIndex("by_partidoId_jugadorId", (q) =>
+            q.eq("partidoId", matchId).eq("jugadorId", playerId)
+          )
+          .first();
+        isSelf = !!reg && reg.creadoPor === anonId;
+      }
+      if (!isOwner && !isSelf) {
         throw new Error("Este jugador no es de tu plantel");
       }
     }
