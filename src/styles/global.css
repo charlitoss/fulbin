@@ -5975,38 +5975,39 @@ body.crt-on #root {
   position: relative;
 }
 
+/* Suggestion dropdown — matches the TimePicker panel (dotted bg, 2px border). */
 .typeahead-list {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
   right: 0;
   z-index: 40;
-  background: var(--surface-2);
-  border: 1px solid var(--surface-5);
-  border-radius: var(--radius-sm);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
-  max-height: 200px;
+  max-height: 240px;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  padding: var(--space-1);
+  padding: 4px 0;
+  background-color: #0a0a0a;
+  background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: 2px solid rgba(255,255,255,0.18);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  font-family: var(--font-display);
 }
 
 .typeahead-item {
+  display: block;
+  width: 100%;
   background: none;
   border: none;
-  color: var(--gray-100);
-  font-size: var(--type-sm);
-  font-family: inherit;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: var(--type-md);
   text-align: left;
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-xs);
+  padding: 8px 12px;
   cursor: pointer;
 }
 
 .typeahead-item:hover {
-  background: var(--surface-3);
-  color: var(--color-primary);
+  background-color: var(--surface-1);
 }
 
 /* Clickable player card name area (opens the player modal) */

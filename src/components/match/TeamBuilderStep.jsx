@@ -35,6 +35,7 @@ function TeamBuilderStep({ match, canManage = false, deviceId, onRegisterAddPlay
   const getOrCreateTeamConfig = useMutation(api.teamConfigurations.getOrCreate)
   const removeRegistration = useMutation(api.registrations.remove)
   const createRegistration = useMutation(api.registrations.create)
+  const updateRegistration = useMutation(api.registrations.update)
   
   // Convert players array to object for easy lookup
   const players = useMemo(() => {
@@ -151,6 +152,21 @@ function TeamBuilderStep({ match, canManage = false, deviceId, onRegisterAddPlay
     setSelectedPlayer(null)
   }
   
+  // Move an assigned player out of their team and into the suplentes section.
+  const handleMoveToSuplentes = async (playerId) => {
+    const newAssignments = teamConfig.asignaciones.filter(a => a.jugadorId !== playerId)
+    await updateRegistration({
+      matchId: match._id,
+      playerId,
+      tipoInscripcion: 'suplente',
+      anonId: deviceId,
+    })
+    await saveTeamConfig({
+      partidoId: match._id,
+      asignaciones: newAssignments,
+    })
+  }
+
   // Handle removing player from team
   const handleUnassignPlayer = async (playerId) => {
     // Remove player from assignments
@@ -481,6 +497,7 @@ function TeamBuilderStep({ match, canManage = false, deviceId, onRegisterAddPlay
         registration={selectedRegistration}
         assignment={selectedPlayer ? getAssignment(selectedPlayer._id || selectedPlayer.id) : null}
         onSwapTeam={canManage ? handleSwapTeam : undefined}
+        onMoveToSuplentes={canManage ? handleMoveToSuplentes : undefined}
         onLeave={canManage ? handleUnassignPlayer : undefined}
       />
 

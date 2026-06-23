@@ -1,8 +1,8 @@
-import { ArrowLeftRight } from 'lucide-react'
+import { ArrowLeftRight, ArrowDownToLine } from 'lucide-react'
 import Modal from '../ui/Modal'
 import { PHYSICAL_STATES } from '../../utils/constants'
 
-function PlayerInfoModal({ isOpen, onClose, player, registration, assignment, onSwapTeam, onLeave }) {
+function PlayerInfoModal({ isOpen, onClose, player, registration, assignment, onSwapTeam, onMoveToSuplentes, onLeave }) {
   if (!player) return null
   
   const physicalState = PHYSICAL_STATES[registration?.estadoFisico] || PHYSICAL_STATES.normal
@@ -42,6 +42,13 @@ function PlayerInfoModal({ isOpen, onClose, player, registration, assignment, on
     }
   }
 
+  const handleMoveToSuplentes = () => {
+    if (onMoveToSuplentes && player) {
+      onMoveToSuplentes(player._id || player.id)
+      onClose()
+    }
+  }
+
   const handleLeave = () => {
     if (onLeave && player) {
       onLeave(player._id || player.id)
@@ -66,6 +73,15 @@ function PlayerInfoModal({ isOpen, onClose, player, registration, assignment, on
             >
               <ArrowLeftRight size={16} />
               Mover a {otherTeamLabel}
+            </button>
+          )}
+          {assignment && onMoveToSuplentes && (
+            <button
+              className="btn btn-secondary player-modal-footer-btn"
+              onClick={handleMoveToSuplentes}
+            >
+              <ArrowDownToLine size={16} />
+              Mover a suplentes
             </button>
           )}
           {canLeave && (
