@@ -111,16 +111,16 @@ function MyPlayersPage({ onNavigate }) {
                   <li key={player._id}>
                     <button
                       type="button"
-                      className={`my-match-card${inactive ? ' my-match-card--inactive' : ''}`}
+                      className={`roster-card${inactive ? ' roster-card--inactive' : ''}`}
                       onClick={() => setModal({ open: true, player })}
                     >
                       <div className="my-player-main">
                         <span className="auth-avatar auth-avatar--initial roster-avatar">
                           {initials(player.nombre)}
                         </span>
-                        <div className="my-match-main">
-                          <span className="my-match-name">{player.nombre}</span>
-                          <span className="my-match-meta">
+                        <div className="roster-card-main">
+                          <span className="roster-card-name">{player.nombre}</span>
+                          <span className="roster-card-meta">
                             {perfil?.posicionPreferida ?? 'Sin posición'}
                             {inactive && <span className="player-inactive-tag">Inactivo</span>}
                           </span>

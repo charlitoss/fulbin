@@ -77,12 +77,6 @@ function App() {
   const isLoggedIn = authEnabled && !!user
   const homeRoute = isLoggedIn ? '#/mis-partidos' : '#/'
 
-  // Super-admins get an extra "Admin" nav link + the #/admin route.
-  const isSuperAdmin = useQuery(api.admin.amISuperAdmin, isLoggedIn ? {} : 'skip')
-  const navLinks = isSuperAdmin
-    ? [...NAV_LINKS, { label: 'Admin', route: '#/admin' }]
-    : NAV_LINKS
-
   // On match routes, size the nav to the match content card so the logo/chip
   // align with it (820px normally, 960px in the team builder); 600px elsewhere.
   const matchRouteId = (route.match(/^#\/partido\/(.+)$/) || [])[1]
@@ -209,7 +203,7 @@ function App() {
           </button>
           <nav>
             <ul className="app-nav-links">
-              {navLinks.map((item) => (
+              {NAV_LINKS.map((item) => (
                 <li key={item.route}>
                   <button
                     type="button"

@@ -1,4 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
+import { useQuery } from 'convex/react'
+import { api } from '../../../convex/_generated/api'
 import { authEnabled, useAuthSession } from '../../auth/useAuthSession'
 import { Menu, MenuItem, MenuHeader } from './Menu'
 
@@ -6,6 +8,7 @@ import { Menu, MenuItem, MenuHeader } from './Menu'
 // configured, so the anonymous-only app is unaffected.
 function AuthControls({ onNavigate }) {
   const { user, isLoading, signIn, signOut } = useAuthSession()
+  const isSuperAdmin = useQuery(api.admin.amISuperAdmin, user ? {} : 'skip')
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
 
@@ -69,6 +72,16 @@ function AuthControls({ onNavigate }) {
           >
             Mi perfil de jugador
           </MenuItem>
+          {isSuperAdmin && (
+            <MenuItem
+              onClick={() => {
+                setMenuOpen(false)
+                onNavigate('#/admin')
+              }}
+            >
+              Administración
+            </MenuItem>
+          )}
           <MenuItem
             onClick={() => {
               setMenuOpen(false)

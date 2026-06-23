@@ -82,7 +82,7 @@ function MyMatchesPage({ onNavigate }) {
                 >
                   <div className="match-card-main">
                     <div className="match-card-title">
-                      <img src="/soccer-ball.svg" alt="" className="match-card-ball" width="28" height="28" />
+                      <img src="/soccer-ball.svg" alt="" className="match-card-ball" width="20" height="20" />
                       <span className="match-card-name">{match.nombre}</span>
                     </div>
                     <div className="match-card-meta">

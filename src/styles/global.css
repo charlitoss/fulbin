@@ -5701,7 +5701,8 @@ body.crt-on #root {
   margin: 0;
 }
 
-.my-match-card {
+/* Mis jugadores roster rows (shares the card look; not match-specific) */
+.roster-card {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -5718,7 +5719,7 @@ body.crt-on #root {
   cursor: pointer;
 }
 
-.my-match-card:hover {
+.roster-card:hover {
   border-color: var(--color-primary);
 }
 
@@ -5739,14 +5740,14 @@ body.crt-on #root {
   background-size: 3px 3px;
 }
 
-.my-match-main {
+.roster-card-main {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
   min-width: 0;
 }
 
-.my-match-name {
+.roster-card-name {
   font-weight: 600;
   color: var(--white);
   overflow: hidden;
@@ -5754,7 +5755,7 @@ body.crt-on #root {
   white-space: nowrap;
 }
 
-.my-match-meta {
+.roster-card-meta {
   font-size: var(--type-sm);
   color: var(--gray-300);
 }
@@ -6414,8 +6415,8 @@ body.crt-on #root {
 
 .tag--grey {
   color: var(--white);
-  background-color: #0a0a0a;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.10) 1px, transparent 1px);
+  background-color: var(--surface-4);
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.14) 1px, transparent 1px);
 }
 
 /* ============================================
@@ -6432,15 +6433,15 @@ body.crt-on #root {
 
 .match-card {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 15px;
   width: 100%;
-  padding: 16px 17px 20px;
+  padding: 12px 16px 14px;
   background-color: #0a0a0a;
   background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
   background-size: 3px 3px;
-  border: 4px solid #000;
+  border: 2px solid #000;
   border-radius: 0;
   color: var(--gray-100);
   text-align: left;
@@ -6468,19 +6469,19 @@ body.crt-on #root {
 .match-card-title {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   min-width: 0;
 }
 
 .match-card-ball {
   flex-shrink: 0;
-  width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
 }
 
 .match-card-name {
   font-family: var(--font-display);
-  font-size: var(--type-xl);
+  font-size: var(--type-lg);
   line-height: 1.2;
   color: var(--white);
   overflow: hidden;
@@ -6493,9 +6494,9 @@ body.crt-on #root {
   flex-wrap: wrap;
   gap: 8px;
   font-family: var(--font-display);
-  font-size: var(--type-md);
+  font-size: var(--type-sm);
   line-height: 1.1;
-  color: var(--gray-400);
+  color: var(--gray-300);
 }
 
 .match-card-sep { color: var(--gray-500); }
@@ -6511,14 +6512,8 @@ body.crt-on #root {
 
 .match-card-score {
   font-family: var(--font-display);
-  font-size: var(--type-3xl);
+  font-size: var(--type-2xl);
   line-height: 1.1;
   color: var(--gray-100);
   white-space: nowrap;
-}
-
-@media (max-width: 480px) {
-  .match-card-name { font-size: var(--type-md); }
-  .match-card-score { font-size: var(--type-2xl); }
-  .match-card-meta { font-size: var(--type-sm); }
 }
