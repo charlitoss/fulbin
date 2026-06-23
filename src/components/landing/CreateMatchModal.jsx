@@ -1,0 +1,19 @@
+import Modal from '../ui/Modal'
+import CreateMatchForm from './CreateMatchForm'
+
+// "Nuevo partido" as a dismissable modal so you can back out without losing
+// your place in Mis partidos.
+function CreateMatchModal({ isOpen, onClose, onNavigate }) {
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title="Nuevo partido">
+      <CreateMatchForm
+        onCreated={(matchId) => {
+          onClose()
+          onNavigate(`#/partido/${matchId}`)
+        }}
+      />
+    </Modal>
+  )
+}
+
+export default CreateMatchModal

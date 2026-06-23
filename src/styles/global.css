@@ -6033,11 +6033,11 @@ body.crt-on #root {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  background: none;
+  background: #000;
   border: none;
-  padding: 0;
+  padding: 2px 8px;
   cursor: pointer;
-  color: var(--color-primary);
+  color: var(--white);
   font-family: var(--font-display);
   font-size: var(--type-md);
 }
@@ -6158,20 +6158,62 @@ body.crt-on #root {
   background: #000;
 }
 
-/* standings-current can wrap on narrow screens once the finalize button appears */
 .standings-current {
   flex-wrap: wrap;
 }
 
-.standings-current-right {
-  display: inline-flex;
-  align-items: center;
+/* Goals column header uses the soccer-ball mark instead of an emoji */
+.standings-goal-icon {
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Single-tournament settings modal */
+.tournament-settings {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.tournament-settings-block {
+  display: flex;
+  flex-direction: column;
   gap: var(--space-2);
 }
 
-.standings-finalize-btn {
-  white-space: nowrap;
+.tournament-settings-champ {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--type-sm);
+  color: var(--gray-200);
 }
+
+.tournament-settings-champ svg { color: var(--color-primary); }
+
+.tournament-settings-confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: 1px solid var(--surface-5);
+}
+
+.tournament-settings-confirm-text {
+  font-size: var(--type-sm);
+  color: var(--gray-200);
+}
+
+.tournament-settings-confirm-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.tournament-settings-confirm-actions .btn { flex: 1; }
 
 /* Champion banner above a finalized season's frozen table */
 .standings-champion {
@@ -6426,7 +6468,7 @@ body.crt-on #root {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: var(--space-2);
   padding: 0;
   margin: 0;
 }

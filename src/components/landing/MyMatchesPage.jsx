@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { useQuery } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import { authEnabled, useAuthSession } from '../../auth/useAuthSession'
 import { formatDate, timeUntilLabel } from '../../utils/dateUtils'
 import Tag from '../ui/Tag'
+import CreateMatchModal from './CreateMatchModal'
 
 // Status tag per match step (Figma: Match card states).
 const TAG_BY_ESTADO = {
@@ -21,6 +23,7 @@ const scoreText = (match) =>
 function MyMatchesPage({ onNavigate }) {
   const { user, isLoading, signIn } = useAuthSession()
   const matches = useQuery(api.matches.myMatches, user ? {} : 'skip')
+  const [showCreate, setShowCreate] = useState(false)
 
   if (!authEnabled || (!isLoading && !user)) {
     return (
@@ -53,11 +56,17 @@ function MyMatchesPage({ onNavigate }) {
         <button
           type="button"
           className="btn btn-primary btn-sm"
-          onClick={() => onNavigate('#/nuevo')}
+          onClick={() => setShowCreate(true)}
         >
           Nuevo partido
         </button>
       </div>
+
+      <CreateMatchModal
+        isOpen={showCreate}
+        onClose={() => setShowCreate(false)}
+        onNavigate={onNavigate}
+      />
 
       {matches.length === 0 ? (
         <div className="my-matches-empty">
