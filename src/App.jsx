@@ -7,6 +7,7 @@ import MyMatchesPage from './components/landing/MyMatchesPage'
 import MyPlayersPage from './components/landing/MyPlayersPage'
 import StandingsPage from './components/landing/StandingsPage'
 import MyProfilePage from './components/landing/MyProfilePage'
+import AdminPage from './components/landing/AdminPage'
 import MatchPage from './components/match/MatchPage'
 import AuthControls from './components/ui/AuthControls'
 import { authEnabled, useAuthSession } from './auth/useAuthSession'
@@ -75,6 +76,12 @@ function App() {
   const { user } = useAuthSession()
   const isLoggedIn = authEnabled && !!user
   const homeRoute = isLoggedIn ? '#/mis-partidos' : '#/'
+
+  // Super-admins get an extra "Admin" nav link + the #/admin route.
+  const isSuperAdmin = useQuery(api.admin.amISuperAdmin, isLoggedIn ? {} : 'skip')
+  const navLinks = isSuperAdmin
+    ? [...NAV_LINKS, { label: 'Admin', route: '#/admin' }]
+    : NAV_LINKS
 
   // On match routes, size the nav to the match content card so the logo/chip
   // align with it (820px normally, 960px in the team builder); 600px elsewhere.
@@ -149,6 +156,10 @@ function App() {
       return <MyProfilePage onNavigate={navigate} />
     }
 
+    if (route === '#/admin') {
+      return <AdminPage onNavigate={navigate} />
+    }
+
     // Short code route: #/p/ABC123
     const shortCodeRoute = route.match(/^#\/p\/([A-Za-z0-9]{6})$/)
     if (shortCodeRoute) {
@@ -198,7 +209,7 @@ function App() {
           </button>
           <nav>
             <ul className="app-nav-links">
-              {NAV_LINKS.map((item) => (
+              {navLinks.map((item) => (
                 <li key={item.route}>
                   <button
                     type="button"

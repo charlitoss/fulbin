@@ -81,6 +81,10 @@ export const create = mutation({
     // Link the match to its creator when they're signed in; anonymous
     // creation keeps working with no owner.
     const ownerId = await upsertCurrentUser(ctx, {});
+    if (ownerId) {
+      const owner = await ctx.db.get(ownerId);
+      if (owner?.deshabilitado) throw new Error("CUENTA_DESHABILITADA");
+    }
 
     // Count the match toward the owner's active tournament, if any.
     const tournament = ownerId ? await activeTournament(ctx, ownerId) : null;
@@ -121,6 +125,8 @@ export const claim = mutation({
   handler: async (ctx, args) => {
     const userId = await upsertCurrentUser(ctx, {});
     if (!userId) throw new Error("Necesitás iniciar sesión para reclamar un partido");
+    const claimer = await ctx.db.get(userId);
+    if (claimer?.deshabilitado) throw new Error("CUENTA_DESHABILITADA");
 
     const match = await ctx.db.get(args.matchId);
     if (!match) throw new Error("Partido no encontrado");

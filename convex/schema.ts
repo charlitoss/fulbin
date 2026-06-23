@@ -9,6 +9,8 @@ export default defineSchema({
     avatar: v.optional(v.string()),
     // The user's own player profile (so the balancer can include them).
     playerId: v.optional(v.id("players")),
+    // Set by a super-admin to block this account from creating/managing matches.
+    deshabilitado: v.optional(v.boolean()),
     createdAt: v.string(),
     updatedAt: v.string(),
   })

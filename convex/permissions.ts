@@ -18,7 +18,8 @@ export async function canManageMatch(
 ): Promise<boolean> {
   if (!match.ownerId) return true; // ownerless / legacy: open
   const user = await currentUserDoc(ctx);
-  return !!user && user._id === match.ownerId;
+  // A disabled account loses management of its own matches.
+  return !!user && !user.deshabilitado && user._id === match.ownerId;
 }
 
 // Throws unless the caller may manage the match.
