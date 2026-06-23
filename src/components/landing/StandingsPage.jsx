@@ -56,8 +56,20 @@ function StandingsPage({ onNavigate }) {
 
   return (
     <div className="my-matches-page">
+      {/* Torneo name is the prominent title; click it to switch/configure */}
       <div className="my-matches-header">
-        <h2>Tabla de posiciones</h2>
+        <button
+          type="button"
+          className="standings-torneo-title"
+          onClick={() => (current ? setShowSettings(true) : setShowManage(true))}
+        >
+          <span>{currentName}</span>
+          {current?.activo && <span className="tournament-tag">Activo</span>}
+          {current?.finalizadoEn && (
+            <span className="tournament-tag tournament-tag--past">Finalizado</span>
+          )}
+          {current && <Pencil size={15} className="standings-current-edit" />}
+        </button>
         <button
           type="button"
           className="btn btn-secondary btn-sm"
@@ -67,20 +79,8 @@ function StandingsPage({ onNavigate }) {
         </button>
       </div>
 
-      {/* Current torneo: click the name to switch, the pencil to configure it */}
-      <div className="standings-current">
-        <button
-          type="button"
-          className="standings-current-name"
-          onClick={() => (current ? setShowSettings(true) : setShowManage(true))}
-        >
-          <span>{currentName}</span>
-          {current?.activo && <span className="tournament-tag">Activo</span>}
-          {current?.finalizadoEn && (
-            <span className="tournament-tag tournament-tag--past">Finalizado</span>
-          )}
-          {current && <Pencil size={13} className="standings-current-edit" />}
-        </button>
+      <div className="standings-subtitle-row">
+        <span className="standings-subtitle">Tabla de posiciones</span>
         {stats && (
           <span className="standings-matches-count">
             {stats.partidos} partido{stats.partidos === 1 ? '' : 's'}

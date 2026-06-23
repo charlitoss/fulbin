@@ -5751,6 +5751,7 @@ body.crt-on #root {
 
 .roster-card-name {
   font-weight: 600;
+  font-size: var(--type-md);
   color: var(--white);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -5783,17 +5784,20 @@ body.crt-on #root {
   width: 36px;
   height: 36px;
   flex-shrink: 0;
-  font-size: 14px;
+  font-size: 16px;
   border-radius: 0;
 }
 
 .roster-nivel {
   flex-shrink: 0;
-  font-weight: 700;
-  font-size: var(--type-sm);
+  font-family: 'Press Start 2P', var(--font-display);
+  font-size: var(--type-2xs);
   color: var(--color-primary);
-  background: var(--acid-yellow-dim);
-  padding: 4px 10px;
+  /* Same green dotted pattern as the match countdown / avatar. */
+  background-color: transparent;
+  background-image: radial-gradient(circle, rgba(30, 255, 180, 0.30) 1px, transparent 1px);
+  background-size: 3px 3px;
+  padding: 6px 10px;
   border-radius: 0;
 }
 
@@ -5891,7 +5895,7 @@ body.crt-on #root {
   width: 100%;
   border-collapse: collapse;
   font-family: var(--font-display);
-  font-size: var(--type-sm);
+  font-size: var(--type-2xs);
 }
 
 .standings-table th,
@@ -6024,15 +6028,9 @@ body.crt-on #root {
 }
 
 /* Tabla: active/selected season line under the heading */
-.standings-current {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  margin-bottom: var(--space-4);
-}
-
-.standings-current-name {
+/* Torneo name as the page title (prominent), and "Tabla de posiciones" as a
+   smaller subtitle below it. */
+.standings-torneo-title {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -6042,14 +6040,28 @@ body.crt-on #root {
   cursor: pointer;
   color: var(--white);
   font-family: var(--font-display);
+  font-size: var(--type-xl);
+}
+
+.standings-subtitle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.standings-subtitle {
+  font-family: var(--font-display);
   font-size: var(--type-md);
+  color: var(--gray-300);
 }
 
 .standings-current-edit {
   color: var(--gray-400);
 }
 
-.standings-current-name:hover .standings-current-edit {
+.standings-torneo-title:hover .standings-current-edit {
   color: var(--color-primary);
 }
 
@@ -6159,10 +6171,6 @@ body.crt-on #root {
 .tournament-tag--past {
   color: var(--gray-300);
   background: #000;
-}
-
-.standings-current {
-  flex-wrap: wrap;
 }
 
 /* Goals column header uses the soccer-ball mark instead of an emoji */
