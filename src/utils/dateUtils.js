@@ -109,6 +109,33 @@ export const isDatePast = (dateStr) => {
 }
 
 /**
+ * Short countdown to a match's kickoff, e.g. "Falta 2d 3h:32m".
+ * Returns null once the kickoff has passed (or on invalid input).
+ * @param {string} dateStr - ISO date (YYYY-MM-DD)
+ * @param {string} timeStr - HH:MM
+ * @returns {string|null}
+ */
+export const timeUntilLabel = (dateStr, timeStr) => {
+  if (!dateStr || !timeStr) return null
+  try {
+    const [y, m, d] = dateStr.split('-').map(Number)
+    const [hh, mm] = timeStr.split(':').map(Number)
+    if ([y, m, d, hh, mm].some(Number.isNaN)) return null
+    const diff = new Date(y, m - 1, d, hh, mm, 0) - new Date()
+    if (diff <= 0) return null
+    const days = Math.floor(diff / 86400000)
+    const hours = Math.floor((diff % 86400000) / 3600000)
+    const mins = Math.floor((diff % 3600000) / 60000)
+    const pad = (n) => String(n).padStart(2, '0')
+    if (days > 0) return `Falta ${days}d ${hours}h:${pad(mins)}m`
+    if (hours > 0) return `Falta ${hours}h:${pad(mins)}m`
+    return `Falta ${mins}m`
+  } catch {
+    return null
+  }
+}
+
+/**
  * Get a human-readable relative time string
  * @param {string} dateStr - ISO date string
  * @returns {string} Relative time string (e.g., "Hace 2 horas")

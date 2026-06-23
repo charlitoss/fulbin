@@ -5722,14 +5722,6 @@ body.crt-on #root {
   border-color: var(--color-primary);
 }
 
-.my-match-winner {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--color-primary);
-}
-
 /* Points badge on the finalized recap player cards */
 .player-points-badge {
   font-size: 11px;
@@ -5765,57 +5757,6 @@ body.crt-on #root {
 .my-match-meta {
   font-size: var(--type-sm);
   color: var(--gray-300);
-}
-
-.my-match-side {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: var(--space-4);
-  flex-shrink: 0;
-}
-
-.my-match-side-stack {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--space-1);
-}
-
-/* Big final score, Geist display font, pinned to the right end of the card */
-.my-match-score {
-  font-family: var(--font-display);
-  font-size: var(--type-2xl);
-  font-weight: 700;
-  color: var(--white);
-  white-space: nowrap;
-  letter-spacing: 0.02em;
-}
-
-.my-match-count {
-  font-size: var(--type-sm);
-  color: var(--gray-300);
-}
-
-.my-match-estado {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 2px 8px;
-  border-radius: 0;
-  background: var(--surface-4);
-  color: var(--gray-200);
-}
-
-.my-match-estado--inscripcion {
-  background: var(--acid-yellow-dim);
-  color: var(--color-primary);
-}
-
-.my-match-estado--jugando {
-  background: rgba(255, 179, 0, 0.15);
-  color: var(--color-accent);
 }
 
 .my-match-codigo {
@@ -6442,3 +6383,142 @@ body.crt-on #root {
 }
 .admin-confirm { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); width: 100%; }
 .admin-confirm-text { flex: 1 1 100%; font-size: var(--type-xs); color: var(--gray-200); font-family: var(--font-display); }
+
+/* ============================================
+   TAG — pixel status tag (Figma design system)
+   ============================================ */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 8px 2px;
+  font-family: var(--font-display);
+  line-height: 1;
+  white-space: nowrap;
+  background-size: 3px 3px;
+}
+
+.tag--md { font-size: 15px; }
+.tag--lg { font-size: 18px; }
+
+.tag--green {
+  color: var(--color-primary);
+  background-color: rgba(30, 255, 180, 0.05);
+  background-image: radial-gradient(circle, rgba(30, 255, 180, 0.30) 1px, transparent 1px);
+}
+
+.tag--orange {
+  color: var(--color-accent);
+  background-color: rgba(255, 179, 0, 0.10);
+  background-image: radial-gradient(circle, rgba(255, 179, 0, 0.30) 1px, transparent 1px);
+}
+
+.tag--grey {
+  color: var(--white);
+  background-color: #0a0a0a;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.10) 1px, transparent 1px);
+}
+
+/* ============================================
+   MIS PARTIDOS — match cards (Figma)
+   ============================================ */
+.match-card-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: 0;
+  margin: 0;
+}
+
+.match-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+  width: 100%;
+  padding: 16px 17px 20px;
+  background-color: #0a0a0a;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
+  border: 4px solid #000;
+  border-radius: 0;
+  color: var(--gray-100);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--ease-in-out);
+}
+
+.match-card:hover {
+  border-color: var(--color-primary);
+}
+
+/* Active match: warm orange-tinted dotted background */
+.match-card--jugando {
+  background-image: radial-gradient(circle, rgba(255, 179, 0, 0.16) 1px, transparent 1px);
+}
+
+.match-card-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.match-card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.match-card-ball {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+}
+
+.match-card-name {
+  font-family: var(--font-display);
+  font-size: var(--type-xl);
+  line-height: 1.2;
+  color: var(--white);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.match-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: var(--type-md);
+  line-height: 1.1;
+  color: var(--gray-400);
+}
+
+.match-card-sep { color: var(--gray-500); }
+.match-card-countdown { color: var(--color-primary); }
+
+.match-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.match-card-score {
+  font-family: var(--font-display);
+  font-size: var(--type-3xl);
+  line-height: 1.1;
+  color: var(--gray-100);
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .match-card-name { font-size: var(--type-md); }
+  .match-card-score { font-size: var(--type-2xl); }
+  .match-card-meta { font-size: var(--type-sm); }
+}

@@ -104,17 +104,43 @@ export const create = mutation({
   },
 });
 
-// Matches owned by the signed-in user, newest first.
+// Matches owned by the signed-in user, newest first. Each match carries a
+// `marcador` (score) when relevant: the live tally for in-progress matches
+// (summed from the team config) and the snapshot for finished ones.
 export const myMatches = query({
   args: {},
   handler: async (ctx) => {
     const user = await currentUserDoc(ctx);
     if (!user) return [];
-    return await ctx.db
+    const matches = await ctx.db
       .query("matches")
       .withIndex("by_ownerId", (q) => q.eq("ownerId", user._id))
       .order("desc")
       .collect();
+
+    const withScore = [];
+    for (const m of matches) {
+      let marcador: { golesBlanco: number; golesOscuro: number } | undefined;
+      if (m.pasoActual === "finalizado" && m.resultado) {
+        marcador = { golesBlanco: m.resultado.golesBlanco, golesOscuro: m.resultado.golesOscuro };
+      } else if (m.pasoActual === "jugando") {
+        const config = await ctx.db
+          .query("teamConfigurations")
+          .withIndex("by_partidoId", (q) => q.eq("partidoId", m._id))
+          .first();
+        if (config) {
+          let golesBlanco = 0;
+          let golesOscuro = 0;
+          for (const a of config.asignaciones) {
+            if (a.equipo === "blanco") golesBlanco += a.goles ?? 0;
+            else if (a.equipo === "oscuro") golesOscuro += a.goles ?? 0;
+          }
+          marcador = { golesBlanco, golesOscuro };
+        }
+      }
+      withScore.push({ ...m, marcador });
+    }
+    return withScore;
   },
 });
 
