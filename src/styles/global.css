@@ -5679,7 +5679,9 @@ body.crt-on #root {
   gap: var(--space-4);
   text-align: center;
   padding: var(--space-8) var(--space-4);
-  background: var(--surface-1);
+  background-color: #060606;
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
+  background-size: 3px 3px;
   border: 1px solid var(--surface-5);
   border-radius: var(--radius-md);
   color: var(--gray-200);
@@ -5851,15 +5853,43 @@ body.crt-on #root {
   border-radius: 0;
 }
 
+/* Native dropdown styled to match the text inputs / TimePicker: dotted bg,
+   2px border, hover + green focus states, and a custom chevron. */
 .roster-select {
   width: 100%;
-  background: var(--surface-4);
-  border: 1px solid var(--surface-5);
-  border-radius: var(--radius-sm);
-  color: var(--gray-100);
-  padding: 10px 12px;
-  font-size: var(--type-base, 15px);
-  font-family: inherit;
+  height: 48px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: #0a0a0a;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23a0a0a0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'/></svg>"),
+    radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-repeat: no-repeat, repeat;
+  background-position: right 12px center, 0 0;
+  background-size: 16px, 3px 3px;
+  border: 2px solid rgba(255,255,255,0.10);
+  border-radius: 0;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: var(--type-md);
+  padding: 10px 40px 10px 10px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--duration-fast), background-color var(--duration-fast);
+}
+
+.roster-select:hover:not(:focus) {
+  background-color: var(--surface-1);
+  border-color: rgba(255,255,255,0.18);
+}
+
+.roster-select:focus {
+  border-color: rgba(30,255,180,0.50);
+}
+
+.roster-select option {
+  background: #0a0a0a;
+  color: var(--text-primary);
 }
 
 .attribute-slider-row {
@@ -6356,7 +6386,14 @@ body.crt-on #root {
    ADMIN — user management
    ============================================ */
 
-.admin-table .standings-name { max-width: 220px; }
+.admin-table .standings-name { max-width: 180px; }
+
+/* Keep the table within the content card — drop secondary columns on mobile
+   (the full breakdown is still in the row's detail modal). */
+@media (max-width: 560px) {
+  .admin-table .admin-col-opt { display: none; }
+  .admin-table .standings-name { max-width: 60vw; }
+}
 
 .admin-row { cursor: pointer; }
 .admin-row:hover td { background-color: var(--surface-3); }

@@ -96,10 +96,10 @@ function AdminPage({ onNavigate }) {
           <thead>
             <tr>
               <th className="standings-name">Usuario</th>
-              <th>Alta</th>
+              <th className="admin-col-opt">Alta</th>
               <th title="Partidos">PJ</th>
-              <th title="Jugadores en su plantel">👥</th>
-              <th title="Torneos">🏆</th>
+              <th className="admin-col-opt" title="Jugadores en su plantel">👥</th>
+              <th className="admin-col-opt" title="Torneos">🏆</th>
               <th>Estado</th>
             </tr>
           </thead>
@@ -114,10 +114,10 @@ function AdminPage({ onNavigate }) {
                   <span className="admin-user-name">{u.nombre}</span>
                   <span className="admin-user-email">{u.email}</span>
                 </td>
-                <td>{fmtDate(u.createdAt)}</td>
+                <td className="admin-col-opt">{fmtDate(u.createdAt)}</td>
                 <td>{u.partidos}</td>
-                <td>{u.jugadores}</td>
-                <td>{u.torneos}</td>
+                <td className="admin-col-opt">{u.jugadores}</td>
+                <td className="admin-col-opt">{u.torneos}</td>
                 <td>
                   {u.isAdmin && <span className="admin-badge admin-badge--admin">Admin</span>}
                   {u.deshabilitado && <span className="admin-badge admin-badge--off">Deshabilitado</span>}
