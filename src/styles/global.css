@@ -6351,10 +6351,6 @@ body.crt-on #root {
   border-color: var(--color-primary);
 }
 
-.my-match-card--inactive {
-  opacity: 0.55;
-}
-
 .player-inactive-tag {
   margin-left: var(--space-2);
   font-size: 9px;
