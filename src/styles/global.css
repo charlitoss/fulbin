@@ -6054,7 +6054,9 @@ body.crt-on #root {
 .standings-subtitle {
   font-family: var(--font-display);
   font-size: var(--type-md);
-  color: var(--gray-300);
+  color: var(--white);
+  background: #000;
+  padding: 2px 8px;
 }
 
 .standings-current-edit {
