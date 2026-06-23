@@ -5715,6 +5715,8 @@ body.crt-on #root {
   border: 1px solid var(--surface-5);
   border-radius: 0;
   color: var(--gray-100);
+  /* Buttons don't inherit body's font — set it so the roster text is Geist Grid */
+  font-family: var(--font-display);
   text-align: left;
   cursor: pointer;
 }
@@ -5888,6 +5890,7 @@ body.crt-on #root {
 .standings-table {
   width: 100%;
   border-collapse: collapse;
+  font-family: var(--font-display);
   font-size: var(--type-sm);
 }
 
