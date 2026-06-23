@@ -7,6 +7,7 @@ function CreateMatchModal({ isOpen, onClose, onNavigate }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Nuevo partido">
       <CreateMatchForm
+        className="match-form match-form--in-modal"
         onCreated={(matchId) => {
           onClose()
           onNavigate(`#/partido/${matchId}`)

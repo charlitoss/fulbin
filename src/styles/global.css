@@ -824,6 +824,14 @@ h4 { font-size: var(--type-lg); }
   padding: var(--space-6);
 }
 
+/* Inside the modal the card chrome is redundant — the modal provides it. */
+.match-form--in-modal {
+  background: none;
+  background-image: none;
+  box-shadow: none;
+  padding: 0;
+}
+
 .form-group {
   margin-bottom: var(--space-6);
 }
@@ -2048,7 +2056,11 @@ h4 { font-size: var(--type-lg); }
   width: 100%;
   max-width: 480px;
   max-height: 90vh;
-  overflow-y: auto;
+  /* Flex column so only the body scrolls — header/footer stay put, and there's
+     a single scrollbar (not one on .modal and one on .modal-body). */
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   box-shadow: inset 0 0 0 4px #000, var(--shadow-lg);
   animation: slideUp var(--duration-normal) var(--ease-out-expo);
 }
@@ -2070,6 +2082,7 @@ h4 { font-size: var(--type-lg); }
   justify-content: space-between;
   padding: var(--space-4);
   border-bottom: var(--border-subtle);
+  flex-shrink: 0;
 }
 
 .modal-header h2 {
@@ -2105,7 +2118,8 @@ h4 { font-size: var(--type-lg); }
 
 .modal-body {
   padding: var(--space-5);
-  max-height: 60vh;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -2114,6 +2128,7 @@ h4 { font-size: var(--type-lg); }
   gap: var(--space-3);
   padding: var(--space-5);
   border-top: var(--border-subtle);
+  flex-shrink: 0;
 }
 
 .modal-footer .btn {
