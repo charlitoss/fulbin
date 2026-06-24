@@ -2337,7 +2337,7 @@ h4 { font-size: var(--type-lg); }
 .overall-levels {
   display: flex;
   gap: var(--space-2);
-  margin-top: var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
 .overall-level {
@@ -2348,11 +2348,9 @@ h4 { font-size: var(--type-lg); }
   align-items: flex-start;
   gap: 4px;
   padding: var(--space-4);
-  background-color: #0a0a0a;
+  background-color: #000000;
   background-image: radial-gradient(circle, rgba(255, 255, 255, 0.10) 1px, transparent 1px);
   background-size: 3px 3px;
-  border: 1px solid var(--surface-5);
-  border-radius: 0;
 }
 
 .overall-level--efectivo {
