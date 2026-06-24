@@ -15,12 +15,14 @@
     "prod": {
       "configure": {
         "redirectUris": [
+          "https://www.fulbin.com.ar/callback",
           "https://fulbin.com.ar/callback",
           "https://fulbin.ar/callback",
           "https://fulbin.vercel.app/callback"
         ],
-        "appHomepageUrl": "https://fulbin.com.ar",
+        "appHomepageUrl": "https://www.fulbin.com.ar",
         "corsOrigins": [
+          "https://www.fulbin.com.ar",
           "https://fulbin.com.ar",
           "https://fulbin.ar",
           "https://fulbin.vercel.app"
