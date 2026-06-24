@@ -188,17 +188,19 @@ function PlayerInfoModal({
           )
         })}
 
-        <div className="overall-level">
-          <span className="overall-label">Nivel general</span>
-          <span className="overall-value">{profile.nivelGeneral?.toFixed(1) || '5.0'}/10</span>
-        </div>
-
-        {effectiveLevel && effectiveLevel !== profile.nivelGeneral?.toFixed(1) && (
-          <div className="overall-level overall-level--efectivo">
-            <span className="overall-label">Nivel efectivo (hoy)</span>
-            <span className="overall-value">{effectiveLevel}/10</span>
+        <div className="overall-levels">
+          <div className="overall-level">
+            <span className="overall-label">Nivel general</span>
+            <span className="overall-value">{profile.nivelGeneral?.toFixed(1) || '5.0'}/10</span>
           </div>
-        )}
+
+          {effectiveLevel && effectiveLevel !== profile.nivelGeneral?.toFixed(1) && (
+            <div className="overall-level overall-level--efectivo">
+              <span className="overall-label">Nivel efectivo (hoy)</span>
+              <span className="overall-value">{effectiveLevel}/10</span>
+            </div>
+          )}
+        </div>
       </div>
     </Modal>
   )

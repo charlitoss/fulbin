@@ -2226,15 +2226,17 @@ h4 { font-size: var(--type-lg); }
   width: 80px;
   height: 80px;
   border-radius: 0;
+  box-shadow: 4px 4px;
   /* Same green dotted pattern as the match countdown / auth avatar. */
   background-color: transparent;
   background-image: radial-gradient(circle, rgba(30,255,180,0.30) 1px, transparent 1px);
   background-size: 3px 3px;
-  border: 1px solid var(--surface-5);
+  border: 1px solid var(--color-primary-dark);
   color: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: 'Press Start 2P', var(--font-display);
   font-weight: 700;
   font-size: 2rem;
   margin: 0 auto var(--space-4);
@@ -2331,21 +2333,30 @@ h4 { font-size: var(--type-lg); }
   color: var(--text-primary);
 }
 
-.overall-level {
+/* The two level cards sit side by side. */
+.overall-levels {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.overall-level {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
   padding: var(--space-4);
   background-color: #060606;
   background-image: radial-gradient(circle, rgba(255,255,255,0.08) 1px, transparent 1px);
   background-size: 3px 3px;
   border: 1px solid var(--surface-5);
   border-radius: 0;
-  margin-top: var(--space-4);
 }
 
 .overall-level--efectivo {
-  margin-top: var(--space-2);
+  margin-top: 0;
 }
 
 .overall-label {
@@ -5554,7 +5565,7 @@ body.crt-on #root {
   gap: var(--space-4);
   max-width: 600px;
   margin: 0 auto;
-  padding: var(--space-4) 16px;
+  padding: var(--space-4) 0;
 }
 
 .app-nav-brand {
@@ -5571,6 +5582,7 @@ body.crt-on #root {
   width: 100px;
   height: auto;
   display: block;
+  padding-top: 10px;
 }
 
 /* The compact symbol logo only shows at mobile breakpoints. */
@@ -5623,6 +5635,13 @@ body.crt-on #root {
 .app-nav-link.active {
   color: var(--color-primary);
   border-color: var(--color-primary);
+}
+
+
+@media (max-width: 800px) {
+  .app-nav {
+    padding: var(--space-4) 16px;
+  }
 }
 
 @media (max-width: 560px) {
