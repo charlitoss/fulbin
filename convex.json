@@ -11,6 +11,21 @@
         "VITE_WORKOS_CLIENT_ID": "${authEnv.WORKOS_CLIENT_ID}",
         "VITE_WORKOS_REDIRECT_URI": "http://localhost:3000/callback"
       }
+    },
+    "prod": {
+      "configure": {
+        "redirectUris": [
+          "https://fulbin.com.ar/callback",
+          "https://fulbin.ar/callback",
+          "https://fulbin.vercel.app/callback"
+        ],
+        "appHomepageUrl": "https://fulbin.com.ar",
+        "corsOrigins": [
+          "https://fulbin.com.ar",
+          "https://fulbin.ar",
+          "https://fulbin.vercel.app"
+        ]
+      }
     }
   }
 }
