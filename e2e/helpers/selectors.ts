@@ -17,7 +17,7 @@ export const createForm = {
   submit: (page: Page) =>
     page.getByRole("button", { name: /^Crear Partido$/i }),
   formError: (page: Page) => page.locator(".form-error"),
-  backLink: (page: Page) => page.locator(".back-link"),
+  backLink: (page: Page) => page.getByRole("button", { name: /Volver/i }),
 };
 
 export const matchPage = {
@@ -34,5 +34,6 @@ export const inGame = {
   container: (page: Page) =>
     page.locator(".match-page--jugando, .match-page--finalizado"),
   finishButton: (page: Page) =>
-    page.getByRole("button", { name: /Finalizar partido|Terminar partido/i }),
+    // Mobile collapses the label to just "Finalizar"
+    page.getByRole("button", { name: /Finalizar|Terminar/i }),
 };

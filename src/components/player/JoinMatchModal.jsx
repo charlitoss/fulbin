@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { X, UserPlus, Users, Clock, Eye, ArrowRight } from 'lucide-react'
+import { X, UserPlus, Users, Clock, Eye, ArrowRight, Plus } from 'lucide-react'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import Modal from '../ui/Modal'
 import { PHYSICAL_STATES, MAX_SUPLENTES } from '../../utils/constants'
+import { getDeviceId } from '../../utils/deviceId'
 
 const REGISTRATION_TYPES = {
   jugador: { label: 'Jugador', icon: Users, description: 'Jugar en el partido' },
@@ -31,23 +32,17 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   
+  // Which input shows roster suggestions: 'nombre' | 'friend' | null
+  const [suggestFor, setSuggestFor] = useState(null)
+
   // Convex queries
   const registrations = useQuery(api.registrations.listByMatch, isOpen && matchId ? { matchId } : "skip")
-  const playersData = useQuery(api.players.list)
-  
-  // Convex mutations
-  const createPlayer = useMutation(api.players.create)
-  const createRegistration = useMutation(api.registrations.create)
-  
-  // Convert players array to object for easy lookup
-  const allPlayers = useMemo(() => {
-    if (!playersData) return {}
-    return playersData.reduce((acc, player) => {
-      acc[player._id] = player
-      return acc
-    }, {})
-  }, [playersData])
-  
+  const rosterAvailable = useQuery(api.players.availableForMatch, isOpen && matchId ? { matchId } : "skip")
+
+  // Convex mutations. The server resolves names against the match owner's
+  // roster (find-or-create) and rejects duplicates with YA_INSCRITO.
+  const joinMatch = useMutation(api.registrations.join)
+
   // Calculate available spots - always count from registrations
   const spotsInfo = useMemo(() => {
     if (!registrations || !match) {
@@ -131,26 +126,12 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
       
       const alreadyInList = currentFriends.some(f => f.nombre.toLowerCase() === name.toLowerCase()) ||
         newFriends.some(f => f.nombre.toLowerCase() === name.toLowerCase())
-      
+
       if (alreadyInList) {
         errors.push(`"${name}" ya está en la lista`)
         continue
       }
-      
-      const existingPlayer = Object.values(allPlayers).find(
-        p => p.nombre.toLowerCase() === name.toLowerCase()
-      )
-      
-      if (existingPlayer && registrations) {
-        const alreadyRegistered = registrations.some(
-          r => r.jugadorId === existingPlayer._id
-        )
-        if (alreadyRegistered) {
-          errors.push(`"${name}" ya está inscrito en el partido`)
-          continue
-        }
-      }
-      
+
       newFriends.push({
         id: `${Date.now()}_${Math.random().toString(36).substr(2, 5)}_${newFriends.length}`,
         nombre: name
@@ -187,6 +168,57 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
   const handleRemoveFriend = (id) => {
     setFriends(friends.filter(f => f.id !== id))
   }
+
+  // Roster typeahead: suggest the organizer's available players (empty for
+  // unowned matches), excluding names already typed or added. Selecting one
+  // fills the exact name; the server resolves it to the roster profile.
+  const normalize = (s) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+
+  const suggestionsFor = (text) => {
+    if (!rosterAvailable?.length) return []
+    const taken = new Set(
+      [nombre.trim(), ...friends.map(f => f.nombre)].filter(Boolean).map(normalize)
+    )
+    const query = normalize(text.trim())
+    return rosterAvailable
+      .filter(p => !taken.has(normalize(p.nombre)))
+      .filter(p => !query || normalize(p.nombre).includes(query))
+      .slice(0, 6)
+  }
+
+  const selectMainSuggestion = (player) => {
+    setNombre(player.nombre)
+    setSuggestFor(null)
+  }
+
+  const selectFriendSuggestion = (player) => {
+    setFriends(prev => [...prev, { id: player._id, nombre: player.nombre }])
+    setFriendName('')
+    setSuggestFor(null)
+    friendInputRef.current?.focus()
+  }
+
+  // Add a brand-new name (not in the roster) straight from the dropdown, so
+  // it's obvious you can register people who don't have a profile yet.
+  const addTypedFriend = (name) => {
+    const { newFriends, errors } = processFriendNames(name, friends)
+    if (newFriends.length > 0) setFriends(prev => [...prev, ...newFriends])
+    if (errors.length > 0) setError(errors.join('. '))
+    setFriendName('')
+    setSuggestFor(null)
+    friendInputRef.current?.focus()
+  }
+
+  // Offer "Agregar X" when the typed name matches no roster player and isn't
+  // already chosen.
+  const canAddTyped = (text) => {
+    const t = text.trim()
+    if (t.length < 2) return false
+    const n = normalize(t)
+    if (suggestionsFor(text).some(p => normalize(p.nombre) === n)) return false
+    if (normalize(nombre.trim()) === n) return false
+    return !friends.some(f => normalize(f.nombre) === n)
+  }
   
   // Submit main player + friends
   const handleSubmit = async () => {
@@ -207,33 +239,19 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
       }
     }
     
-    // Validate main player name
+    // Validate main player name. It's optional when there are friends to
+    // register (e.g. the organizer signing up others without playing).
     const trimmedName = nombre.trim()
-    if (!trimmedName) {
-      setError('Por favor ingresa tu nombre')
+    if (!trimmedName && finalFriends.length === 0) {
+      setError('Ingresá tu nombre o anotá jugadores')
       return
     }
-    
-    if (trimmedName.length < 2) {
+
+    if (trimmedName && trimmedName.length < 2) {
       setError('El nombre debe tener al menos 2 caracteres')
       return
     }
-    
-    // Check if main player already registered
-    const existingMainPlayer = Object.values(allPlayers).find(
-      p => p.nombre.toLowerCase() === trimmedName.toLowerCase()
-    )
-    
-    if (existingMainPlayer && registrations) {
-      const alreadyRegistered = registrations.some(
-        r => r.jugadorId === existingMainPlayer._id
-      )
-      if (alreadyRegistered) {
-        setError('Ya estás inscrito en este partido')
-        return
-      }
-    }
-    
+
     // Check availability for selected type
     if (!isTypeAvailable(tipoInscripcion)) {
       setError(`No hay más lugares disponibles como ${REGISTRATION_TYPES[tipoInscripcion].label.toLowerCase()}`)
@@ -245,68 +263,35 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
     try {
       // Calculate how many spots are available for jugadores
       const availableJugadorSpots = spotsInfo.cupoTotal - spotsInfo.jugadores
-      
-      // 1. Register main player
-      let mainPlayerId = existingMainPlayer?._id
-      
-      if (!mainPlayerId) {
-        mainPlayerId = await createPlayer({
-          nombre: trimmedName,
-          perfilPermanente: {
-            posicionPreferida: 'Mediocampista',
-            posicionesSecundarias: [],
-            atributos: {
-              velocidad: 5,
-              tecnica: 5,
-              resistencia: 5,
-              defensa: 5,
-              ataque: 5,
-              pase: 5
-            },
-            nivelGeneral: 5
-          }
-        })
-      }
-      
-      // Main player always gets their selected type
-      await createRegistration({
-        partidoId: matchId,
-        jugadorId: mainPlayerId,
-        estadoFisico: tipoInscripcion === 'hinchada' ? 'normal' : estadoFisico,
-        tipoInscripcion: tipoInscripcion,
-        confirmado: true,
-        asistira: true
-      })
-      
-      // Track how many jugador spots we've used (1 for main player if they're jugador)
-      let jugadorSpotsUsed = tipoInscripcion === 'jugador' ? 1 : 0
-      
-      // 2. Register friends - overflow goes to suplentes if registering as jugador
-      for (let i = 0; i < finalFriends.length; i++) {
-        const friend = finalFriends[i]
-        let friendPlayerId = Object.values(allPlayers).find(
-          p => p.nombre.toLowerCase() === friend.nombre.toLowerCase()
-        )?._id
-        
-        if (!friendPlayerId) {
-          friendPlayerId = await createPlayer({
-            nombre: friend.nombre,
-            perfilPermanente: {
-              posicionPreferida: 'Mediocampista',
-              posicionesSecundarias: [],
-              atributos: {
-                velocidad: 5,
-                tecnica: 5,
-                resistencia: 5,
-                defensa: 5,
-                ataque: 5,
-                pase: 5
-              },
-              nivelGeneral: 5
-            }
+
+      // 1. Register main player (server resolves the player by name)
+      let mainPlayerId
+      if (trimmedName) {
+        try {
+          const result = await joinMatch({
+            matchId,
+            nombre: trimmedName,
+            estadoFisico: tipoInscripcion === 'hinchada' ? 'normal' : estadoFisico,
+            tipoInscripcion: tipoInscripcion,
+            anonId: getDeviceId(),
           })
+          mainPlayerId = result.playerId
+        } catch (err) {
+          if (String(err.message).includes('YA_INSCRITO')) {
+            setError('Ya estás inscrito en este partido')
+            setIsSubmitting(false)
+            return
+          }
+          throw err
         }
-        
+      }
+
+      // Track how many jugador spots we've used (1 for main player if they're jugador)
+      let jugadorSpotsUsed = trimmedName && tipoInscripcion === 'jugador' ? 1 : 0
+
+      // 2. Register friends - overflow goes to suplentes if registering as jugador
+      const joinErrors = []
+      for (const friend of finalFriends) {
         // Determine registration type for this friend
         let friendType = tipoInscripcion
         if (tipoInscripcion === 'jugador') {
@@ -318,23 +303,37 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
             jugadorSpotsUsed++
           }
         }
-        
-        await createRegistration({
-          partidoId: matchId,
-          jugadorId: friendPlayerId,
-          estadoFisico: 'normal',
-          tipoInscripcion: friendType,
-          confirmado: true,
-          asistira: true
-        })
+
+        try {
+          await joinMatch({
+            matchId,
+            nombre: friend.nombre,
+            estadoFisico: 'normal',
+            tipoInscripcion: friendType,
+            anonId: getDeviceId(),
+          })
+        } catch (err) {
+          if (String(err.message).includes('YA_INSCRITO')) {
+            joinErrors.push(`"${friend.nombre}" ya está inscrito`)
+          } else {
+            throw err
+          }
+        }
       }
-      
+
+      if (joinErrors.length > 0) {
+        setError(joinErrors.join('. '))
+        setIsSubmitting(false)
+        return
+      }
+
       // Reset and close
       setNombre('')
       setEstadoFisico('normal')
       setTipoInscripcion('jugador')
       setFriendName('')
       setFriends([])
+      setSuggestFor(null)
       setIsSubmitting(false)
       
       if (onJoined) {
@@ -356,6 +355,7 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
     setTipoInscripcion('jugador')
     setFriendName('')
     setFriends([])
+    setSuggestFor(null)
     setError('')
     onClose()
   }
@@ -368,10 +368,10 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
   }
   
   // Count pending friends in the input field (comma-separated names)
-  const pendingFriendsCount = friendName.trim() 
-    ? friendName.split(',').map(n => n.trim()).filter(n => n.length > 0).length 
+  const pendingFriendsCount = friendName.trim()
+    ? friendName.split(',').map(n => n.trim()).filter(n => n.length > 0).length
     : 0
-  const totalToRegister = 1 + friends.length + pendingFriendsCount
+  const totalToRegister = (nombre.trim() ? 1 : 0) + friends.length + pendingFriendsCount
   const cupoLleno = spotsInfo.jugadores >= spotsInfo.cupoTotal
   const suplentesLleno = spotsInfo.suplentes >= spotsInfo.maxSuplentes
 
@@ -405,7 +405,7 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
             <span>
               {isSubmitting
                 ? 'Inscribiendo...'
-                : (friends.length > 0 || pendingFriendsCount > 0)
+                : totalToRegister > 1
                   ? `Confirmar (${totalToRegister})`
                   : 'Confirmar'
               }
@@ -453,15 +453,38 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
           <label htmlFor="nombre">
             Tu nombre <span className="required">*</span>
           </label>
-          <input
-            type="text"
-            id="nombre"
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            placeholder="Ej: Juan Pérez"
-            maxLength={50}
-            autoFocus={autoFocusName}
-          />
+          <div className="typeahead-wrap">
+            <input
+              type="text"
+              id="nombre"
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              onFocus={() => setSuggestFor('nombre')}
+              onBlur={() => setSuggestFor(s => (s === 'nombre' ? null : s))}
+              placeholder="Ej: Juan Pérez"
+              maxLength={50}
+              autoFocus={autoFocusName}
+              autoComplete="off"
+            />
+            {suggestFor === 'nombre' && suggestionsFor(nombre).length > 0 && (
+              <div className="typeahead-list" role="listbox">
+                {suggestionsFor(nombre).map((player) => (
+                  <button
+                    key={player._id}
+                    type="button"
+                    role="option"
+                    className="typeahead-item"
+                    onMouseDown={(e) => {
+                      e.preventDefault()
+                      selectMainSuggestion(player)
+                    }}
+                  >
+                    {player.nombre}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
         
         {/* Physical state - only for jugador and suplente */}
@@ -486,17 +509,73 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
         {tipoInscripcion !== 'hinchada' && (
           <div className="friends-section form-group">
             <label htmlFor="friend-input">Anota a un amigo (opcional)</label>
-            <input
-              id="friend-input"
-              ref={friendInputRef}
-              type="text"
-              value={friendName}
-              onChange={(e) => setFriendName(e.target.value)}
-              placeholder="Juan, Pedro, Mati"
-              maxLength={200}
-              className="friend-input"
-            />
+            <div className="typeahead-wrap">
+              <input
+                id="friend-input"
+                ref={friendInputRef}
+                type="text"
+                value={friendName}
+                onChange={(e) => setFriendName(e.target.value)}
+                onKeyDown={handleFriendKeyDown}
+                onFocus={() => setSuggestFor('friend')}
+                onBlur={() => setSuggestFor(s => (s === 'friend' ? null : s))}
+                placeholder="Juan, Pedro, Mati"
+                maxLength={200}
+                className="friend-input"
+                autoComplete="off"
+              />
+              {suggestFor === 'friend' && (suggestionsFor(friendName).length > 0 || canAddTyped(friendName)) && (
+                <div className="typeahead-list" role="listbox">
+                  {suggestionsFor(friendName).map((player) => (
+                    <button
+                      key={player._id}
+                      type="button"
+                      role="option"
+                      className="typeahead-item"
+                      onMouseDown={(e) => {
+                        e.preventDefault()
+                        selectFriendSuggestion(player)
+                      }}
+                    >
+                      {player.nombre}
+                    </button>
+                  ))}
+                  {canAddTyped(friendName) && (
+                    <button
+                      type="button"
+                      role="option"
+                      className="typeahead-item typeahead-item--add"
+                      onMouseDown={(e) => {
+                        e.preventDefault()
+                        addTypedFriend(friendName)
+                      }}
+                    >
+                      <Plus size={14} /> Agregar “{friendName.trim()}”
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
             <span className="hint">Podes agregar varios separados por coma</span>
+
+            {friends.length > 0 && (
+              <div className="friends-list-items">
+                {friends.map((friend, index) => (
+                  <div key={friend.id} className="friend-item">
+                    <span className="friend-number">{index + 1}.</span>
+                    <span className="friend-name">{friend.nombre}</span>
+                    <button
+                      type="button"
+                      className="friend-remove"
+                      onClick={() => handleRemoveFriend(friend.id)}
+                      aria-label={`Quitar a ${friend.nombre}`}
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

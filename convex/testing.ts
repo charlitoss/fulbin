@@ -106,6 +106,85 @@ export const wipeAllTestData = mutation({
   },
 });
 
+// Seed a throwaway user + an owned match/player/tournament, for exercising the
+// admin user-management flows (disable / delete / orphan). All e2e-prefixed.
+export const seedUserWithData = mutation({
+  args: { secret: v.string(), workosId: v.string(), nombre: v.string(), email: v.string() },
+  handler: async (ctx, args) => {
+    assertSecret(args.secret);
+    const now = new Date().toISOString();
+    const userId = await ctx.db.insert("users", {
+      workosId: args.workosId,
+      nombre: args.nombre,
+      email: args.email,
+      createdAt: now,
+      updatedAt: now,
+    });
+    const tournamentId = await ctx.db.insert("tournaments", {
+      ownerId: userId,
+      nombre: "e2e-admin-trn",
+      activo: true,
+      createdAt: now,
+    });
+    const matchId = await ctx.db.insert("matches", {
+      codigoCorto: `E2E${Math.floor(Math.random() * 900 + 100)}`,
+      nombre: "e2e-admin-match",
+      fecha: "2030-01-01",
+      horario: "12:00",
+      ubicacion: "Cancha",
+      cantidadJugadores: 2,
+      jugadoresPorEquipo: 1,
+      pasoActual: "inscripcion",
+      ownerId: userId,
+      tournamentId,
+      createdAt: now,
+      updatedAt: now,
+    });
+    const playerId = await ctx.db.insert("players", {
+      nombre: "e2e-admin-player",
+      ownerId: userId,
+    });
+    return { userId, matchId, playerId, tournamentId };
+  },
+});
+
+// Directly flip a user's disabled flag (to test enforcement without the admin API).
+export const rawSetDisabled = mutation({
+  args: { secret: v.string(), userId: v.id("users"), deshabilitado: v.boolean() },
+  handler: async (ctx, args) => {
+    assertSecret(args.secret);
+    await ctx.db.patch(args.userId, { deshabilitado: args.deshabilitado });
+  },
+});
+
+// Hard-delete seeded matches (cascade) + players by id, for admin-test cleanup.
+export const wipeSeeded = mutation({
+  args: {
+    secret: v.string(),
+    matchIds: v.array(v.id("matches")),
+    playerIds: v.array(v.id("players")),
+  },
+  handler: async (ctx, args) => {
+    assertSecret(args.secret);
+    for (const matchId of args.matchIds) {
+      const regs = await ctx.db
+        .query("registrations")
+        .withIndex("by_partidoId", (q) => q.eq("partidoId", matchId))
+        .collect();
+      for (const r of regs) await ctx.db.delete(r._id);
+      const configs = await ctx.db
+        .query("teamConfigurations")
+        .withIndex("by_partidoId", (q) => q.eq("partidoId", matchId))
+        .collect();
+      for (const c of configs) await ctx.db.delete(c._id);
+      if (await ctx.db.get(matchId)) await ctx.db.delete(matchId);
+    }
+    for (const playerId of args.playerIds) {
+      if (await ctx.db.get(playerId)) await ctx.db.delete(playerId);
+    }
+  },
+});
+
 // Seed N players with predictable names so a test can register them in bulk
 // without typing each name through the UI.
 export const seedPlayers = mutation({
