@@ -41,6 +41,14 @@ function Root() {
   return (
     <AuthKitProvider
       clientId={import.meta.env.VITE_WORKOS_CLIENT_ID}
+      // Persist the refresh token in localStorage instead of a cross-site cookie
+      // on api.workos.com. Without this, AuthKit refreshes the session via a
+      // third-party cookie that Safari/Brave/Chrome block, so the silent refresh
+      // fails and the user gets logged out unexpectedly (clicking "Iniciar
+      // sesión" then logs back in instantly because the WorkOS SSO session is
+      // still alive). The fully-secure alternative is a paid custom AuthKit
+      // domain; this is WorkOS's documented fallback when you don't have one.
+      devMode={true}
       redirectUri={import.meta.env.VITE_WORKOS_REDIRECT_URI || window.location.origin}
       onRedirectCallback={() => {
         // The app routes via the URL hash; drop the /callback path after login.
