@@ -46,7 +46,7 @@ export default function SplashPage({ onNavigate }) {
             className="btn-add-player splash-cta"
             onClick={() => onNavigate('#/nuevo')}
           >
-            <span>Nuevo Partido</span>
+            <span>Crear partido</span>
             <span className="btn-arrow" aria-hidden="true" />
           </button>
         </div>

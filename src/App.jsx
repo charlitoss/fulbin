@@ -22,7 +22,7 @@ const CRT_STORAGE_KEY = 'fulbin:crt-enabled'
 const NAV_LINKS = [
   { label: 'Partidos', route: '#/mis-partidos' },
   { label: 'Jugadores', route: '#/mis-jugadores' },
-  { label: 'Tabla', route: '#/tabla' },
+  { label: 'Torneos', route: '#/tabla' },
 ]
 
 // Component to handle short code redirect

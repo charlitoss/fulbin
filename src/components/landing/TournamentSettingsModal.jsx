@@ -63,9 +63,60 @@ function TournamentSettingsModal({ isOpen, onClose, tournament, leader, onSelect
       onClose={onClose}
       title="Configurar torneo"
       footer={
-        <button className="btn btn-primary" onClick={onClose} style={{ width: '100%' }}>
-          Listo
-        </button>
+        confirm ? (
+          <div style={{ flex: 1 }}>
+            {confirm === 'finalize' && (
+              <InlineConfirm
+                text={leader
+                  ? `Se coronará campeón a ${leader.nombre} (${leader.puntos} pts) y la tabla quedará congelada.`
+                  : 'No hay partidos finalizados, no se coronará campeón. La tabla quedará congelada.'}
+                busy={busy}
+                yesLabel="Finalizar"
+                onYes={() => run(() => finalize({ tournamentId: tournament._id }))}
+                onNo={() => setConfirm(null)}
+              />
+            )}
+            {confirm === 'reopen' && (
+              <InlineConfirm
+                text="¿Reabrir el torneo? Se borra el campeón y vuelve a estar activo."
+                busy={busy}
+                yesLabel="Reabrir"
+                onYes={() => run(() => reopen({ tournamentId: tournament._id }))}
+                onNo={() => setConfirm(null)}
+              />
+            )}
+            {confirm === 'delete' && (
+              <InlineConfirm
+                text="¿Eliminar el torneo? Sus partidos quedan en Todos."
+                busy={busy}
+                yesLabel="Eliminar"
+                danger
+                onYes={() => run(async () => {
+                  await remove({ tournamentId: tournament._id })
+                  onSelect(null)
+                  onClose()
+                })}
+                onNo={() => setConfirm(null)}
+              />
+            )}
+          </div>
+        ) : (
+          <>
+            <button
+              className="btn btn-secondary btn-danger-text"
+              style={{ marginRight: 0 }}
+              onClick={() => setConfirm('delete')}
+            >
+              Eliminar torneo
+            </button>
+            <button
+              className="btn btn-secondary"
+              onClick={() => setConfirm(finalized ? 'reopen' : 'finalize')}
+            >
+              {finalized ? 'Reabrir torneo' : 'Finalizar torneo'}
+            </button>
+          </>
+        )
       }
     >
       <div className="tournament-settings">
@@ -82,71 +133,11 @@ function TournamentSettingsModal({ isOpen, onClose, tournament, leader, onSelect
           />
         </div>
 
-        {finalized ? (
-          <div className="tournament-settings-block">
-            {tournament.campeon && (
-              <p className="tournament-settings-champ">
-                <Trophy size={14} /> Campeón: <strong>{tournament.campeon.nombre}</strong> ({tournament.campeon.puntos} pts)
-              </p>
-            )}
-            {confirm === 'reopen' ? (
-              <InlineConfirm
-                text="¿Reabrir el torneo? Se borra el campeón y vuelve a estar activo."
-                busy={busy}
-                yesLabel="Reabrir"
-                onYes={() => run(() => reopen({ tournamentId: tournament._id }))}
-                onNo={() => setConfirm(null)}
-              />
-            ) : (
-              <button className="btn btn-secondary" style={{ width: '100%' }} onClick={() => setConfirm('reopen')}>
-                Reabrir torneo
-              </button>
-            )}
-          </div>
-        ) : (
-          <div className="tournament-settings-block">
-            {confirm === 'finalize' ? (
-              <InlineConfirm
-                text={leader
-                  ? `Se coronará campeón a ${leader.nombre} (${leader.puntos} pts) y la tabla quedará congelada.`
-                  : 'No hay partidos finalizados, no se coronará campeón. La tabla quedará congelada.'}
-                busy={busy}
-                yesLabel="Finalizar"
-                onYes={() => run(() => finalize({ tournamentId: tournament._id }))}
-                onNo={() => setConfirm(null)}
-              />
-            ) : (
-              <button className="btn btn-secondary" style={{ width: '100%' }} onClick={() => setConfirm('finalize')}>
-                Finalizar torneo
-              </button>
-            )}
-          </div>
+        {finalized && tournament.campeon && (
+          <p className="tournament-settings-champ">
+            <Trophy size={14} /> Campeón: <strong>{tournament.campeon.nombre}</strong> ({tournament.campeon.puntos} pts)
+          </p>
         )}
-
-        <div className="tournament-settings-block">
-          {confirm === 'delete' ? (
-            <InlineConfirm
-              text="¿Eliminar el torneo? Sus partidos quedan en Todos."
-              busy={busy}
-              yesLabel="Eliminar"
-              danger
-              onYes={() => run(async () => {
-                await remove({ tournamentId: tournament._id })
-                onSelect(null)
-                onClose()
-              })}
-              onNo={() => setConfirm(null)}
-            />
-          ) : (
-            <button
-              className="btn btn-secondary btn-danger-text"
-              style={{ width: '100%' }}
-              onClick={() => setConfirm('delete')}
-            >
-              Eliminar torneo
-            </button>
-          )}
-        </div>
       </div>
     </Modal>
   )

@@ -58,7 +58,7 @@ function MyMatchesPage({ onNavigate }) {
           className="btn btn-primary btn-sm"
           onClick={() => setShowCreate(true)}
         >
-          Nuevo partido
+          Crear partido
         </button>
       </div>
 
@@ -70,11 +70,8 @@ function MyMatchesPage({ onNavigate }) {
 
       {matches.length === 0 ? (
         <div className="my-matches-empty">
-          <p>Todavía no tenés partidos vinculados a tu cuenta.</p>
-          <p className="my-matches-hint">
-            Los partidos que crees estando logueado aparecen acá. También podés
-            abrir un partido existente y reclamarlo.
-          </p>
+          <h2>Todavía no tenés partidos.</h2>
+          <p>Crea tu primer partido apretando el botón crear partido.</p>
         </div>
       ) : (
         <ul className="match-card-list">

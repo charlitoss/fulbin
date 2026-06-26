@@ -1,7 +1,38 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { X } from 'lucide-react'
 
 function Modal({ isOpen, onClose, title, children, footer, onSubmit }) {
+  const overlayRef = useRef(null)
+
+  // Mobile keyboards shrink the visual viewport but not the layout viewport, so
+  // a full-height fixed overlay leaves a blank gap (and the page scrolls under
+  // it). Pin the overlay to the visual viewport so it tracks the keyboard.
+  useEffect(() => {
+    if (!isOpen) return
+    const vv = window.visualViewport
+    if (!vv) return
+
+    const sync = () => {
+      const el = overlayRef.current
+      if (!el) return
+      el.style.height = `${vv.height}px`
+      el.style.transform = `translateY(${vv.offsetTop}px)`
+    }
+
+    sync()
+    vv.addEventListener('resize', sync)
+    vv.addEventListener('scroll', sync)
+    return () => {
+      vv.removeEventListener('resize', sync)
+      vv.removeEventListener('scroll', sync)
+      const el = overlayRef.current
+      if (el) {
+        el.style.height = ''
+        el.style.transform = ''
+      }
+    }
+  }, [isOpen])
+
   // Handle keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -39,7 +70,7 @@ function Modal({ isOpen, onClose, title, children, footer, onSubmit }) {
   }
   
   return (
-    <div className="modal-overlay" onClick={handleOverlayClick}>
+    <div className="modal-overlay" ref={overlayRef} onClick={handleOverlayClick}>
       <div className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div className="modal-header">
           <h2 id="modal-title">{title}</h2>
