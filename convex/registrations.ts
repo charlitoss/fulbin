@@ -45,6 +45,8 @@ export const join = mutation({
     nombre: v.optional(v.string()),
     estadoFisico: v.string(),
     tipoInscripcion: v.optional(v.string()),
+    // "Tercer tiempo": staying after the match (birra / parri).
+    seQueda: v.optional(v.boolean()),
     // Device token of whoever is inscribing, so they can later remove their
     // own inscriptions without an account.
     anonId: v.optional(v.string()),
@@ -85,6 +87,7 @@ export const join = mutation({
           jugadorId: playerId,
           estadoFisico: args.estadoFisico,
           tipoInscripcion: args.tipoInscripcion || "jugador",
+          seQueda: args.seQueda,
           creadoPor: args.anonId,
           confirmado: true,
           asistira: true,
@@ -106,6 +109,7 @@ export const join = mutation({
       await ctx.db.patch(existingReg._id, {
         estadoFisico: args.estadoFisico,
         tipoInscripcion: args.tipoInscripcion || "jugador",
+        seQueda: args.seQueda,
         // Re-stamp the creator on re-join so the re-inscriber owns it.
         creadoPor: args.anonId ?? existingReg.creadoPor,
         confirmado: true,
@@ -120,6 +124,7 @@ export const join = mutation({
       jugadorId: playerId,
       estadoFisico: args.estadoFisico,
       tipoInscripcion: args.tipoInscripcion || "jugador",
+      seQueda: args.seQueda,
       creadoPor: args.anonId,
       confirmado: true,
       asistira: true,
@@ -191,6 +196,7 @@ export const update = mutation({
     tipoInscripcion: v.optional(v.string()),
     confirmado: v.optional(v.boolean()),
     asistira: v.optional(v.boolean()),
+    seQueda: v.optional(v.boolean()),
     anonId: v.optional(v.string()),
   },
   handler: async (ctx, args) => {

@@ -111,6 +111,9 @@ export default defineSchema({
     jugadorId: v.id("players"),
     estadoFisico: v.string(), // 'excelente' | 'normal' | 'cansado'
     tipoInscripcion: v.optional(v.string()), // 'jugador' | 'suplente' | 'hinchada'
+    // "Tercer tiempo": the player is staying after the match (birra / parri).
+    // Absent = not staying.
+    seQueda: v.optional(v.boolean()),
     // Anonymous device token of whoever created this registration, so a player
     // who inscribed can remove themselves (but not others) without an account.
     // Absent on legacy rows — those can only be removed by the match owner.

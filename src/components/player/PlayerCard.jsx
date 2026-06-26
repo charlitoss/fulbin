@@ -50,6 +50,16 @@ function PlayerCard({
               height="24"
             />
           )}
+          {registration?.seQueda && (
+            <img
+              src="/icons/chori.svg"
+              alt="Se queda al tercer tiempo"
+              title="Se queda al tercer tiempo"
+              width="22"
+              height="22"
+              className="stay-icon"
+            />
+          )}
           {typeof points === 'number' && (
             <span
               className={`player-points-badge${points > 0 ? '' : ' player-points-badge--zero'}`}
@@ -141,6 +151,16 @@ function PlayerCard({
         <span className="physical-state" title={physicalState.label}>
           {physicalState.emoji}
         </span>
+        {registration?.seQueda && (
+          <img
+            src="/icons/chori.svg"
+            alt="Se queda al tercer tiempo"
+            title="Se queda al tercer tiempo"
+            width="22"
+            height="22"
+            className="stay-icon"
+          />
+        )}
         {onViewInfo && (
           <button className="btn-info" onClick={() => onViewInfo(player)}>
             Ver info

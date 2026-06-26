@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ArrowLeftRight, ArrowDownToLine } from 'lucide-react'
+import { ArrowLeftRight, ArrowDownToLine, Check } from 'lucide-react'
 import { useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import Modal from '../ui/Modal'
@@ -31,11 +31,13 @@ function PlayerInfoModal({
 
   const [estado, setEstado] = useState('normal')
   const [posicion, setPosicion] = useState(POSITIONS.MEDIOCAMPISTA)
+  const [seQueda, setSeQueda] = useState(false)
 
   useEffect(() => {
     if (isOpen && player) {
       setEstado(registration?.estadoFisico ?? 'normal')
       setPosicion(player.perfilPermanente?.posicionPreferida ?? POSITIONS.MEDIOCAMPISTA)
+      setSeQueda(registration?.seQueda ?? false)
     }
   }, [isOpen, registration, player])
 
@@ -63,6 +65,16 @@ function PlayerInfoModal({
       await updateRegistration({ matchId, playerId, estadoFisico: key, anonId: deviceId })
     } catch (err) {
       console.error('Error updating estado físico:', err)
+    }
+  }
+
+  const changeSeQueda = async (next) => {
+    setSeQueda(next)
+    try {
+      await updateRegistration({ matchId, playerId, seQueda: next, anonId: deviceId })
+    } catch (err) {
+      console.error('Error updating tercer tiempo:', err)
+      setSeQueda(!next)
     }
   }
 
@@ -157,6 +169,21 @@ function PlayerInfoModal({
               ))}
             </select>
           </div>
+          {registration && (
+            <div className="form-group">
+              <label>Tercer tiempo</label>
+              <button
+                type="button"
+                className={`stay-toggle${seQueda ? ' active' : ''}`}
+                onClick={() => changeSeQueda(!seQueda)}
+                aria-pressed={seQueda}
+              >
+                <img src={seQueda ? '/icons/chori.svg' : '/icons/chori-inactive.svg'} alt="" width="20" height="20" className="stay-toggle-icon" />
+                <span>{seQueda ? 'Me quedo a la birra / parri' : 'Avisar que me quedo después'}</span>
+                {seQueda && <Check size={18} className="stay-toggle-check" />}
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="player-details">
@@ -164,6 +191,14 @@ function PlayerInfoModal({
             <span className="detail-label">Posición preferida</span>
             <span className="detail-value">{profile.posicionPreferida || 'No definida'}</span>
           </div>
+          {seQueda && (
+            <div className="detail-row">
+              <span className="detail-label">Tercer tiempo</span>
+              <span className="detail-value detail-value--stay">
+                <img src="/icons/chori.svg" alt="" width="16" height="16" /> Se queda
+              </span>
+            </div>
+          )}
           {profile.posicionesSecundarias?.length > 0 && (
             <div className="detail-row">
               <span className="detail-label">Posiciones secundarias</span>
