@@ -187,7 +187,16 @@ function PlayerProfileModal({ isOpen, onClose, player, hideDelete = false }) {
         </div>
 
         <div className="form-group">
-          <label>Atributos</label>
+          <div className="profile-nivel-card">
+            <span className="profile-nivel-label">Nivel general</span>
+            <span className="profile-nivel-value">{nivelGeneral.toFixed(1)}/10</span>
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label>
+            Características{nombre.trim() ? ` de ${nombre.trim()}` : ''}
+          </label>
           {Object.entries(ATTRIBUTE_LABELS).map(([key, label]) => (
             <div key={key} className="attribute-slider-row">
               <span className="attribute-slider-label">{label}</span>
@@ -197,6 +206,7 @@ function PlayerProfileModal({ isOpen, onClose, player, hideDelete = false }) {
                 max={10}
                 step={1}
                 value={atributos[key]}
+                style={{ '--range-fill': `${((atributos[key] - 1) / 9) * 100}%` }}
                 onChange={(e) =>
                   setAtributos((prev) => ({ ...prev, [key]: Number(e.target.value) }))
                 }
@@ -205,10 +215,6 @@ function PlayerProfileModal({ isOpen, onClose, player, hideDelete = false }) {
               <span className="attribute-slider-value">{atributos[key]}</span>
             </div>
           ))}
-          <div className="overall-level">
-            <span className="overall-label">Nivel general</span>
-            <span className="overall-value">{nivelGeneral.toFixed(1)}/10</span>
-          </div>
         </div>
       </div>
     </Modal>

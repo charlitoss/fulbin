@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Pencil, Trash2, Trophy } from 'lucide-react'
+import { Check, Pencil, Trash2, Trophy } from 'lucide-react'
 import { useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import Modal from '../ui/Modal'
@@ -89,8 +89,13 @@ function TournamentsModal({ isOpen, onClose, tournaments, selectedId, onSelect }
       onClose={onClose}
       title="Torneos"
       footer={
-        <button className="btn btn-primary" onClick={onClose} style={{ width: '100%' }}>
-          Listo
+        <button
+          className="btn btn-primary"
+          onClick={() => setCreating(true)}
+          disabled={creating}
+          style={{ width: '100%' }}
+        >
+          Crear torneo
         </button>
       }
     >
@@ -100,7 +105,10 @@ function TournamentsModal({ isOpen, onClose, tournaments, selectedId, onSelect }
             className={`tournament-list-name${selectedId == null ? ' selected' : ''}`}
             onClick={() => pick(null)}
           >
-            Todos los partidos
+            {selectedId == null && (
+              <span className="tournament-check"><Check size={14} /></span>
+            )}
+            Tabla histórica
           </button>
         </li>
         {tournaments.map((t) => (
@@ -148,6 +156,9 @@ function TournamentsModal({ isOpen, onClose, tournaments, selectedId, onSelect }
                   }`}
                   onClick={() => pick(t._id)}
                 >
+                  {selectedId === t._id && (
+                    <span className="tournament-check"><Check size={14} /></span>
+                  )}
                   <span className="tournament-list-label">
                     <span>{t.nombre}</span>
                     {t.campeon && (
@@ -195,7 +206,7 @@ function TournamentsModal({ isOpen, onClose, tournaments, selectedId, onSelect }
         ))}
       </ul>
 
-      {creating ? (
+      {creating && (
         <div className="tournament-create">
           {activeT && (
             <p className="tournament-create-note">
@@ -221,14 +232,6 @@ function TournamentsModal({ isOpen, onClose, tournaments, selectedId, onSelect }
             </button>
           </div>
         </div>
-      ) : (
-        <button
-          type="button"
-          className="btn btn-secondary tournament-add-btn"
-          onClick={() => setCreating(true)}
-        >
-          + Nuevo torneo
-        </button>
       )}
     </Modal>
   )

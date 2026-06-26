@@ -23,6 +23,15 @@ function MyProfilePage({ onNavigate }) {
 
   const player = useQuery(api.players.getById, playerId ? { playerId } : 'skip')
 
+  // Self-heal: if the linked profile was deleted in a previous session (an old
+  // bug let it be removed), getById returns null — recreate it so the page
+  // always loads instead of hanging on "Cargando...".
+  useEffect(() => {
+    if (playerId && player === null) {
+      ensureMyProfile({}).then(setPlayerId)
+    }
+  }, [playerId, player, ensureMyProfile])
+
   if (!authEnabled || (!isLoading && !user)) {
     return (
       <div className="my-matches-page">

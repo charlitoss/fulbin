@@ -7,7 +7,7 @@ export default function CreateMatchPage({ onNavigate }) {
       <div className="landing-hero">
         <div className="hero-form-container">
           <CreateMatchForm
-            heading="Nuevo partido"
+            heading="Crear partido"
             className="match-form hero-form"
             onCreated={(matchId) => onNavigate(`#/partido/${matchId}`)}
           />

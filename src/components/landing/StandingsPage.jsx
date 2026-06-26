@@ -33,7 +33,7 @@ function StandingsPage({ onNavigate }) {
   )
 
   const current = selected ? (tournaments ?? []).find((t) => t._id === selected) : null
-  const currentName = selected == null ? 'Todos los partidos' : current?.nombre ?? '…'
+  const currentName = selected == null ? 'Tabla histórica' : current?.nombre ?? '…'
   const leader = stats?.tabla?.[0]
 
   if (!authEnabled || (!isLoading && !user)) {
@@ -75,17 +75,12 @@ function StandingsPage({ onNavigate }) {
           className="btn btn-secondary btn-sm"
           onClick={() => setShowManage(true)}
         >
-          Torneos
+          Todos los torneos
         </button>
       </div>
 
       <div className="standings-subtitle-row">
         <span className="standings-subtitle">Tabla de posiciones</span>
-        {stats && (
-          <span className="standings-matches-count">
-            {stats.partidos} partido{stats.partidos === 1 ? '' : 's'}
-          </span>
-        )}
       </div>
 
       {/* Champion banner for a finalized season */}
@@ -118,11 +113,8 @@ function StandingsPage({ onNavigate }) {
         <div className="loading">Cargando...</div>
       ) : stats.tabla.length === 0 ? (
         <div className="my-matches-empty">
-          <p>Todavía no hay partidos finalizados en esta tabla.</p>
-          <p className="my-matches-hint">
-            Cuando termines un partido, los jugadores del equipo ganador suman
-            3 puntos y los de un empate suman 1.
-          </p>
+          <h2>Todavía no tenés partidos finalizados.</h2>
+          <p>Cuando termine un partido, los jugadores ganadores sumarán 3 puntos.</p>
         </div>
       ) : (
         <div className="standings-table-wrap">
@@ -131,10 +123,10 @@ function StandingsPage({ onNavigate }) {
               <tr>
                 <th className="standings-pos">#</th>
                 <th className="standings-name">Jugador</th>
-                <th title="Partidos jugados">PJ</th>
-                <th title="Ganados">G</th>
-                <th title="Empatados">E</th>
-                <th title="Perdidos">P</th>
+                <th className="standings-th-stat" title="Partidos jugados">PJ</th>
+                <th className="standings-th-stat" title="Ganados">G</th>
+                <th className="standings-th-stat" title="Empatados">E</th>
+                <th className="standings-th-stat" title="Perdidos">P</th>
                 <th title="Goles">
                   <img src="/soccer-ball.svg" alt="Goles" className="standings-goal-icon" width="16" height="16" />
                 </th>
