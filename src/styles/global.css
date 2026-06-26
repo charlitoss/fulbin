@@ -2342,11 +2342,17 @@ h4 { font-size: var(--type-lg); }
 }
 
 /* Attributes */
+/* "Características de …" subtitle matches the form input labels (black pill). */
 .attributes-section h4 {
-  font-size: var(--type-xs);
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-wide);
+  display: inline-block;
+  background: #000;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: var(--type-md);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  padding: 2px 4px;
   margin-bottom: var(--space-4);
 }
 
@@ -2359,7 +2365,7 @@ h4 { font-size: var(--type-lg); }
 
 .attribute-label {
   width: 100px;
-  font-size: var(--type-sm);
+  font-size: var(--type-base);
   color: var(--text-secondary);
 }
 
@@ -2422,36 +2428,40 @@ h4 { font-size: var(--type-lg); }
   color: var(--color-primary);
 }
 
-/* Player info modal footer: primary actions on a row, "Bajarme" below */
-.player-modal-footer {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  width: 100%;
-}
-
+/* Player info modal footer: a single row of actions that fill the width
+   (Me bajo / Mover / Listo, or the move destinations once "Mover" is tapped). */
 .player-modal-footer-main {
   display: flex;
   gap: var(--space-2);
+  width: 100%;
 }
 
-/* Compact (icon over label) so all three actions fit on one line. */
 .player-modal-footer-btn {
   flex: 1;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  padding: 8px 6px;
-  font-size: var(--type-xs);
-  line-height: 1.2;
-  text-align: center;
 }
 
-.player-modal-leave-btn {
+/* "Mover" button + its destination dropdown (opens upward, over the body). */
+.mover-wrap {
+  position: relative;
+}
+
+.mover-btn {
   width: 100%;
+}
+
+/* moveplayer.svg is a horizontal move glyph; rotate it for the Mover button. */
+.mover-icon {
+  transform: rotate(90deg);
+}
+
+.mover-dropdown {
+  position: absolute;
+  bottom: calc(100% + var(--space-2));
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 180px;
+  z-index: var(--z-toast);
 }
 
 /* ===================================
