@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { X } from 'lucide-react'
 
 function Modal({ isOpen, onClose, title, children, footer, onSubmit }) {
@@ -16,7 +17,9 @@ function Modal({ isOpen, onClose, title, children, footer, onSubmit }) {
       const el = overlayRef.current
       if (!el) return
       el.style.height = `${vv.height}px`
-      el.style.transform = `translateY(${vv.offsetTop}px)`
+      // Use top (not transform): a transform on a position:fixed element re-bases
+      // it to the document on some engines, which broke modal placement.
+      el.style.top = `${vv.offsetTop}px`
     }
 
     sync()
@@ -28,7 +31,7 @@ function Modal({ isOpen, onClose, title, children, footer, onSubmit }) {
       const el = overlayRef.current
       if (el) {
         el.style.height = ''
-        el.style.transform = ''
+        el.style.top = ''
       }
     }
   }, [isOpen])
@@ -69,7 +72,11 @@ function Modal({ isOpen, onClose, title, children, footer, onSubmit }) {
     }
   }
   
-  return (
+  // Portal to <body> so the overlay lives outside #root. When the CRT effect is on,
+  // `#root` has a `filter`, which makes it the containing block for position:fixed
+  // descendants — that re-based the overlay to document scroll and dragged it off-screen
+  // on long, scrolled lists. Rendering at the body level keeps it viewport-fixed.
+  return createPortal(
     <div className="modal-overlay" ref={overlayRef} onClick={handleOverlayClick}>
       <div className="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
         <div className="modal-header">
@@ -87,7 +94,8 @@ function Modal({ isOpen, onClose, title, children, footer, onSubmit }) {
           </div>
         )}
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
 
