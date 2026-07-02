@@ -10,6 +10,7 @@ import MyProfilePage from './components/landing/MyProfilePage'
 import AdminPage from './components/landing/AdminPage'
 import GroupsPage from './components/landing/GroupsPage'
 import JoinGroupPage from './components/landing/JoinGroupPage'
+import PublicGroupPage from './components/landing/PublicGroupPage'
 import MatchPage from './components/match/MatchPage'
 import AuthControls from './components/ui/AuthControls'
 import { authEnabled, useAuthSession } from './auth/useAuthSession'
@@ -157,6 +158,19 @@ function App() {
     const inviteRoute = route.match(/^#\/unirse\/([A-Za-z0-9]{6})$/)
     if (inviteRoute) {
       return <JoinGroupPage code={inviteRoute[1].toUpperCase()} onNavigate={navigate} />
+    }
+
+    // Public group page: #/g/TOKEN and #/g/TOKEN/jugador/PLAYER_ID.
+    // Read-only, no session needed.
+    const publicGroupRoute = route.match(/^#\/g\/([A-Za-z0-9]+)(?:\/jugador\/([A-Za-z0-9]+))?$/)
+    if (publicGroupRoute) {
+      return (
+        <PublicGroupPage
+          publicToken={publicGroupRoute[1]}
+          playerId={publicGroupRoute[2]}
+          onNavigate={navigate}
+        />
+      )
     }
 
     // Short code route: #/p/ABC123

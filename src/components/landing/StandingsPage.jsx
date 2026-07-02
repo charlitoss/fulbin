@@ -5,6 +5,9 @@ import { api } from '../../../convex/_generated/api'
 import { authEnabled, useAuthSession } from '../../auth/useAuthSession'
 import TournamentsModal from './TournamentsModal'
 import TournamentSettingsModal from './TournamentSettingsModal'
+import StandingsTable from '../ui/StandingsTable'
+import StandingsShareMenu from '../ui/StandingsShareMenu'
+import { appBaseUrl } from '../../utils/share'
 
 // Individual standings across the admin's finished matches: teams change
 // every match, so points follow players (win 3, draw 1, loss 0). Results are
@@ -12,6 +15,8 @@ import TournamentSettingsModal from './TournamentSettingsModal'
 function StandingsPage({ onNavigate }) {
   const { user, isLoading, signIn } = useAuthSession()
   const tournaments = useQuery(api.tournaments.mine, user ? {} : 'skip')
+  const groups = useQuery(api.groups.myGroups, user ? {} : 'skip')
+  const myMatches = useQuery(api.matches.myMatches, user ? {} : 'skip')
 
   // null = "Todos"; a string = a tournament id; undefined = not yet defaulted.
   const [selected, setSelected] = useState(undefined)
@@ -35,6 +40,16 @@ function StandingsPage({ onNavigate }) {
   const current = selected ? (tournaments ?? []).find((t) => t._id === selected) : null
   const currentName = selected == null ? 'Tabla histórica' : current?.nombre ?? '…'
   const leader = stats?.tabla?.[0]
+
+  // Share context: the active group's name/public link + this view's results.
+  const activeGroup = (groups ?? []).find((g) => g.esActivo)
+  const shareResults = (myMatches ?? [])
+    .filter(
+      (m) =>
+        m.pasoActual === 'finalizado' &&
+        (selectedId === undefined || m.tournamentId === selectedId)
+    )
+    .sort((a, b) => (b.finalizadoEn ?? 0) - (a.finalizadoEn ?? 0))
 
   if (!authEnabled || (!isLoading && !user)) {
     return (
@@ -81,6 +96,20 @@ function StandingsPage({ onNavigate }) {
 
       <div className="standings-subtitle-row">
         <span className="standings-subtitle">Tabla de posiciones</span>
+        {!loading && stats.tabla.length > 0 && (
+          <StandingsShareMenu
+            groupName={activeGroup?.nombre ?? 'Fulbin'}
+            tournamentName={selected == null ? null : currentName}
+            partidos={stats.partidos}
+            tabla={stats.tabla}
+            results={shareResults}
+            publicUrl={
+              activeGroup?.publico && activeGroup?.publicToken
+                ? `${appBaseUrl()}#/g/${activeGroup.publicToken}`
+                : null
+            }
+          />
+        )}
       </div>
 
       {/* Champion banner for a finalized season */}
@@ -117,38 +146,7 @@ function StandingsPage({ onNavigate }) {
           <p>Cuando termine un partido, los jugadores ganadores sumarán 3 puntos.</p>
         </div>
       ) : (
-        <div className="standings-table-wrap">
-          <table className="standings-table">
-            <thead>
-              <tr>
-                <th className="standings-pos">#</th>
-                <th className="standings-name">Jugador</th>
-                <th className="standings-th-stat" title="Partidos jugados">PJ</th>
-                <th className="standings-th-stat" title="Ganados">G</th>
-                <th className="standings-th-stat" title="Empatados">E</th>
-                <th className="standings-th-stat" title="Perdidos">P</th>
-                <th title="Goles">
-                  <img src="/soccer-ball.svg" alt="Goles" className="standings-goal-icon" width="16" height="16" />
-                </th>
-                <th className="standings-th-pts" title="Puntos">Pts</th>
-              </tr>
-            </thead>
-            <tbody>
-              {stats.tabla.map((row, index) => (
-                <tr key={row.playerId} className={index === 0 ? 'standings-leader' : ''}>
-                  <td className="standings-pos">{index + 1}</td>
-                  <td className="standings-name">{row.nombre}</td>
-                  <td>{row.pj}</td>
-                  <td>{row.pg}</td>
-                  <td>{row.pe}</td>
-                  <td>{row.pp}</td>
-                  <td>{row.goles}</td>
-                  <td className="standings-puntos">{row.puntos}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <StandingsTable tabla={stats.tabla} />
       )}
     </div>
   )

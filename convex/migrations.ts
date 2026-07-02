@@ -1,6 +1,8 @@
 import { internalMutation } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
+import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
+import { generatePublicToken } from "./codes";
 
 // One-off, idempotent backfill for the co-managed-groups feature.
 //
@@ -123,5 +125,24 @@ export const backfillGroups = internalMutation({
       playersStamped,
       tournamentsStamped,
     };
+  },
+});
+
+// Ops/dev utility (internal = CLI-only, never callable from clients): flip a
+// group's public page by name, minting the token if needed. Returns the
+// public path. Run: npx convex run migrations:setGroupPublic '{"nombre": "...", "publico": true}'
+export const setGroupPublic = internalMutation({
+  args: { nombre: v.string(), publico: v.boolean() },
+  handler: async (ctx, args) => {
+    const groups = await ctx.db.query("groups").collect();
+    const group = groups.find((g) => g.nombre === args.nombre);
+    if (!group) throw new Error(`Grupo "${args.nombre}" no encontrado`);
+    const publicToken = group.publicToken ?? generatePublicToken();
+    await ctx.db.patch(group._id, {
+      publico: args.publico,
+      publicToken,
+      updatedAt: new Date().toISOString(),
+    });
+    return { publico: args.publico, path: `#/g/${publicToken}` };
   },
 });

@@ -54,9 +54,14 @@ export const myGroups = query({
         rol: m.rol,
         esActivo: user.activeGroupId === group._id,
         miembros: members.length,
-        // Only the owner sees the sharing secrets.
+        // The invite code grants co-admin membership: owner-only. The public
+        // token is read-only and meant to be shared: any member may see it
+        // once the public page is on.
         inviteCode: group.ownerId === user._id ? group.inviteCode : undefined,
-        publicToken: group.ownerId === user._id ? group.publicToken : undefined,
+        publicToken:
+          group.ownerId === user._id || group.publico
+            ? group.publicToken
+            : undefined,
         publico: group.publico ?? false,
         createdAt: group.createdAt,
       });

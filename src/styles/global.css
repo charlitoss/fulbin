@@ -6963,3 +6963,115 @@ body.crt-on #root {
 .menu-item--checked {
   color: var(--color-primary);
 }
+
+/* ============================================
+   Public group page (#/g/:token) — read-only standings/results/player
+   ============================================ */
+
+.public-group-header {
+  align-items: flex-start;
+}
+
+.public-group-header h2 {
+  margin: 0;
+}
+
+.public-group-badge {
+  display: inline-block;
+  margin-top: 4px;
+  font-family: var(--font-display);
+  font-size: var(--type-xs);
+  color: var(--gray-400);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.public-season-picker {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+.standings-player-link {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: var(--surface-5);
+  text-underline-offset: 3px;
+}
+
+.standings-player-link:hover {
+  color: var(--color-primary);
+  text-decoration-color: var(--color-primary);
+}
+
+.public-player-header {
+  margin-bottom: var(--space-4);
+}
+
+.public-player-header h2 {
+  margin: 0 0 4px;
+}
+
+.public-player-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-2);
+  margin-bottom: var(--space-5, 24px);
+}
+
+.public-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: var(--space-3);
+  background: var(--surface-1);
+  border: 1px solid var(--surface-5);
+}
+
+.public-stat-value {
+  font-family: var(--font-display);
+  font-size: var(--type-xl, 24px);
+  color: var(--color-primary);
+  white-space: nowrap;
+}
+
+.public-stat-label {
+  font-family: var(--font-display);
+  font-size: var(--type-xs);
+  color: var(--gray-400);
+  text-transform: uppercase;
+}
+
+.public-result-tag {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: var(--type-sm);
+  border: 1px solid var(--surface-5);
+}
+
+.public-result-tag--g {
+  color: var(--semantic-success);
+  border-color: var(--semantic-success);
+}
+
+.public-result-tag--e {
+  color: var(--semantic-warning);
+  border-color: var(--semantic-warning);
+}
+
+.public-result-tag--p {
+  color: var(--semantic-error);
+  border-color: var(--semantic-error);
+}
