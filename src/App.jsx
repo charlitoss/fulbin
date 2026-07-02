@@ -199,6 +199,8 @@ function App() {
   }
 
   const isSplash = route === '#/' || route === '' || route === '#'
+  // The invite screen is a focused, single-CTA page: logo only, no nav menu.
+  const isInviteRoute = /^#\/unirse\//.test(route)
 
   // Anonymous users keep the simple "← Volver" back button on sub-pages;
   // signed-in users navigate via the always-visible top nav instead.
@@ -216,7 +218,13 @@ function App() {
         </div>
       )}
 
-      {!isSplash && isLoggedIn && (
+      {isInviteRoute && (
+        <header className="app-logo">
+          <img src="/LOGO.svg" alt="Fulbin" width="120" height="41" />
+        </header>
+      )}
+
+      {!isSplash && !isInviteRoute && isLoggedIn && (
         <header className="app-nav" style={{ maxWidth: navMaxWidth }}>
           <button
             type="button"
@@ -246,7 +254,7 @@ function App() {
         </header>
       )}
 
-      {!isSplash && !isLoggedIn && (
+      {!isSplash && !isInviteRoute && !isLoggedIn && (
         <header className={`app-logo${showBack ? ' app-logo--with-back' : ''}`}>
           {showBack && (
             <button

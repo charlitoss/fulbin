@@ -6806,33 +6806,30 @@ body.crt-on #root {
    Groups (co-managed): GroupsPage, settings modal, join page
    ============================================ */
 
-.group-card {
-  cursor: default;
-}
-
 .group-card--active {
   border-color: var(--color-primary);
-}
-
-.group-card-main {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  flex: 1;
-  min-width: 0;
-  background: none;
-  border: none;
-  padding: 0;
-  color: inherit;
-  font-family: var(--font-display);
-  text-align: left;
-  cursor: pointer;
 }
 
 .group-card .roster-card-meta {
   display: inline-flex;
   align-items: center;
   gap: 4px;
+}
+
+/* Small member-removal button: quiet by default, unmistakably destructive
+   on hover. */
+.group-member-remove {
+  height: 26px;
+  padding: 2px 8px 4px;
+  font-size: var(--type-xs);
+  flex-shrink: 0;
+  box-shadow: 0 3px 0 0 var(--gray-600);
+}
+
+.group-member-remove:hover:not(:disabled) {
+  border-color: var(--semantic-error);
+  color: var(--semantic-error);
+  box-shadow: 0 3px 0 0 var(--semantic-error);
 }
 
 .group-settings {

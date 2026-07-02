@@ -89,7 +89,7 @@ function GroupSettingsModal({ group, onClose }) {
                 {isOwner && m.rol !== 'owner' && (
                   <button
                     type="button"
-                    className="btn btn-secondary btn-sm"
+                    className="btn btn-secondary group-member-remove"
                     onClick={() => removeMember({ groupId: group._id, userId: m.userId })}
                   >
                     Quitar
@@ -250,7 +250,6 @@ function GroupSettingsModal({ group, onClose }) {
 function GroupsPage({ onNavigate }) {
   const { user, isLoading, signIn } = useAuthSession()
   const groups = useQuery(api.groups.myGroups, user ? {} : 'skip')
-  const setActive = useMutation(api.groups.setActive)
   const createGroup = useMutation(api.groups.create)
 
   const [settingsFor, setSettingsFor] = useState(null)
@@ -310,15 +309,12 @@ function GroupsPage({ onNavigate }) {
       <ul className="my-matches-list">
         {groups.map((g) => (
           <li key={g._id}>
-            <div className={`roster-card group-card${g.esActivo ? ' group-card--active' : ''}`}>
-              <button
-                type="button"
-                className="group-card-main"
-                onClick={() => {
-                  if (!g.esActivo) setActive({ groupId: g._id })
-                }}
-                title={g.esActivo ? 'Grupo activo' : 'Cambiar a este grupo'}
-              >
+            <button
+              type="button"
+              className={`roster-card group-card${g.esActivo ? ' group-card--active' : ''}`}
+              onClick={() => setSettingsFor(g._id)}
+            >
+              <div className="my-player-main">
                 <span className="auth-avatar auth-avatar--initial roster-avatar">
                   {initials(g.nombre)}
                 </span>
@@ -340,15 +336,8 @@ function GroupsPage({ onNavigate }) {
                     )}
                   </span>
                 </div>
-              </button>
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                onClick={() => setSettingsFor(g._id)}
-              >
-                Ajustes
-              </button>
-            </div>
+              </div>
+            </button>
           </li>
         ))}
       </ul>
