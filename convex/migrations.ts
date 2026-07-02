@@ -2,7 +2,7 @@ import { internalMutation } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
 import type { Doc, Id } from "./_generated/dataModel";
-import { generatePublicToken } from "./codes";
+import { generatePublicToken, generateShortCode } from "./codes";
 
 // One-off, idempotent backfill for the co-managed-groups feature.
 //
@@ -125,6 +125,25 @@ export const backfillGroups = internalMutation({
       playersStamped,
       tournamentsStamped,
     };
+  },
+});
+
+// Ops/dev utility (internal = CLI-only, never callable from clients): mint an
+// invite code for a group by name (same as the owner's "Crear link de
+// invitación"). Run: npx convex run migrations:setGroupInvite '{"nombre": "..."}'
+export const setGroupInvite = internalMutation({
+  args: { nombre: v.string() },
+  handler: async (ctx, args) => {
+    const groups = await ctx.db.query("groups").collect();
+    const group = groups.find((g) => g.nombre === args.nombre);
+    if (!group) throw new Error(`Grupo "${args.nombre}" no encontrado`);
+    let code = generateShortCode();
+    while (groups.some((g) => g.inviteCode === code)) code = generateShortCode();
+    await ctx.db.patch(group._id, {
+      inviteCode: code,
+      updatedAt: new Date().toISOString(),
+    });
+    return { path: `#/unirse/${code}` };
   },
 });
 

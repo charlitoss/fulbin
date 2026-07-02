@@ -1,7 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import type { MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
-import { currentUserDoc } from "./users";
+import { currentUserDoc, upsertCurrentUser } from "./users";
 import { assertGroupMember, assertGroupOwner } from "./permissions";
 import { generateShortCode, generatePublicToken } from "./codes";
 
@@ -198,10 +198,15 @@ export const revokeInvite = mutation({
 });
 
 // Join a group as co-admin via its invite code, and switch to it.
+// Upserts the caller's users row: right after a first-ever login the row may
+// not exist yet (SyncUser's ensureUser runs async) — joining must not depend
+// on that timing.
 export const joinByInvite = mutation({
   args: { code: v.string() },
   handler: async (ctx, args) => {
-    const user = await currentUserDoc(ctx);
+    const userId = await upsertCurrentUser(ctx, {});
+    if (!userId) throw new Error("Necesitás iniciar sesión para unirte a un grupo");
+    const user = await ctx.db.get(userId);
     if (!user) throw new Error("Necesitás iniciar sesión para unirte a un grupo");
     if (user.deshabilitado) throw new Error("CUENTA_DESHABILITADA");
 

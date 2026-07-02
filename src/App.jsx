@@ -14,6 +14,7 @@ import PublicGroupPage from './components/landing/PublicGroupPage'
 import MatchPage from './components/match/MatchPage'
 import AuthControls from './components/ui/AuthControls'
 import { authEnabled, useAuthSession } from './auth/useAuthSession'
+import { PENDING_INVITE_KEY } from './utils/constants'
 import Footer from './components/ui/Footer'
 import CrtEffect from './components/ui/CrtEffect'
 import CrtControlPanel from './components/ui/CrtControlPanel'
@@ -100,10 +101,16 @@ function App() {
     window.scrollTo(0, 0)
   }, [route])
 
-  // Logged-in users land on their matches instead of the marketing splash.
+  // Logged-in users land on their matches instead of the marketing splash —
+  // unless they signed in from a group invite: the WorkOS redirect drops the
+  // URL hash, so finish that flow first (the join page consumes the stash).
   useEffect(() => {
     if (isLoggedIn && (route === '#/' || route === '' || route === '#')) {
-      navigate('#/mis-partidos')
+      let pendingInvite = null
+      try {
+        pendingInvite = sessionStorage.getItem(PENDING_INVITE_KEY)
+      } catch {}
+      navigate(pendingInvite ? `#/unirse/${pendingInvite}` : '#/mis-partidos')
     }
   }, [isLoggedIn, route])
 
