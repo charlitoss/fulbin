@@ -1,5 +1,6 @@
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { generateShortCode } from "./codes";
 
 // Helper to get next Saturday's date
 function getNextSaturday(): string {
@@ -19,16 +20,6 @@ function getNextSunday(): string {
   const nextSunday = new Date(today);
   nextSunday.setDate(today.getDate() + daysUntilSunday);
   return nextSunday.toISOString().split('T')[0];
-}
-
-// Generate a short 6-character alphanumeric code for sharing
-function generateShortCode(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let code = '';
-  for (let i = 0; i < 6; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return code;
 }
 
 // Seed the database with sample data

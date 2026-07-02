@@ -120,8 +120,23 @@ export const seedUserWithData = mutation({
       createdAt: now,
       updatedAt: now,
     });
+    // Mirror the post-migration shape: every user has a personal group they own.
+    const groupId = await ctx.db.insert("groups", {
+      nombre: `e2e-${args.nombre}`,
+      ownerId: userId,
+      createdAt: now,
+      updatedAt: now,
+    });
+    await ctx.db.insert("memberships", {
+      groupId,
+      userId,
+      rol: "owner",
+      createdAt: now,
+    });
+    await ctx.db.patch(userId, { activeGroupId: groupId, updatedAt: now });
     const tournamentId = await ctx.db.insert("tournaments", {
       ownerId: userId,
+      groupId,
       nombre: "e2e-admin-trn",
       activo: true,
       createdAt: now,
@@ -136,6 +151,7 @@ export const seedUserWithData = mutation({
       jugadoresPorEquipo: 1,
       pasoActual: "inscripcion",
       ownerId: userId,
+      groupId,
       tournamentId,
       createdAt: now,
       updatedAt: now,
@@ -143,8 +159,9 @@ export const seedUserWithData = mutation({
     const playerId = await ctx.db.insert("players", {
       nombre: "e2e-admin-player",
       ownerId: userId,
+      groupId,
     });
-    return { userId, matchId, playerId, tournamentId };
+    return { userId, matchId, playerId, tournamentId, groupId };
   },
 });
 
