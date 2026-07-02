@@ -5,6 +5,7 @@ import { AuthKitProvider, useAuth } from '@workos-inc/authkit-react'
 import { ConvexProviderWithAuthKit } from '@convex-dev/workos'
 import { api } from '../convex/_generated/api'
 import { authEnabled } from './auth/useAuthSession'
+import { PENDING_INVITE_KEY } from './utils/constants'
 import App from './App'
 import './styles/global.css'
 
@@ -53,6 +54,15 @@ function Root() {
       onRedirectCallback={() => {
         // The app routes via the URL hash; drop the /callback path after login.
         window.history.replaceState(null, '', '/')
+        // If sign-in started from a group invite, resume it: the login
+        // redirect drops the hash, so JoinGroupPage stashes the code first.
+        try {
+          const pendingInvite = sessionStorage.getItem(PENDING_INVITE_KEY)
+          if (pendingInvite) {
+            sessionStorage.removeItem(PENDING_INVITE_KEY)
+            window.location.hash = `#/unirse/${pendingInvite}`
+          }
+        } catch {}
       }}
     >
       <ConvexProviderWithAuthKit client={convex} useAuth={useAuth}>

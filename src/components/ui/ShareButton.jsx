@@ -3,6 +3,7 @@ import { Share2, Check, Link2, MessageCircle, X } from 'lucide-react'
 import { useQuery } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import { formatDate } from '../../utils/dateUtils'
+import { copyToClipboard, openWhatsApp, appBaseUrl } from '../../utils/share'
 
 function ShareButton({ matchId, match }) {
   const [showMenu, setShowMenu] = useState(false)
@@ -27,8 +28,8 @@ function ShareButton({ matchId, match }) {
   // Get match data for the share message (match is now passed as prop)
   const shortCode = match?.codigoCorto || ''
   const shareUrl = shortCode
-    ? `${window.location.origin}${window.location.pathname}#/p/${shortCode}`
-    : `${window.location.origin}${window.location.pathname}#/partido/${matchId}`
+    ? `${appBaseUrl()}#/p/${shortCode}`
+    : `${appBaseUrl()}#/partido/${matchId}`
   
   // Close menu when clicking outside
   useEffect(() => {
@@ -125,39 +126,18 @@ function ShareButton({ matchId, match }) {
   }
   
   const copyLink = async () => {
-    try {
-      await navigator.clipboard.writeText(shareUrl)
-      setCopied(true)
-      setTimeout(() => {
-        setCopied(false)
-        setShowMenu(false)
-      }, 1500)
-    } catch (err) {
-      // Fallback for older browsers
-      const textArea = document.createElement('textarea')
-      textArea.value = shareUrl
-      document.body.appendChild(textArea)
-      textArea.select()
-      document.execCommand('copy')
-      document.body.removeChild(textArea)
-      setCopied(true)
-      setTimeout(() => {
-        setCopied(false)
-        setShowMenu(false)
-      }, 1500)
-    }
+    await copyToClipboard(shareUrl)
+    setCopied(true)
+    setTimeout(() => {
+      setCopied(false)
+      setShowMenu(false)
+    }, 1500)
   }
-  
+
   const shareWhatsApp = () => {
     const text = getWhatsAppMessage()
     setShowMenu(false)
-    const encoded = encodeURIComponent(text)
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
-    // whatsapp:// preserves the full prefilled text on iOS where wa.me sometimes drops everything but the URL
-    const target = isMobile
-      ? `whatsapp://send?text=${encoded}`
-      : `https://api.whatsapp.com/send?text=${encoded}`
-    window.open(target, '_blank')
+    openWhatsApp(text)
   }
   
   return (

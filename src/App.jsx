@@ -8,6 +8,8 @@ import MyPlayersPage from './components/landing/MyPlayersPage'
 import StandingsPage from './components/landing/StandingsPage'
 import MyProfilePage from './components/landing/MyProfilePage'
 import AdminPage from './components/landing/AdminPage'
+import GroupsPage from './components/landing/GroupsPage'
+import JoinGroupPage from './components/landing/JoinGroupPage'
 import MatchPage from './components/match/MatchPage'
 import AuthControls from './components/ui/AuthControls'
 import { authEnabled, useAuthSession } from './auth/useAuthSession'
@@ -145,6 +147,16 @@ function App() {
 
     if (route === '#/admin') {
       return <AdminPage onNavigate={navigate} />
+    }
+
+    if (route === '#/grupos') {
+      return <GroupsPage onNavigate={navigate} />
+    }
+
+    // Group invite route: #/unirse/ABC123
+    const inviteRoute = route.match(/^#\/unirse\/([A-Za-z0-9]{6})$/)
+    if (inviteRoute) {
+      return <JoinGroupPage code={inviteRoute[1].toUpperCase()} onNavigate={navigate} />
     }
 
     // Short code route: #/p/ABC123

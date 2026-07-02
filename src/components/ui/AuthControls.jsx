@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { useQuery } from 'convex/react'
+import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import { authEnabled, useAuthSession } from '../../auth/useAuthSession'
 import { Menu, MenuItem, MenuHeader } from './Menu'
@@ -9,6 +9,8 @@ import { Menu, MenuItem, MenuHeader } from './Menu'
 function AuthControls({ onNavigate }) {
   const { user, isLoading, signIn, signOut } = useAuthSession()
   const isSuperAdmin = useQuery(api.admin.amISuperAdmin, user ? {} : 'skip')
+  const groups = useQuery(api.groups.myGroups, user ? {} : 'skip')
+  const setActiveGroup = useMutation(api.groups.setActive)
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
 
@@ -64,6 +66,34 @@ function AuthControls({ onNavigate }) {
             <span className="auth-dropdown-name">{displayName}</span>
             {user.email && <span className="auth-dropdown-email">{user.email}</span>}
           </MenuHeader>
+          {groups && groups.length > 1 && (
+            <>
+              <MenuHeader>
+                <span className="auth-dropdown-email">Grupo activo</span>
+              </MenuHeader>
+              {groups.map((g) => (
+                <MenuItem
+                  key={g._id}
+                  className={g.esActivo ? 'menu-item--checked' : ''}
+                  onClick={() => {
+                    setMenuOpen(false)
+                    if (!g.esActivo) setActiveGroup({ groupId: g._id })
+                  }}
+                >
+                  {g.esActivo ? '✓ ' : ''}
+                  {g.nombre}
+                </MenuItem>
+              ))}
+            </>
+          )}
+          <MenuItem
+            onClick={() => {
+              setMenuOpen(false)
+              onNavigate('#/grupos')
+            }}
+          >
+            Mis grupos
+          </MenuItem>
           <MenuItem
             onClick={() => {
               setMenuOpen(false)
