@@ -2,7 +2,12 @@ import { query, mutation } from "./_generated/server";
 import type { QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
 import type { Id } from "./_generated/dataModel";
-import { currentUserDoc, upsertCurrentUser } from "./users";
+import {
+  currentUserDoc,
+  upsertCurrentUser,
+  ensureActiveGroupId,
+  resolveActiveGroupId,
+} from "./users";
 import { activeTournament } from "./tournaments";
 import { assertCanManageMatch } from "./permissions";
 import { generateShortCode } from "./codes";
@@ -69,21 +74,24 @@ export const create = mutation({
 
     const now = new Date().toISOString();
 
-    // Link the match to its creator when they're signed in; anonymous
-    // creation keeps working with no owner.
+    // Link the match to its creator's active group when they're signed in;
+    // anonymous creation keeps working with no owner and no group.
     const ownerId = await upsertCurrentUser(ctx, {});
+    let groupId;
     if (ownerId) {
       const owner = await ctx.db.get(ownerId);
       if (owner?.deshabilitado) throw new Error("CUENTA_DESHABILITADA");
+      if (owner) groupId = await ensureActiveGroupId(ctx, owner);
     }
 
-    // Count the match toward the owner's active tournament, if any.
-    const tournament = ownerId ? await activeTournament(ctx, ownerId) : null;
+    // Count the match toward the group's active tournament, if any.
+    const tournament = groupId ? await activeTournament(ctx, groupId) : null;
 
     const matchId = await ctx.db.insert("matches", {
       ...args,
       codigoCorto,
       ownerId: ownerId ?? undefined,
+      groupId,
       tournamentId: tournament?._id,
       pasoActual: "inscripcion",
       linkCompartible: "",
@@ -103,9 +111,11 @@ export const myMatches = query({
   handler: async (ctx) => {
     const user = await currentUserDoc(ctx);
     if (!user) return [];
+    const groupId = await resolveActiveGroupId(ctx, user);
+    if (!groupId) return [];
     const matches = await ctx.db
       .query("matches")
-      .withIndex("by_ownerId", (q) => q.eq("ownerId", user._id))
+      .withIndex("by_groupId", (q) => q.eq("groupId", groupId))
       .order("desc")
       .collect();
 
@@ -143,7 +153,8 @@ export const claim = mutation({
     const userId = await upsertCurrentUser(ctx, {});
     if (!userId) throw new Error("Necesitás iniciar sesión para reclamar un partido");
     const claimer = await ctx.db.get(userId);
-    if (claimer?.deshabilitado) throw new Error("CUENTA_DESHABILITADA");
+    if (!claimer) throw new Error("Necesitás iniciar sesión para reclamar un partido");
+    if (claimer.deshabilitado) throw new Error("CUENTA_DESHABILITADA");
 
     const match = await ctx.db.get(args.matchId);
     if (!match) throw new Error("Partido no encontrado");
@@ -152,17 +163,19 @@ export const claim = mutation({
     }
 
     if (!match.ownerId) {
+      const groupId = await ensureActiveGroupId(ctx, claimer);
       await ctx.db.patch(args.matchId, {
         ownerId: userId,
+        groupId,
         updatedAt: new Date().toISOString(),
       });
 
-      // Absorb the match's ownerless players into the claimer's roster so
+      // Absorb the match's ownerless players into the group's roster so
       // their history carries over. Skip names already on the roster to
       // avoid duplicates — those players stay in the legacy pool.
       const roster = await ctx.db
         .query("players")
-        .withIndex("by_ownerId", (q) => q.eq("ownerId", userId))
+        .withIndex("by_groupId", (q) => q.eq("groupId", groupId))
         .collect();
       const rosterNames = new Set(roster.map((p) => p.nombre.toLowerCase()));
 
@@ -172,8 +185,8 @@ export const claim = mutation({
         .collect();
       for (const reg of regs) {
         const player = await ctx.db.get(reg.jugadorId);
-        if (player && !player.ownerId && !rosterNames.has(player.nombre.toLowerCase())) {
-          await ctx.db.patch(player._id, { ownerId: userId });
+        if (player && !player.ownerId && !player.groupId && !rosterNames.has(player.nombre.toLowerCase())) {
+          await ctx.db.patch(player._id, { ownerId: userId, groupId });
           rosterNames.add(player.nombre.toLowerCase());
         }
       }

@@ -44,7 +44,7 @@ export async function upsertCurrentUser(
     return existing._id;
   }
 
-  return await ctx.db.insert("users", {
+  const userId = await ctx.db.insert("users", {
     workosId: identity.subject,
     nombre,
     email,
@@ -52,6 +52,86 @@ export async function upsertCurrentUser(
     createdAt: now,
     updatedAt: now,
   });
+
+  // Every account gets a personal group from day one — the space their
+  // roster/matches/tournaments live in, and where co-admins can be invited.
+  const groupId = await ctx.db.insert("groups", {
+    nombre: `Grupo de ${nombre}`,
+    ownerId: userId,
+    createdAt: now,
+    updatedAt: now,
+  });
+  await ctx.db.insert("memberships", {
+    groupId,
+    userId,
+    rol: "owner",
+    createdAt: now,
+  });
+  await ctx.db.patch(userId, { activeGroupId: groupId });
+
+  return userId;
+}
+
+// The group the user currently operates in: their activeGroupId when it still
+// points at a group they belong to, else the group they own, else their oldest
+// membership. Null only for users with no memberships at all.
+export async function resolveActiveGroupId(
+  ctx: QueryCtx,
+  user: Doc<"users">
+): Promise<Id<"groups"> | null> {
+  if (user.activeGroupId) {
+    const membership = await ctx.db
+      .query("memberships")
+      .withIndex("by_groupId_userId", (q) =>
+        q.eq("groupId", user.activeGroupId!).eq("userId", user._id)
+      )
+      .unique();
+    if (membership) return user.activeGroupId;
+  }
+
+  const memberships = await ctx.db
+    .query("memberships")
+    .withIndex("by_userId", (q) => q.eq("userId", user._id))
+    .collect();
+  if (memberships.length === 0) return null;
+  const owned = memberships.find((m) => m.rol === "owner");
+  const pick =
+    owned ??
+    memberships.sort((a, b) => a.createdAt.localeCompare(b.createdAt))[0];
+  return pick.groupId;
+}
+
+// Mutation-side variant: resolves the active group, creating the personal
+// group if the user somehow has none (safety net for pre-backfill accounts),
+// and self-heals a stale users.activeGroupId pointer.
+export async function ensureActiveGroupId(
+  ctx: MutationCtx,
+  user: Doc<"users">
+): Promise<Id<"groups">> {
+  const resolved = await resolveActiveGroupId(ctx, user);
+  const now = new Date().toISOString();
+
+  if (resolved) {
+    if (user.activeGroupId !== resolved) {
+      await ctx.db.patch(user._id, { activeGroupId: resolved, updatedAt: now });
+    }
+    return resolved;
+  }
+
+  const groupId = await ctx.db.insert("groups", {
+    nombre: `Grupo de ${user.nombre}`,
+    ownerId: user._id,
+    createdAt: now,
+    updatedAt: now,
+  });
+  await ctx.db.insert("memberships", {
+    groupId,
+    userId: user._id,
+    rol: "owner",
+    createdAt: now,
+  });
+  await ctx.db.patch(user._id, { activeGroupId: groupId, updatedAt: now });
+  return groupId;
 }
 
 // The signed-in user's profile, or null when anonymous.

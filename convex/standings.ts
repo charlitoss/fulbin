@@ -14,18 +14,19 @@ export type StandingsRow = {
   puntos: number;
 };
 
-// Per-player standings across an admin's finished matches. Teams change every
+// Per-player standings across a group's finished matches. Teams change every
 // match, so the tournament follows individuals — win 3, draw 1, loss 0. With a
 // tournamentId, only that season's matches count; without it, all do.
-// Shared by the live stats query and the finalize mutation (which freezes it).
+// Shared by the live stats query, the public group page, and the finalize
+// mutation (which freezes it).
 export async function computeStandings(
   ctx: QueryCtx,
-  ownerId: Id<"users">,
+  groupId: Id<"groups">,
   tournamentId?: Id<"tournaments">
 ): Promise<{ partidos: number; tabla: StandingsRow[] }> {
   const matches = await ctx.db
     .query("matches")
-    .withIndex("by_ownerId", (q) => q.eq("ownerId", ownerId))
+    .withIndex("by_groupId", (q) => q.eq("groupId", groupId))
     .collect();
   const finished = matches.filter(
     (m) =>

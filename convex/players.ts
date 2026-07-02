@@ -1,6 +1,13 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { currentUserDoc } from "./users";
+import type { QueryCtx } from "./_generated/server";
+import type { Doc } from "./_generated/dataModel";
+import {
+  currentUserDoc,
+  ensureActiveGroupId,
+  resolveActiveGroupId,
+} from "./users";
+import { isGroupMember } from "./permissions";
 
 const perfilValidator = v.optional(v.object({
   posicionPreferida: v.string(),
@@ -47,15 +54,31 @@ export const getById = query({
   },
 });
 
-// The signed-in admin's roster, alphabetical.
+// True if the caller may manage this roster player: any member of its group,
+// or (legacy ungrouped) its owner. Ownerless pool players have no roster to
+// manage — archive/delete stays closed for them (update handles its own
+// anyone-can-edit-ownerless rule).
+async function canManagePlayer(
+  ctx: QueryCtx,
+  player: Doc<"players">
+): Promise<boolean> {
+  if (player.groupId) return await isGroupMember(ctx, player.groupId);
+  if (!player.ownerId) return false;
+  const user = await currentUserDoc(ctx);
+  return !!user && !user.deshabilitado && user._id === player.ownerId;
+}
+
+// The active group's roster, alphabetical.
 export const myRoster = query({
   args: {},
   handler: async (ctx) => {
     const user = await currentUserDoc(ctx);
     if (!user) return [];
+    const groupId = await resolveActiveGroupId(ctx, user);
+    if (!groupId) return [];
     const players = await ctx.db
       .query("players")
-      .withIndex("by_ownerId", (q) => q.eq("ownerId", user._id))
+      .withIndex("by_groupId", (q) => q.eq("groupId", groupId))
       .collect();
     return players.sort((a, b) => a.nombre.localeCompare(b.nombre, "es"));
   },
@@ -74,9 +97,11 @@ export const ensureMyProfile = mutation({
       if (existing) return existing._id;
     }
 
+    const groupId = await ensureActiveGroupId(ctx, user);
     const playerId = await ctx.db.insert("players", {
       nombre: user.nombre,
       ownerId: user._id,
+      groupId,
       perfilPermanente: DEFAULT_PROFILE,
     });
     await ctx.db.patch(user._id, { playerId });
@@ -93,19 +118,24 @@ export const myProfileId = query({
   },
 });
 
-// Roster players of the match's owner who aren't registered yet — the
+// Roster players of the match's group who aren't registered yet — the
 // quick-select list in the join modal. Anyone with the match link can see
 // it (the link is the group's trust boundary). Empty for unowned matches.
 export const availableForMatch = query({
   args: { matchId: v.id("matches") },
   handler: async (ctx, args) => {
     const match = await ctx.db.get(args.matchId);
-    if (!match?.ownerId) return [];
+    if (!match || (!match.groupId && !match.ownerId)) return [];
 
-    const roster = await ctx.db
-      .query("players")
-      .withIndex("by_ownerId", (q) => q.eq("ownerId", match.ownerId))
-      .collect();
+    const roster = match.groupId
+      ? await ctx.db
+          .query("players")
+          .withIndex("by_groupId", (q) => q.eq("groupId", match.groupId))
+          .collect()
+      : await ctx.db
+          .query("players")
+          .withIndex("by_ownerId", (q) => q.eq("ownerId", match.ownerId))
+          .collect();
     const regs = await ctx.db
       .query("registrations")
       .withIndex("by_partidoId", (q) => q.eq("partidoId", args.matchId))
@@ -124,7 +154,7 @@ export const availableForMatch = query({
   },
 });
 
-// Create a player in the signed-in admin's roster.
+// Create a player in the active group's roster.
 export const createInRoster = mutation({
   args: {
     nombre: v.string(),
@@ -134,13 +164,15 @@ export const createInRoster = mutation({
   handler: async (ctx, args) => {
     const user = await currentUserDoc(ctx);
     if (!user) throw new Error("Necesitás iniciar sesión");
+    if (user.deshabilitado) throw new Error("CUENTA_DESHABILITADA");
 
     const nombre = args.nombre.trim();
     if (nombre.length < 2) throw new Error("El nombre debe tener al menos 2 caracteres");
 
+    const groupId = await ensureActiveGroupId(ctx, user);
     const roster = await ctx.db
       .query("players")
-      .withIndex("by_ownerId", (q) => q.eq("ownerId", user._id))
+      .withIndex("by_groupId", (q) => q.eq("groupId", groupId))
       .collect();
     if (roster.some((p) => p.nombre.toLowerCase() === nombre.toLowerCase())) {
       throw new Error(`Ya tenés un jugador llamado "${nombre}"`);
@@ -150,6 +182,7 @@ export const createInRoster = mutation({
       ...args,
       nombre,
       ownerId: user._id,
+      groupId,
       perfilPermanente: args.perfilPermanente ?? DEFAULT_PROFILE,
     });
   },
@@ -161,12 +194,11 @@ export const createInRoster = mutation({
 export const setPlayerActive = mutation({
   args: { playerId: v.id("players"), activo: v.boolean() },
   handler: async (ctx, args) => {
-    const user = await currentUserDoc(ctx);
-    if (!user) throw new Error("Necesitás iniciar sesión");
-
     const player = await ctx.db.get(args.playerId);
     if (!player) throw new Error("Jugador no encontrado");
-    if (player.ownerId !== user._id) throw new Error("Este jugador no es de tu plantel");
+    if (!(await canManagePlayer(ctx, player))) {
+      throw new Error("Este jugador no es de tu plantel");
+    }
 
     await ctx.db.patch(args.playerId, { activo: args.activo });
     return args.playerId;
@@ -178,12 +210,11 @@ export const setPlayerActive = mutation({
 export const removeFromRoster = mutation({
   args: { playerId: v.id("players") },
   handler: async (ctx, args) => {
-    const user = await currentUserDoc(ctx);
-    if (!user) throw new Error("Necesitás iniciar sesión");
-
     const player = await ctx.db.get(args.playerId);
     if (!player) throw new Error("Jugador no encontrado");
-    if (player.ownerId !== user._id) throw new Error("Este jugador no es de tu plantel");
+    if (!(await canManagePlayer(ctx, player))) {
+      throw new Error("Este jugador no es de tu plantel");
+    }
 
     const registration = await ctx.db
       .query("registrations")
@@ -210,10 +241,11 @@ export const create = mutation({
   },
 });
 
-// Update an existing player. Roster players can be edited by their owner; the
-// player who inscribed via this device can also edit their own profile (pass
-// anonId + matchId — checked against the registration's creator). Ownerless
-// (anonymous) players stay editable by anyone, as before.
+// Update an existing player. Roster players can be edited by any member of
+// their group (or, legacy ungrouped, their owner); the player who inscribed
+// via this device can also edit their own profile (pass anonId + matchId —
+// checked against the registration's creator). Ownerless (anonymous) players
+// stay editable by anyone, as before.
 export const update = mutation({
   args: {
     playerId: v.id("players"),
@@ -228,11 +260,10 @@ export const update = mutation({
 
     const player = await ctx.db.get(playerId);
     if (!player) throw new Error("Jugador no encontrado");
-    if (player.ownerId) {
-      const user = await currentUserDoc(ctx);
-      const isOwner = !!user && user._id === player.ownerId;
+    if (player.groupId || player.ownerId) {
+      const isManager = await canManagePlayer(ctx, player);
       let isSelf = false;
-      if (!isOwner && anonId && matchId) {
+      if (!isManager && anonId && matchId) {
         const reg = await ctx.db
           .query("registrations")
           .withIndex("by_partidoId_jugadorId", (q) =>
@@ -241,7 +272,7 @@ export const update = mutation({
           .first();
         isSelf = !!reg && reg.creadoPor === anonId;
       }
-      if (!isOwner && !isSelf) {
+      if (!isManager && !isSelf) {
         throw new Error("Este jugador no es de tu plantel");
       }
     }

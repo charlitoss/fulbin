@@ -9,7 +9,9 @@
  */
 
 import type * as admin from "../admin.js";
+import type * as codes from "../codes.js";
 import type * as matches from "../matches.js";
+import type * as migrations from "../migrations.js";
 import type * as permissions from "../permissions.js";
 import type * as players from "../players.js";
 import type * as registrations from "../registrations.js";
@@ -29,7 +31,9 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
+  codes: typeof codes;
   matches: typeof matches;
+  migrations: typeof migrations;
   permissions: typeof permissions;
   players: typeof players;
   registrations: typeof registrations;
