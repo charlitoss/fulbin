@@ -178,10 +178,23 @@ export async function generateStandingsImage(data) {
   return { blob, file }
 }
 
-// Share the card: Web Share API with files on mobile (lands straight in a
-// WhatsApp chat); otherwise copy to clipboard or download. Returns which
-// path ran: 'shared' | 'copied' | 'downloaded'.
-export async function shareStandingsImage(data) {
+// Copy the card to the clipboard. The ClipboardItem gets a *promise* for the
+// PNG so the write starts inside the click gesture — Safari rejects writes
+// once the gesture expires, and canvas generation takes long enough to do so.
+// Fallbacks for browsers without image clipboard: the mobile share sheet
+// (which offers Copy), then a plain download.
+export async function copyStandingsImage(data) {
+  if (navigator.clipboard?.write && typeof ClipboardItem !== 'undefined') {
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': generateStandingsImage(data).then((r) => r.blob) }),
+      ])
+      return 'copied'
+    } catch {
+      // fall through to share/download
+    }
+  }
+
   const { blob, file } = await generateStandingsImage(data)
 
   if (navigator.canShare?.({ files: [file] })) {
@@ -190,15 +203,6 @@ export async function shareStandingsImage(data) {
       return 'shared'
     } catch (err) {
       if (err?.name === 'AbortError') return 'shared' // user closed the sheet
-      // fall through to clipboard/download
-    }
-  }
-
-  if (navigator.clipboard?.write && typeof ClipboardItem !== 'undefined') {
-    try {
-      await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
-      return 'copied'
-    } catch {
       // fall through to download
     }
   }

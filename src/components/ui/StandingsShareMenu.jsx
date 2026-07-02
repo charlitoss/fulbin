@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Check, Link2, MessageCircle, Image } from 'lucide-react'
 import { buildStandingsMessage } from '../../utils/standingsShare'
-import { shareStandingsImage } from '../../utils/standingsImage'
+import { copyStandingsImage } from '../../utils/standingsImage'
 import { copyToClipboard, openWhatsApp } from '../../utils/share'
 
 // "Compartir" menu for a standings table: WhatsApp text version, PNG card of
@@ -9,7 +9,7 @@ import { copyToClipboard, openWhatsApp } from '../../utils/share'
 // signed-in StandingsPage and the public group page.
 function StandingsShareMenu({ groupName, tournamentName, partidos, tabla, results, publicUrl }) {
   const [showMenu, setShowMenu] = useState(false)
-  const [feedback, setFeedback] = useState(null) // 'link' | 'image-copied' | 'image-downloaded' | 'image-error'
+  const [feedback, setFeedback] = useState(null) // 'link' | 'image' | 'image-error'
   const menuRef = useRef(null)
 
   useEffect(() => {
@@ -44,17 +44,10 @@ function StandingsShareMenu({ groupName, tournamentName, partidos, tabla, result
     openWhatsApp(message)
   }
 
-  const shareImage = async () => {
+  const copyImage = async () => {
     try {
-      const outcome = await shareStandingsImage({
-        groupName,
-        tournamentName,
-        partidos,
-        tabla,
-      })
-      if (outcome === 'copied') flash('image-copied')
-      else if (outcome === 'downloaded') flash('image-downloaded')
-      else setShowMenu(false)
+      await copyStandingsImage({ groupName, tournamentName, partidos, tabla })
+      flash('image')
     } catch {
       flash('image-error', false)
     }
@@ -85,20 +78,16 @@ function StandingsShareMenu({ groupName, tournamentName, partidos, tabla, result
               <span>Enviar tabla por WhatsApp</span>
             </button>
 
-            <button className="share-option" onClick={shareImage}>
+            <button className="share-option" onClick={copyImage}>
               <Image size={18} />
               <span>
-                {feedback === 'image-copied'
-                  ? '¡Imagen copiada!'
-                  : feedback === 'image-downloaded'
-                    ? 'Imagen descargada'
-                    : feedback === 'image-error'
-                      ? 'No se pudo generar'
-                      : 'Compartir imagen de la tabla'}
+                {feedback === 'image'
+                  ? '¡Copiado!'
+                  : feedback === 'image-error'
+                    ? 'No se pudo generar'
+                    : 'Copiar imagen (Tabla)'}
               </span>
-              {(feedback === 'image-copied' || feedback === 'image-downloaded') && (
-                <Check size={16} className="copied-icon" />
-              )}
+              {feedback === 'image' && <Check size={16} className="copied-icon" />}
             </button>
 
             {publicUrl && (
