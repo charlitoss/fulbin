@@ -29,7 +29,8 @@ import { api } from "../convex/_generated/api";
 test.describe.configure({ mode: "serial", timeout: 120_000 });
 
 const RUN = uniqueRunId();
-const OWNER: TestIdentity = { subject: `e2e-owner-${RUN}`, name: `e2e-owner-${RUN}` };
+// The surname lets the invite-page test assert first-name-only copy.
+const OWNER: TestIdentity = { subject: `e2e-owner-${RUN}`, name: `e2e-owner-${RUN} Apellido` };
 const COADMIN: TestIdentity = { subject: `e2e-coadmin-${RUN}`, name: `e2e-coadmin-${RUN}` };
 const STRANGER: TestIdentity = { subject: `e2e-stranger-${RUN}`, name: `e2e-stranger-${RUN}` };
 
@@ -218,8 +219,9 @@ test.describe("co-ownership", () => {
 
   test("invite page renders for an anonymous visitor", async ({ page }) => {
     await page.goto(`/#/unirse/${inviteCode}`);
+    // First name only — "… Apellido" must not appear in the header.
     await expect(
-      page.getByText(`${OWNER.name} te invitó a organizar un fulbin`),
+      page.getByText(`${OWNER.name.split(" ")[0]} te invitó a organizar un fulbin`),
     ).toBeVisible();
     await expect(
       page.getByRole("heading", { name: `Grupo de ${OWNER.name}` }),

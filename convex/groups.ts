@@ -133,7 +133,9 @@ export const byInviteCode = query({
       miembros: memberships.length,
       // Active roster size — the invite card shows the group's plantel.
       jugadores: roster.filter((p) => p.activo !== false).length,
-      organizador: owner?.nombre ?? "",
+      // First name only: friendlier copy, and the anonymous preview
+      // shouldn't expose the organizer's full name anyway.
+      organizador: (owner?.nombre ?? "").trim().split(/\s+/)[0] ?? "",
     };
   },
 });
