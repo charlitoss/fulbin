@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
-import { ArrowLeftRight, ArrowDownToLine } from 'lucide-react'
+import { useState, useEffect, useRef } from 'react'
+import { ArrowLeftRight, ArrowDownToLine, Check } from 'lucide-react'
 import { useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import Modal from '../ui/Modal'
+import { Menu, MenuItem } from '../ui/Menu'
 import { PHYSICAL_STATES, POSITIONS } from '../../utils/constants'
 
 const DEFAULT_ATTRS = { velocidad: 5, tecnica: 5, resistencia: 5, defensa: 5, ataque: 5, pase: 5 }
@@ -31,13 +32,31 @@ function PlayerInfoModal({
 
   const [estado, setEstado] = useState('normal')
   const [posicion, setPosicion] = useState(POSITIONS.MEDIOCAMPISTA)
+  const [seQueda, setSeQueda] = useState(false)
+  // When true, the "Mover" dropdown (destination choices) is open.
+  const [moving, setMoving] = useState(false)
+  const moverRef = useRef(null)
 
   useEffect(() => {
     if (isOpen && player) {
       setEstado(registration?.estadoFisico ?? 'normal')
       setPosicion(player.perfilPermanente?.posicionPreferida ?? POSITIONS.MEDIOCAMPISTA)
+      setSeQueda(registration?.seQueda ?? false)
+      setMoving(false)
     }
   }, [isOpen, registration, player])
+
+  // Close the Mover dropdown when clicking outside it.
+  useEffect(() => {
+    if (!moving) return
+    const handleClickOutside = (event) => {
+      if (moverRef.current && !moverRef.current.contains(event.target)) {
+        setMoving(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [moving])
 
   if (!player) return null
 
@@ -63,6 +82,16 @@ function PlayerInfoModal({
       await updateRegistration({ matchId, playerId, estadoFisico: key, anonId: deviceId })
     } catch (err) {
       console.error('Error updating estado físico:', err)
+    }
+  }
+
+  const changeSeQueda = async (next) => {
+    setSeQueda(next)
+    try {
+      await updateRegistration({ matchId, playerId, seQueda: next, anonId: deviceId })
+    } catch (err) {
+      console.error('Error updating tercer tiempo:', err)
+      setSeQueda(!next)
     }
   }
 
@@ -96,23 +125,43 @@ function PlayerInfoModal({
       title="Información del Jugador"
       footer={
         <div className="player-modal-footer-main">
-          {assignment && onSwapTeam && (
-            <button className="btn btn-secondary player-modal-footer-btn" onClick={handleSwapTeam}>
-              <ArrowLeftRight size={16} />
-              Mover a {otherTeamLabel}
-            </button>
-          )}
-          {assignment && onMoveToSuplentes && (
-            <button className="btn btn-secondary player-modal-footer-btn" onClick={handleMoveToSuplentes}>
-              <ArrowDownToLine size={16} />
-              Mover a suplentes
-            </button>
-          )}
           {canLeave && (
             <button className="btn btn-secondary btn-danger-text player-modal-footer-btn" onClick={handleLeave}>
+              <img src="/icons/removeplayer.svg" alt="" width="20" height="20" />
               Me bajo
             </button>
           )}
+          {assignment && (onSwapTeam || onMoveToSuplentes) && (
+            <div className="mover-wrap player-modal-footer-btn" ref={moverRef}>
+              <button
+                type="button"
+                className="btn btn-secondary mover-btn"
+                onClick={() => setMoving((o) => !o)}
+                aria-haspopup="menu"
+                aria-expanded={moving}
+              >
+                <img src="/icons/moveplayer.svg" alt="" width="20" height="20" className="mover-icon" />
+                Mover
+              </button>
+              {moving && (
+                <Menu className="mover-dropdown">
+                  {onSwapTeam && (
+                    <MenuItem onClick={handleSwapTeam}>
+                      <ArrowLeftRight size={16} /> A {otherTeamLabel}
+                    </MenuItem>
+                  )}
+                  {onMoveToSuplentes && (
+                    <MenuItem onClick={handleMoveToSuplentes}>
+                      <ArrowDownToLine size={16} /> A suplentes
+                    </MenuItem>
+                  )}
+                </Menu>
+              )}
+            </div>
+          )}
+          <button className="btn btn-primary player-modal-footer-btn" onClick={onClose}>
+            Listo
+          </button>
         </div>
       }
     >
@@ -157,6 +206,21 @@ function PlayerInfoModal({
               ))}
             </select>
           </div>
+          {registration && (
+            <div className="form-group">
+              <label>Tercer tiempo</label>
+              <button
+                type="button"
+                className={`stay-toggle${seQueda ? ' active' : ''}`}
+                onClick={() => changeSeQueda(!seQueda)}
+                aria-pressed={seQueda}
+              >
+                <img src={seQueda ? '/icons/chori.svg' : '/icons/chori-inactive.svg'} alt="" width="20" height="20" className="stay-toggle-icon" />
+                <span>{seQueda ? 'Me quedo a la birra / parri' : 'Avisar que me quedo después'}</span>
+                {seQueda && <Check size={18} className="stay-toggle-check" />}
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <div className="player-details">
@@ -164,6 +228,14 @@ function PlayerInfoModal({
             <span className="detail-label">Posición preferida</span>
             <span className="detail-value">{profile.posicionPreferida || 'No definida'}</span>
           </div>
+          {seQueda && (
+            <div className="detail-row">
+              <span className="detail-label">Tercer tiempo</span>
+              <span className="detail-value detail-value--stay">
+                <img src="/icons/chori.svg" alt="" width="16" height="16" /> Se queda
+              </span>
+            </div>
+          )}
           {profile.posicionesSecundarias?.length > 0 && (
             <div className="detail-row">
               <span className="detail-label">Posiciones secundarias</span>

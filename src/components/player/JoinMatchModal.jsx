@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import { X, UserPlus, Users, Clock, Eye, ArrowRight, Plus } from 'lucide-react'
+import { X, UserPlus, Users, Clock, Eye, ArrowRight, Plus, Check } from 'lucide-react'
 import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import Modal from '../ui/Modal'
@@ -23,6 +23,7 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
   const [nombre, setNombre] = useState('')
   const [estadoFisico, setEstadoFisico] = useState('normal')
   const [tipoInscripcion, setTipoInscripcion] = useState('jugador')
+  const [seQueda, setSeQueda] = useState(false)
   
   // Friends to add
   const [friendName, setFriendName] = useState('')
@@ -273,6 +274,7 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
             nombre: trimmedName,
             estadoFisico: tipoInscripcion === 'hinchada' ? 'normal' : estadoFisico,
             tipoInscripcion: tipoInscripcion,
+            seQueda,
             anonId: getDeviceId(),
           })
           mainPlayerId = result.playerId
@@ -331,6 +333,7 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
       setNombre('')
       setEstadoFisico('normal')
       setTipoInscripcion('jugador')
+      setSeQueda(false)
       setFriendName('')
       setFriends([])
       setSuggestFor(null)
@@ -353,6 +356,7 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
     setNombre('')
     setEstadoFisico('normal')
     setTipoInscripcion('jugador')
+    setSeQueda(false)
     setFriendName('')
     setFriends([])
     setSuggestFor(null)
@@ -505,6 +509,21 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
           </div>
         )}
         
+        {/* Tercer tiempo - available for all types (jugador, suplente, hinchada) */}
+        <div className="form-group">
+          <label>Tercer tiempo</label>
+          <button
+            type="button"
+            className={`stay-toggle${seQueda ? ' active' : ''}`}
+            onClick={() => setSeQueda((s) => !s)}
+            aria-pressed={seQueda}
+          >
+            <img src={seQueda ? '/icons/chori.svg' : '/icons/chori-inactive.svg'} alt="" width="20" height="20" className="stay-toggle-icon" />
+            <span>{seQueda ? 'Me quedo a la birra / parri' : 'Avisar que me quedo después'}</span>
+            {seQueda && <Check size={18} className="stay-toggle-check" />}
+          </button>
+        </div>
+
         {/* Friends section - only for jugador and suplente */}
         {tipoInscripcion !== 'hinchada' && (
           <div className="friends-section form-group">

@@ -163,8 +163,7 @@ export default defineSchema({
     estadoFisico: v.string(), // 'excelente' | 'normal' | 'cansado'
     tipoInscripcion: v.optional(v.string()), // 'jugador' | 'suplente' | 'hinchada'
     // "Tercer tiempo": the player is staying after the match (birra / parri).
-    // Absent = not staying. (Feature lives on the post-game-hangout branch;
-    // declared here too so both branches validate against the shared dev data.)
+    // Absent = not staying.
     seQueda: v.optional(v.boolean()),
     // Anonymous device token of whoever created this registration, so a player
     // who inscribed can remove themselves (but not others) without an account.
