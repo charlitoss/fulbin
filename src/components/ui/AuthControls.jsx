@@ -1,14 +1,16 @@
 import { useState, useRef, useEffect } from 'react'
-import { useQuery } from 'convex/react'
+import { useQuery, useMutation } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import { authEnabled, useAuthSession } from '../../auth/useAuthSession'
-import { Menu, MenuItem, MenuHeader } from './Menu'
+import { Menu, MenuItem, MenuDivider } from './Menu'
 
 // Sign-in button / signed-in user menu. Renders nothing until WorkOS is
 // configured, so the anonymous-only app is unaffected.
 function AuthControls({ onNavigate }) {
   const { user, isLoading, signIn, signOut } = useAuthSession()
   const isSuperAdmin = useQuery(api.admin.amISuperAdmin, user ? {} : 'skip')
+  const groups = useQuery(api.groups.myGroups, user ? {} : 'skip')
+  const setActiveGroup = useMutation(api.groups.setActive)
   const [menuOpen, setMenuOpen] = useState(false)
   const menuRef = useRef(null)
 
@@ -60,17 +62,13 @@ function AuthControls({ onNavigate }) {
       </button>
       {menuOpen && (
         <Menu className="auth-dropdown">
-          <MenuHeader>
-            <span className="auth-dropdown-name">{displayName}</span>
-            {user.email && <span className="auth-dropdown-email">{user.email}</span>}
-          </MenuHeader>
           <MenuItem
             onClick={() => {
               setMenuOpen(false)
               onNavigate('#/mi-perfil')
             }}
           >
-            Mi perfil de jugador
+            Mi perfil
           </MenuItem>
           {isSuperAdmin && (
             <MenuItem
@@ -82,6 +80,40 @@ function AuthControls({ onNavigate }) {
               Administración
             </MenuItem>
           )}
+          {groups && groups.length > 0 && (
+            <>
+              <MenuDivider />
+              <li className="menu-li menu-section">
+                <span className="menu-section-label">Grupos</span>
+                <button
+                  type="button"
+                  className="menu-section-action"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    onNavigate('#/grupos')
+                  }}
+                >
+                  Ver todos
+                </button>
+              </li>
+              {groups.map((g) => (
+                <MenuItem
+                  key={g._id}
+                  className={g.esActivo ? 'menu-item--selected' : ''}
+                  onClick={() => {
+                    setMenuOpen(false)
+                    if (!g.esActivo) setActiveGroup({ groupId: g._id })
+                  }}
+                >
+                  <span className="menu-item-grow">{g.nombre}</span>
+                  {g.esActivo && (
+                    <img src="/icons/selected-check.svg" alt="" width="18" height="18" />
+                  )}
+                </MenuItem>
+              ))}
+            </>
+          )}
+          <MenuDivider />
           <MenuItem
             onClick={() => {
               setMenuOpen(false)

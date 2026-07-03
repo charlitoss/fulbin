@@ -14,6 +14,7 @@
 
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
+import { orphanAndRemoveUser } from "./admin";
 
 const TEST_NAME_PREFIX = "e2e-";
 
@@ -102,7 +103,44 @@ export const wipeAllTestData = mutation({
       await ctx.db.delete(player._id);
     }
 
-    return { matchesRemoved: removed, playersRemoved: testPlayers.length };
+    // And stale e2e users from aborted runs (the co-ownership spec creates
+    // accounts via spoofed identities whose workosId is always e2e-*). The
+    // cascade removes their groups, memberships and tournaments too.
+    const allUsers = await ctx.db.query("users").collect();
+    const testUsers = allUsers.filter((u) =>
+      u.workosId.startsWith(TEST_NAME_PREFIX),
+    );
+    for (const user of testUsers) {
+      await orphanAndRemoveUser(ctx, user._id);
+    }
+
+    return {
+      matchesRemoved: removed,
+      playersRemoved: testPlayers.length,
+      usersRemoved: testUsers.length,
+    };
+  },
+});
+
+// Remove one e2e user and everything the cascade implies (their groups,
+// memberships, tournaments; matches/players are orphaned or reassigned —
+// see admin.orphanAndRemoveUser). Only e2e-* identities can be targeted.
+export const wipeE2EUser = mutation({
+  args: { secret: v.string(), workosId: v.string() },
+  handler: async (ctx, args) => {
+    assertSecret(args.secret);
+    if (!args.workosId.startsWith(TEST_NAME_PREFIX)) {
+      throw new Error(
+        `wipeE2EUser only accepts workosIds starting with '${TEST_NAME_PREFIX}'`,
+      );
+    }
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_workosId", (q) => q.eq("workosId", args.workosId))
+      .unique();
+    if (!user) return { removed: false };
+    await orphanAndRemoveUser(ctx, user._id);
+    return { removed: true };
   },
 });
 
@@ -120,8 +158,23 @@ export const seedUserWithData = mutation({
       createdAt: now,
       updatedAt: now,
     });
+    // Mirror the post-migration shape: every user has a personal group they own.
+    const groupId = await ctx.db.insert("groups", {
+      nombre: `e2e-${args.nombre}`,
+      ownerId: userId,
+      createdAt: now,
+      updatedAt: now,
+    });
+    await ctx.db.insert("memberships", {
+      groupId,
+      userId,
+      rol: "owner",
+      createdAt: now,
+    });
+    await ctx.db.patch(userId, { activeGroupId: groupId, updatedAt: now });
     const tournamentId = await ctx.db.insert("tournaments", {
       ownerId: userId,
+      groupId,
       nombre: "e2e-admin-trn",
       activo: true,
       createdAt: now,
@@ -136,6 +189,7 @@ export const seedUserWithData = mutation({
       jugadoresPorEquipo: 1,
       pasoActual: "inscripcion",
       ownerId: userId,
+      groupId,
       tournamentId,
       createdAt: now,
       updatedAt: now,
@@ -143,8 +197,9 @@ export const seedUserWithData = mutation({
     const playerId = await ctx.db.insert("players", {
       nombre: "e2e-admin-player",
       ownerId: userId,
+      groupId,
     });
-    return { userId, matchId, playerId, tournamentId };
+    return { userId, matchId, playerId, tournamentId, groupId };
   },
 });
 

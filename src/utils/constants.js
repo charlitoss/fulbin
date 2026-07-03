@@ -1,5 +1,10 @@
 export const MAX_SUPLENTES = 10;
 
+// sessionStorage key that carries a group invite code across the WorkOS
+// login redirect (which drops the URL hash). Written by JoinGroupPage,
+// consumed by main.jsx's onRedirectCallback.
+export const PENDING_INVITE_KEY = 'fulbin:pending-invite';
+
 export const PHYSICAL_STATES = {
   cansado: { emoji: '😫', label: 'Cansado', factor: 0.6, color: '#ef4444', icon: '/icons/State=Down, Size=Medium.svg' },
   normal: { emoji: '😐', label: 'Normal', factor: 1.0, color: '#f59e0b', icon: '/icons/State=Good, Size=Medium.svg' },

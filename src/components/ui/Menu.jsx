@@ -28,4 +28,9 @@ export function MenuHeader({ children }) {
   return <li className="menu-li menu-header">{children}</li>
 }
 
+// Thin separator line between menu sections.
+export function MenuDivider() {
+  return <li className="menu-li menu-divider" role="separator" aria-hidden="true" />
+}
+
 export default Menu

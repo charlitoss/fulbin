@@ -8,9 +8,13 @@ import MyPlayersPage from './components/landing/MyPlayersPage'
 import StandingsPage from './components/landing/StandingsPage'
 import MyProfilePage from './components/landing/MyProfilePage'
 import AdminPage from './components/landing/AdminPage'
+import GroupsPage from './components/landing/GroupsPage'
+import JoinGroupPage from './components/landing/JoinGroupPage'
+import PublicGroupPage from './components/landing/PublicGroupPage'
 import MatchPage from './components/match/MatchPage'
 import AuthControls from './components/ui/AuthControls'
 import { authEnabled, useAuthSession } from './auth/useAuthSession'
+import { PENDING_INVITE_KEY } from './utils/constants'
 import Footer from './components/ui/Footer'
 import CrtEffect from './components/ui/CrtEffect'
 import CrtControlPanel from './components/ui/CrtControlPanel'
@@ -97,10 +101,16 @@ function App() {
     window.scrollTo(0, 0)
   }, [route])
 
-  // Logged-in users land on their matches instead of the marketing splash.
+  // Logged-in users land on their matches instead of the marketing splash —
+  // unless they signed in from a group invite: the WorkOS redirect drops the
+  // URL hash, so finish that flow first (the join page consumes the stash).
   useEffect(() => {
     if (isLoggedIn && (route === '#/' || route === '' || route === '#')) {
-      navigate('#/mis-partidos')
+      let pendingInvite = null
+      try {
+        pendingInvite = sessionStorage.getItem(PENDING_INVITE_KEY)
+      } catch {}
+      navigate(pendingInvite ? `#/unirse/${pendingInvite}` : '#/mis-partidos')
     }
   }, [isLoggedIn, route])
 
@@ -147,6 +157,29 @@ function App() {
       return <AdminPage onNavigate={navigate} />
     }
 
+    if (route === '#/grupos') {
+      return <GroupsPage onNavigate={navigate} />
+    }
+
+    // Group invite route: #/unirse/ABC123
+    const inviteRoute = route.match(/^#\/unirse\/([A-Za-z0-9]{6})$/)
+    if (inviteRoute) {
+      return <JoinGroupPage code={inviteRoute[1].toUpperCase()} onNavigate={navigate} />
+    }
+
+    // Public group page: #/g/TOKEN and #/g/TOKEN/jugador/PLAYER_ID.
+    // Read-only, no session needed.
+    const publicGroupRoute = route.match(/^#\/g\/([A-Za-z0-9]+)(?:\/jugador\/([A-Za-z0-9]+))?$/)
+    if (publicGroupRoute) {
+      return (
+        <PublicGroupPage
+          publicToken={publicGroupRoute[1]}
+          playerId={publicGroupRoute[2]}
+          onNavigate={navigate}
+        />
+      )
+    }
+
     // Short code route: #/p/ABC123
     const shortCodeRoute = route.match(/^#\/p\/([A-Za-z0-9]{6})$/)
     if (shortCodeRoute) {
@@ -166,6 +199,8 @@ function App() {
   }
 
   const isSplash = route === '#/' || route === '' || route === '#'
+  // The invite screen is a focused, single-CTA page: logo only, no nav menu.
+  const isInviteRoute = /^#\/unirse\//.test(route)
 
   // Anonymous users keep the simple "← Volver" back button on sub-pages;
   // signed-in users navigate via the always-visible top nav instead.
@@ -183,7 +218,13 @@ function App() {
         </div>
       )}
 
-      {!isSplash && isLoggedIn && (
+      {isInviteRoute && (
+        <header className="app-logo">
+          <img src="/LOGO.svg" alt="Fulbin" width="120" height="41" />
+        </header>
+      )}
+
+      {!isSplash && !isInviteRoute && isLoggedIn && (
         <header className="app-nav" style={{ maxWidth: navMaxWidth }}>
           <button
             type="button"
@@ -213,7 +254,7 @@ function App() {
         </header>
       )}
 
-      {!isSplash && !isLoggedIn && (
+      {!isSplash && !isInviteRoute && !isLoggedIn && (
         <header className={`app-logo${showBack ? ' app-logo--with-back' : ''}`}>
           {showBack && (
             <button

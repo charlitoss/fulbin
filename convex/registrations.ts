@@ -1,5 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
+import type { Doc } from "./_generated/dataModel";
 import { DEFAULT_PROFILE } from "./players";
 import { assertCanManageMatch, canManageRegistration } from "./permissions";
 
@@ -33,7 +34,7 @@ export const getByMatchAndPlayer = query({
 });
 
 // Register a person: either a roster player picked by id, or a free-form
-// name (find-or-create). Name lookup is scoped to the match owner's roster so
+// name (find-or-create). Name lookup is scoped to the match's group roster so
 // different groups never share profiles; unowned matches keep using the
 // legacy ownerless pool.
 export const join = mutation({
@@ -55,10 +56,28 @@ export const join = mutation({
     const match = await ctx.db.get(args.matchId);
     if (!match) throw new Error("Partido no encontrado");
 
+    // The match's player pool: the group roster for grouped matches, the
+    // owner roster for legacy owned-but-ungrouped ones, the ownerless pool
+    // for anonymous matches.
+    const samePool = (p: Doc<"players">) =>
+      match.groupId
+        ? p.groupId === match.groupId
+        : p.ownerId === match.ownerId && !p.groupId;
+    const poolQuery = () =>
+      match.groupId
+        ? ctx.db
+            .query("players")
+            .withIndex("by_groupId", (q) => q.eq("groupId", match.groupId))
+            .collect()
+        : ctx.db
+            .query("players")
+            .withIndex("by_ownerId", (q) => q.eq("ownerId", match.ownerId))
+            .collect();
+
     let existing;
     if (args.playerId) {
       const picked = await ctx.db.get(args.playerId);
-      if (!picked || picked.ownerId !== match.ownerId) {
+      if (!picked || !samePool(picked)) {
         throw new Error("Ese jugador no pertenece al plantel de este partido");
       }
       existing = picked;
@@ -68,10 +87,7 @@ export const join = mutation({
         throw new Error("El nombre debe tener al menos 2 caracteres");
       }
 
-      const pool = await ctx.db
-        .query("players")
-        .withIndex("by_ownerId", (q) => q.eq("ownerId", match.ownerId))
-        .collect();
+      const pool = await poolQuery();
       existing = pool.find(
         (p) => p.nombre.toLowerCase() === nombre.toLowerCase()
       );
@@ -80,6 +96,7 @@ export const join = mutation({
         const playerId = await ctx.db.insert("players", {
           nombre,
           ownerId: match.ownerId,
+          groupId: match.groupId,
           perfilPermanente: DEFAULT_PROFILE,
         });
         const registrationId = await ctx.db.insert("registrations", {
