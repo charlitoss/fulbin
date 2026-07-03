@@ -96,7 +96,10 @@ Worst case: a crashed run leaves an `e2e-*` row behind; the next run's
 
 The test-only Convex functions live in **`convex/testing.ts`**
 (`wipeAllTestData`, `wipeMatchCascade`, `seedPlayers`, `seedRegistrations`,
-`backdateMatchKickoff`) — all secret-gated.
+`backdateMatchKickoff`, `seedUserWithData`, `wipeE2EUser`) — all secret-gated.
+`wipeAllTestData` also removes users whose `workosId` starts with `e2e-`
+(accounts created by the co-ownership spec's spoofed identities), cascading
+their groups/memberships/tournaments.
 
 ## Specs
 
@@ -109,6 +112,27 @@ The test-only Convex functions live in **`convex/testing.ts`**
 | `inscription.spec.ts` | quota gating; suplentes/hinchada don't count toward the jugador quota |
 | `team-builder.spec.ts` | balance indicator renders; LIFO smoke |
 | `mobile.spec.ts` | iOS date-input alignment (`dfa3a88`); in-game 820px cap (`38c47de`) |
+| `co-ownership.spec.ts` | invite → join → co-manage → shared standings → access control → member removal; anonymous invite + public group pages in the browser |
+
+### Auth-gated flows (`co-ownership.spec.ts`)
+
+Playwright can't mint a real WorkOS session, so this spec drives the deployed
+functions as spoofed identities via `npx convex run --identity`
+(`helpers/identity.ts`). That still crosses the REAL auth path on the
+deployment — `ctx.auth.getUserIdentity()` → `users.by_workosId` →
+`memberships` — so group authorization is exercised honestly; only the JWT
+issuance is bypassed (the CLI's admin credentials vouch for the identity).
+Test identities always use an `e2e-` subject so `wipeAllTestData` can sweep
+leftovers, and `testing.wipeE2EUser` cascades one account away in teardown.
+
+Because each CLI call spawns a subprocess (~1–2s), the spec lives in its own
+Playwright project that runs **after** the browser projects (`dependencies`
+in `playwright.config.ts`) so the churn can't starve timing-sensitive UI
+tests. Run it alone with:
+
+```bash
+npx playwright test --project=co-ownership --no-deps
+```
 
 ## Maintaining tests when the app changes
 

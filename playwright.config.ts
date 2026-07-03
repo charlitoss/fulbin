@@ -33,10 +33,23 @@ export default defineConfig({
     {
       name: "chromium-desktop",
       use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 800 } },
+      testIgnore: "co-ownership.spec.ts",
     },
     {
       name: "webkit-mobile-iphone",
       use: { ...devices["iPhone 13"] },
+      testIgnore: "co-ownership.spec.ts",
+    },
+    {
+      // Backend orchestration via `npx convex run --identity` (one CLI spawn
+      // per call, ~1-2s each). Isolated in its own project that runs AFTER
+      // the browser projects so the subprocess churn can't starve their
+      // timing-sensitive UI flows. Run it alone with:
+      //   npx playwright test --project=co-ownership --no-deps
+      name: "co-ownership",
+      use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 800 } },
+      testMatch: "co-ownership.spec.ts",
+      dependencies: ["chromium-desktop", "webkit-mobile-iphone"],
     },
   ],
 

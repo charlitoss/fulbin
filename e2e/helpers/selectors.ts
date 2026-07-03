@@ -4,7 +4,8 @@
 import type { Page } from "@playwright/test";
 
 export const splash = {
-  cta: (page: Page) => page.getByRole("button", { name: /Nuevo Partido/i }),
+  // Label changed from "Nuevo Partido" in eb26eef (UX polish).
+  cta: (page: Page) => page.getByRole("button", { name: /Crear partido/i }),
 };
 
 export const createForm = {

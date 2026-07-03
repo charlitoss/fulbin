@@ -114,7 +114,8 @@ export const setUserDisabled = mutation({
 //   anonymous season grouping).
 // - Resources they merely created in a surviving group stay in the group;
 //   their ownerId provenance is reassigned to that group's owner.
-async function orphanAndRemoveUser(ctx: MutationCtx, userId: Id<"users">): Promise<void> {
+// Exported for the secret-gated e2e cleanup in testing.ts.
+export async function orphanAndRemoveUser(ctx: MutationCtx, userId: Id<"users">): Promise<void> {
   const now = new Date().toISOString();
 
   // 1. Groups this user owns: transfer to the oldest other member, else dissolve.
