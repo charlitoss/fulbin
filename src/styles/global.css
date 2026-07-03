@@ -7006,7 +7006,7 @@ body.crt-on #root {
 .menu-divider {
   height: 1px;
   background: var(--surface-4);
-  margin: var(--space-1) 0;
+  margin: var(--space-2) 0;
 }
 
 .menu-section {
@@ -7023,7 +7023,7 @@ body.crt-on #root {
   /* Same treatment as the app's headings: white on a black chip. */
   color: var(--text-primary);
   background: #000;
-  padding: 2px 8px;
+  padding: 2px 2px;
 }
 
 .menu-section-action {
