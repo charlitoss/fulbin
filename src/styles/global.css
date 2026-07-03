@@ -7002,8 +7002,53 @@ body.crt-on #root {
   margin: var(--space-2) 0;
 }
 
-.menu-item--checked {
+/* Account dropdown: Grupos section (label + "Ver todos"), selected group. */
+.menu-divider {
+  height: 1px;
+  background: var(--surface-4);
+  margin: var(--space-1) 0;
+}
+
+.menu-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+}
+
+.menu-section-label {
+  font-family: var(--font-display);
+  font-size: var(--type-base);
+  color: var(--gray-400);
+}
+
+.menu-section-action {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-display);
+  font-size: var(--type-base);
   color: var(--color-primary);
+  cursor: pointer;
+}
+
+.menu-section-action:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.menu-item--selected {
+  color: var(--color-primary);
+  background-color: rgba(30, 255, 180, 0.08);
+}
+
+.menu-item-grow {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ============================================
