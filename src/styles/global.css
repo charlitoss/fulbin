@@ -7020,7 +7020,10 @@ body.crt-on #root {
 .menu-section-label {
   font-family: var(--font-display);
   font-size: var(--type-base);
-  color: var(--gray-400);
+  /* Same treatment as the app's headings: white on a black chip. */
+  color: var(--text-primary);
+  background: #000;
+  padding: 2px 8px;
 }
 
 .menu-section-action {
