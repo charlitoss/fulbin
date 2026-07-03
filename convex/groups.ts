@@ -66,13 +66,9 @@ export const myGroups = query({
         createdAt: group.createdAt,
       });
     }
-    rows.sort((a, b) =>
-      a.esActivo === b.esActivo
-        ? a.createdAt.localeCompare(b.createdAt)
-        : a.esActivo
-          ? -1
-          : 1
-    );
+    // Stable order (by creation) regardless of which group is active, so the
+    // switcher list doesn't reshuffle when the selection changes.
+    rows.sort((a, b) => a.createdAt.localeCompare(b.createdAt));
     return rows;
   },
 });

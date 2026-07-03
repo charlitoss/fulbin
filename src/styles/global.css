@@ -7028,7 +7028,7 @@ body.crt-on #root {
   border: none;
   padding: 0;
   font-family: var(--font-display);
-  font-size: var(--type-base);
+  font-size: var(--type-sm);
   color: var(--color-primary);
   cursor: pointer;
 }
