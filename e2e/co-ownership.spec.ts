@@ -218,9 +218,15 @@ test.describe("co-ownership", () => {
 
   test("invite page renders for an anonymous visitor", async ({ page }) => {
     await page.goto(`/#/unirse/${inviteCode}`);
-    await expect(page.getByRole("heading", { name: "Te invitaron a co-organizar" })).toBeVisible();
-    await expect(page.getByText(`Grupo de ${OWNER.name}`)).toBeVisible();
-    await expect(page.getByText("2 miembros")).toBeVisible();
+    await expect(
+      page.getByText(`${OWNER.name} te invitó a organizar un fulbin`),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: `Grupo de ${OWNER.name}` }),
+    ).toBeVisible();
+    // The seeded players are pool players (not roster), so the chip reads 0.
+    await expect(page.getByText("0 jugadores")).toBeVisible();
+    await expect(page.getByRole("button", { name: /Unirme al fulbin/ })).toBeVisible();
   });
 
   test("public group page shows the shared standings read-only", async ({ page }) => {

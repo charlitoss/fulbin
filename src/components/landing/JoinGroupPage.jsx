@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useQuery, useMutation, useConvexAuth } from 'convex/react'
-import { Users } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { api } from '../../../convex/_generated/api'
 import { authEnabled, useAuthSession } from '../../auth/useAuthSession'
 import { PENDING_INVITE_KEY } from '../../utils/constants'
@@ -89,39 +89,39 @@ function JoinGroupPage({ code, onNavigate }) {
   // Signed in with WorkOS but the Convex session is still connecting.
   const connecting = !!user && !isAuthenticated
 
+  const ctaLabel = joining ? 'Uniéndote…' : connecting ? 'Conectando…' : 'Unirme al fulbin'
+
   return (
     <div className="my-matches-page">
-      <div className="my-matches-empty join-group-card">
-        <h2>Te invitaron a co-organizar</h2>
-        <p className="join-group-name">{preview.nombre}</p>
-        <p className="join-group-meta">
-          <Users size={16} /> {preview.miembros}{' '}
-          {preview.miembros === 1 ? 'miembro' : 'miembros'}
-          {preview.organizador && <> · organiza {preview.organizador}</>}
+      <div className="my-matches-empty join-card">
+        <p className="join-card-header">
+          {preview.organizador || 'Alguien'} te invitó a organizar un fulbin
         </p>
-        <p>
-          Como co-organizador vas a poder crear partidos, editar el plantel y
-          manejar los torneos del grupo.
+        <div className="join-card-divider" />
+
+        <img src="/soccer-ball.svg" alt="" className="join-card-ball" width="64" height="64" />
+        <h2 className="join-card-name">{preview.nombre}</h2>
+        <span className="join-card-count">
+          {preview.jugadores} {preview.jugadores === 1 ? 'jugador' : 'jugadores'}
+        </span>
+        <p className="join-card-desc">
+          Como organizador podés crear partidos, editar el plantel y compartir
+          los resultados
         </p>
 
         {error && <p className="join-group-error">{error}</p>}
 
-        {user ? (
+        <div className="join-card-divider" />
+        {authEnabled ? (
           <button
             type="button"
-            className="btn btn-primary"
-            onClick={handleJoin}
+            className="btn btn-primary join-card-cta"
+            onClick={user ? handleJoin : handleSignInFirst}
             disabled={joining || connecting}
           >
-            {joining ? 'Uniéndote…' : connecting ? 'Conectando…' : 'Unirme al grupo'}
+            <Plus size={18} aria-hidden="true" />
+            <span>{ctaLabel}</span>
           </button>
-        ) : authEnabled ? (
-          <>
-            <p className="group-hint">Necesitás una cuenta para unirte.</p>
-            <button type="button" className="btn btn-primary" onClick={handleSignInFirst}>
-              Iniciar sesión y unirme
-            </button>
-          </>
         ) : (
           <p className="group-hint">
             El inicio de sesión no está disponible en esta instalación.

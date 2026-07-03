@@ -107,7 +107,7 @@ export const members = query({
   },
 });
 
-// Safe preview of an invite before joining: name + member count only.
+// Safe preview of an invite before joining: name, organizer and roster size.
 // No auth required (the invitee may not have signed in yet), and no secrets.
 export const byInviteCode = query({
   args: { code: v.string() },
@@ -123,10 +123,16 @@ export const byInviteCode = query({
       .query("memberships")
       .withIndex("by_groupId", (q) => q.eq("groupId", group._id))
       .collect();
+    const roster = await ctx.db
+      .query("players")
+      .withIndex("by_groupId", (q) => q.eq("groupId", group._id))
+      .collect();
     const owner = await ctx.db.get(group.ownerId);
     return {
       nombre: group.nombre,
       miembros: memberships.length,
+      // Active roster size — the invite card shows the group's plantel.
+      jugadores: roster.filter((p) => p.activo !== false).length,
       organizador: owner?.nombre ?? "",
     };
   },

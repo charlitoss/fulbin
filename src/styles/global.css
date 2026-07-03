@@ -6937,19 +6937,64 @@ body.crt-on #root {
   padding-top: var(--space-3);
 }
 
-.join-group-card .join-group-name {
+/* Invite card (#/unirse/:code) — focused single-CTA layout:
+   header · divider · ball · group name · roster chip · blurb · divider · CTA */
+.join-card {
+  gap: var(--space-3);
+  padding-top: var(--space-5);
+}
+
+.join-card-header {
+  font-family: var(--font-display);
+  font-size: var(--type-md);
+  color: var(--gray-200);
+  margin: 0 0 var(--space-2);
+}
+
+.join-card-divider {
+  align-self: stretch;
+  height: 1px;
+  background: var(--surface-5);
+  /* Full-bleed across the card's horizontal padding, like the mock. */
+  margin: 0 calc(-1 * var(--space-4));
+}
+
+.join-card-ball {
+  width: 64px;
+  height: 64px;
+  margin-top: var(--space-5);
+}
+
+/* Outscores `.my-matches-empty h2` (the black name-chip treatment) — the
+   invite card's name is plain mint text per the design. */
+.join-card h2.join-card-name {
   font-family: var(--font-display);
   font-size: var(--type-2xl);
   color: var(--color-primary);
-  margin: var(--space-2) 0;
+  background: none;
+  padding: 0;
+  margin: 0;
 }
 
-.join-group-card .join-group-meta {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--gray-300);
-  margin-bottom: var(--space-3);
+.join-card-count {
+  font-family: var(--font-display);
+  font-size: var(--type-sm);
+  color: var(--gray-100);
+  background: var(--surface-1);
+  border: 1px dotted var(--gray-500);
+  padding: 3px 10px;
+}
+
+.join-card-desc {
+  font-size: var(--type-sm);
+  color: var(--gray-400);
+  line-height: 1.5;
+  max-width: 42ch;
+  margin: var(--space-2) 0 var(--space-5);
+}
+
+.join-card-cta {
+  margin-top: var(--space-4);
 }
 
 .join-group-error {
