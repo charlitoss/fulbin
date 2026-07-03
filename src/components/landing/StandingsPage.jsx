@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
-import { Pencil, Trophy } from 'lucide-react'
+import { ChevronRight, Trophy } from 'lucide-react'
 import { useQuery } from 'convex/react'
 import { api } from '../../../convex/_generated/api'
 import { authEnabled, useAuthSession } from '../../auth/useAuthSession'
 import TournamentsModal from './TournamentsModal'
-import TournamentSettingsModal from './TournamentSettingsModal'
 import StandingsTable from '../ui/StandingsTable'
 import StandingsShareMenu from '../ui/StandingsShareMenu'
 import { appBaseUrl } from '../../utils/share'
@@ -21,7 +20,6 @@ function StandingsPage({ onNavigate }) {
   // null = "Todos"; a string = a tournament id; undefined = not yet defaulted.
   const [selected, setSelected] = useState(undefined)
   const [showManage, setShowManage] = useState(false)
-  const [showSettings, setShowSettings] = useState(false)
 
   // Default the view to the active tournament once tournaments load.
   useEffect(() => {
@@ -39,7 +37,6 @@ function StandingsPage({ onNavigate }) {
 
   const current = selected ? (tournaments ?? []).find((t) => t._id === selected) : null
   const currentName = selected == null ? 'Tabla histórica' : current?.nombre ?? '…'
-  const leader = stats?.tabla?.[0]
 
   // Share context: the active group's name/public link + this view's results.
   const activeGroup = (groups ?? []).find((g) => g.esActivo)
@@ -71,26 +68,20 @@ function StandingsPage({ onNavigate }) {
 
   return (
     <div className="my-matches-page">
-      {/* Torneo name is the prominent title; click it to switch/configure */}
+      {/* Torneo name is the prominent title; click it to open the torneos
+          list (switch, rename, finalize, create — all live there). */}
       <div className="my-matches-header">
         <button
           type="button"
           className="standings-torneo-title"
-          onClick={() => (current ? setShowSettings(true) : setShowManage(true))}
+          onClick={() => setShowManage(true)}
         >
           <span>{currentName}</span>
           {current?.activo && <span className="tournament-tag">Activo</span>}
           {current?.finalizadoEn && (
             <span className="tournament-tag tournament-tag--past">Finalizado</span>
           )}
-          {current && <Pencil size={15} className="standings-current-edit" />}
-        </button>
-        <button
-          type="button"
-          className="btn btn-secondary btn-sm"
-          onClick={() => setShowManage(true)}
-        >
-          Todos los torneos
+          <ChevronRight size={18} className="standings-current-edit" />
         </button>
       </div>
 
@@ -127,14 +118,6 @@ function StandingsPage({ onNavigate }) {
         onClose={() => setShowManage(false)}
         tournaments={tournaments ?? []}
         selectedId={selected ?? null}
-        onSelect={setSelected}
-      />
-
-      <TournamentSettingsModal
-        isOpen={showSettings}
-        onClose={() => setShowSettings(false)}
-        tournament={current}
-        leader={leader}
         onSelect={setSelected}
       />
 

@@ -6415,47 +6415,6 @@ body.crt-on #root {
   vertical-align: middle;
 }
 
-/* Single-tournament settings modal */
-.tournament-settings {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.tournament-settings-champ {
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: var(--type-sm);
-  color: var(--gray-200);
-}
-
-.tournament-settings-champ svg { color: var(--color-primary); }
-
-.tournament-settings-confirm {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-3);
-  background-color: #060606;
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-  background-size: 3px 3px;
-  border: 1px solid var(--surface-5);
-}
-
-.tournament-settings-confirm-text {
-  font-size: var(--type-sm);
-  color: var(--gray-200);
-}
-
-.tournament-settings-confirm-actions {
-  display: flex;
-  gap: var(--space-2);
-}
-
-.tournament-settings-confirm-actions .btn { flex: 1; }
-
 /* Champion banner above a finalized season's frozen table */
 .standings-champion {
   display: flex;
