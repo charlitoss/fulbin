@@ -34,6 +34,11 @@ export default defineSchema({
     publicToken: v.optional(v.string()),
     // Opt-in: the public page only resolves when this is true.
     publico: v.optional(v.boolean()),
+    // Open editing: anyone with a match link may manage the group's matches
+    // (teams, players, details, score) without an account. Absent = true —
+    // open is the default, and groups opt OUT by setting it to false.
+    // Deleting a match is never opened up (see permissions.canDeleteMatch).
+    edicionAbierta: v.optional(v.boolean()),
     createdAt: v.string(),
     updatedAt: v.string(),
   })

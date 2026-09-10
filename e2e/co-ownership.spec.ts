@@ -10,7 +10,8 @@
 // Flow under test:
 //   owner signs up → invites → co-admin joins → co-admin creates a season +
 //   match in the SHARED group → both manage it → finished match lands in
-//   BOTH users' standings → outsiders are rejected → removal revokes access.
+//   BOTH users' standings → open editing lets link-holders manage it and the
+//   owner can close it → outsiders are rejected → removal revokes access.
 
 import { test, expect } from "./helpers/test";
 import { runAs, runAnon, type TestIdentity } from "./helpers/identity";
@@ -52,6 +53,7 @@ type GroupRow = {
   inviteCode?: string;
   publicToken?: string;
   publico: boolean;
+  edicionAbierta: boolean;
 };
 
 test.describe("co-ownership", () => {
@@ -199,6 +201,33 @@ test.describe("co-ownership", () => {
     }
   });
 
+  test("open editing lets any link-holder manage the match, except delete", async () => {
+    // On by default — including for groups created before the toggle existed.
+    const before = await runAs<GroupRow[]>(OWNER, "groups:myGroups");
+    expect(before.find((g) => g._id === groupId)!.edicionAbierta).toBe(true);
+
+    // No account at all: whoever has the link can edit the match…
+    await runAnon("matches:update", { matchId, ubicacion: "Cancha del vecino" });
+    const edited = await runAnon<{ ubicacion: string }>("matches:getById", { matchId });
+    expect(edited?.ubicacion).toBe("Cancha del vecino");
+
+    // …but deleting is never granted by open editing.
+    await expect(runAnon("matches:remove", { matchId })).rejects.toThrow(/NO_AUTORIZADO/);
+    expect(await runAnon("matches:getById", { matchId })).not.toBeNull();
+
+    // The toggle itself is owner-only: a co-admin cannot flip it.
+    await expect(
+      runAs(COADMIN, "groups:setOpenEditing", { groupId, edicionAbierta: false }),
+    ).rejects.toThrow(/NO_AUTORIZADO/);
+
+    // The owner closes it — the rest of this spec runs with editing locked.
+    await runAs(OWNER, "groups:setOpenEditing", { groupId, edicionAbierta: false });
+    const after = await runAs<GroupRow[]>(OWNER, "groups:myGroups");
+    expect(after.find((g) => g._id === groupId)!.edicionAbierta).toBe(false);
+    // Members keep managing it, exactly as before the toggle existed.
+    await runAs(COADMIN, "matches:update", { matchId, ubicacion: "Cancha E2E (editada)" });
+  });
+
   test("outsiders cannot touch the group", async () => {
     // A third signed-in account that never joined…
     await runAs(STRANGER, "users:ensureUser", { nombre: STRANGER.name });
@@ -208,7 +237,8 @@ test.describe("co-ownership", () => {
     await expect(runAs(STRANGER, "groups:members", { groupId })).rejects.toThrow(
       /NO_AUTORIZADO/,
     );
-    // …and a fully anonymous caller: grouped matches are NOT open.
+    // …and a fully anonymous caller: with open editing closed (previous test),
+    // the match link no longer carries write access.
     await expect(
       runAnon("matches:update", { matchId, nombre: `e2e-hijacked-${RUN}` }),
     ).rejects.toThrow(/NO_AUTORIZADO/);
