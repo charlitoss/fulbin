@@ -17,14 +17,13 @@ function MatchPage({ matchId, onNavigate }) {
   
   // Convex queries
   const match = useQuery(api.matches.getById, { matchId })
-  const me = useQuery(api.users.current)
   const registrations = useQuery(api.registrations.listByMatch, { matchId })
   const teamConfig = useQuery(api.teamConfigurations.getByMatch, { matchId })
 
-  // Owned matches can only be managed by their owner; ownerless (anonymous)
-  // matches stay fully open. canManage gates all admin controls below.
-  const isOwner = !!me && !!match?.ownerId && me._id === match.ownerId
-  const canManage = !!match && (!match.ownerId || isOwner)
+  // Asked of the server so the UI gates exactly like the mutations do: open
+  // editing (the group's default), group membership, or an ownerless match.
+  // Undefined while it loads — treat that as read-only, never as allowed.
+  const canManage = useQuery(api.matches.canManage, { matchId }) === true
   // Anyone may inscribe during the inscription phase; otherwise admin-only.
   const canAddPlayer = match?.pasoActual === 'inscripcion' || canManage
   

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery, useMutation } from 'convex/react'
-import { Check, Link2, Users, Globe, RefreshCw } from 'lucide-react'
+import { Check, Link2, Users, Globe, RefreshCw, Pencil } from 'lucide-react'
 import { api } from '../../../convex/_generated/api'
 import { authEnabled, useAuthSession } from '../../auth/useAuthSession'
 import Modal from '../ui/Modal'
@@ -15,7 +15,8 @@ function initials(name) {
     .slice(0, 2)
 }
 
-// Settings for one group: rename, members, invite link, public page toggle.
+// Settings for one group: rename, members, invite link, public page toggle,
+// open-editing toggle.
 function GroupSettingsModal({ group, onClose }) {
   const members = useQuery(api.groups.members, { groupId: group._id })
   const rename = useMutation(api.groups.rename)
@@ -23,6 +24,7 @@ function GroupSettingsModal({ group, onClose }) {
   const revokeInvite = useMutation(api.groups.revokeInvite)
   const removeMember = useMutation(api.groups.removeMember)
   const setPublic = useMutation(api.groups.setPublic)
+  const setOpenEditing = useMutation(api.groups.setOpenEditing)
   const leave = useMutation(api.groups.leave)
   const removeGroup = useMutation(api.groups.remove)
 
@@ -155,6 +157,28 @@ function GroupSettingsModal({ group, onClose }) {
                 <Link2 size={16} /> Crear link de invitación
               </button>
             )}
+          </div>
+        )}
+
+        {isOwner && (
+          <div className="form-group">
+            <label>Edición abierta</label>
+            <p className="group-hint">
+              Cualquiera con el link de un partido puede armar los equipos,
+              sumar o sacar jugadores y cargar el resultado — sin cuenta.
+              Desactivala y solo los administradores del grupo pueden hacerlo.
+              Borrar un partido siempre queda para los administradores.
+            </p>
+            <label className="group-toggle-row">
+              <input
+                type="checkbox"
+                checked={group.edicionAbierta}
+                onChange={(e) =>
+                  setOpenEditing({ groupId: group._id, edicionAbierta: e.target.checked })
+                }
+              />
+              <Pencil size={16} /> Edición abierta activada
+            </label>
           </div>
         )}
 

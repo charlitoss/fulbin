@@ -115,12 +115,14 @@ function ShareButton({ matchId, match }) {
     if (!match) return shareUrl
 
     let message = buildHeader()
+    // Right under the match details, above the lists: anotados/equipos can run
+    // long on WhatsApp, and the link shouldn't end up buried under them.
+    message += `\n\nAnotate acá: ${shareUrl}`
     if (match.pasoActual === 'inscripcion') {
       message += buildInscriptionSection()
     } else if (match.pasoActual === 'armado_equipos') {
       message += buildTeamSection()
     }
-    message += `\n\nAnotate acá: ${shareUrl}`
 
     return message
   }

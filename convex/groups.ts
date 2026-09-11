@@ -63,6 +63,9 @@ export const myGroups = query({
             ? group.publicToken
             : undefined,
         publico: group.publico ?? false,
+        // Absent = open (the default), so the toggle reads true for every
+        // group that predates it.
+        edicionAbierta: group.edicionAbierta !== false,
         createdAt: group.createdAt,
       });
     }
@@ -329,6 +332,21 @@ export const setPublic = mutation({
     await ctx.db.patch(args.groupId, {
       publico: args.publico,
       publicToken: group.publicToken ?? generatePublicToken(),
+      updatedAt: new Date().toISOString(),
+    });
+  },
+});
+
+// Toggle open editing: whether anyone holding a match link can manage the
+// group's matches (teams, players, details, score) without an account.
+// Turning it off restricts them to the group's members. Deleting a match is
+// members-only either way. Owner only.
+export const setOpenEditing = mutation({
+  args: { groupId: v.id("groups"), edicionAbierta: v.boolean() },
+  handler: async (ctx, args) => {
+    await assertGroupOwner(ctx, args.groupId);
+    await ctx.db.patch(args.groupId, {
+      edicionAbierta: args.edicionAbierta,
       updatedAt: new Date().toISOString(),
     });
   },

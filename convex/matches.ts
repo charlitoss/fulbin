@@ -9,7 +9,11 @@ import {
   resolveActiveGroupId,
 } from "./users";
 import { activeTournament } from "./tournaments";
-import { assertCanManageMatch } from "./permissions";
+import {
+  assertCanManageMatch,
+  assertCanDeleteMatch,
+  canManageMatch,
+} from "./permissions";
 import { generateShortCode } from "./codes";
 
 // List all matches, ordered by creation time (newest first)
@@ -39,6 +43,19 @@ export const getByShortCode = query({
       .withIndex("by_codigoCorto", (q) => q.eq("codigoCorto", normalizedCode))
       .first();
     return match;
+  },
+});
+
+// Whether the caller may manage this match: the same rule the mutations
+// enforce (open editing / group membership / ownerless match), so the UI can
+// gate its admin controls without guessing from ownerId. Anyone with the link
+// may ask — the answer is about them, and leaks nothing about the match.
+export const canManage = query({
+  args: { matchId: v.id("matches") },
+  handler: async (ctx, args) => {
+    const match = await ctx.db.get(args.matchId);
+    if (!match) return false;
+    return await canManageMatch(ctx, match);
   },
 });
 
@@ -238,13 +255,14 @@ export const update = mutation({
   },
 });
 
-// Delete a match
+// Delete a match. Members only, even when the group's editing is open:
+// deletion is the one action open editing never grants.
 export const remove = mutation({
   args: { matchId: v.id("matches") },
   handler: async (ctx, args) => {
     const match = await ctx.db.get(args.matchId);
     if (!match) return;
-    await assertCanManageMatch(ctx, match);
+    await assertCanDeleteMatch(ctx, match);
     await ctx.db.delete(args.matchId);
   },
 });
