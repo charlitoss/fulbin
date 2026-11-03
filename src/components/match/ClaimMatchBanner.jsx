@@ -23,7 +23,7 @@ function ClaimMatchBanner({ match }) {
 
   return (
     <div className="claim-banner">
-      <span className="claim-banner-text">¿Organizás este partido?</span>
+      <span className="claim-banner-text">Organizás este partido?</span>
       <button
         type="button"
         className="btn btn-secondary btn-sm"

@@ -1,7 +1,7 @@
 const STEPS = [
-  'Crea tu partido',
-  'Invita a tus amigos',
-  'Arma los equipos',
+  'Creá tu partido',
+  'Invitá a tus amigos',
+  'Armá los equipos',
   'Anotá los goles',
 ]
 
@@ -28,7 +28,7 @@ export default function SplashPage({ onNavigate }) {
           />
 
           <h1 className="splash-headline">
-            <span>Organiza el fulbito</span>
+            <span>Organizá el fulbito</span>
             <span>con amigos</span>
           </h1>
 

@@ -144,8 +144,8 @@ function AdminPage({ onNavigate }) {
                 <div className="admin-confirm">
                   <span className="admin-confirm-text">
                     {confirm === 'permanent'
-                      ? '¿Eliminar definitivamente? También se borra la cuenta de WorkOS.'
-                      : '¿Eliminar la cuenta? Sus partidos quedan anónimos.'}
+                      ? 'Eliminar definitivamente? También se borra la cuenta de WorkOS.'
+                      : 'Eliminar la cuenta? Sus partidos quedan anónimos.'}
                   </span>
                   <button
                     className="btn btn-secondary btn-sm btn-danger-text"

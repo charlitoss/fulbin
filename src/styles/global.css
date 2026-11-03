@@ -1121,12 +1121,6 @@ h4 { font-size: var(--type-lg); }
   height: auto;
 }
 
-.form-group .hint {
-  font-size: var(--type-sm);
-  color: var(--gray-200);
-  margin-top: var(--space-2);
-}
-
 .form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -5189,7 +5183,7 @@ body.crt-on #root {
   font-variant-numeric: tabular-nums;
 }
 
-/* ¡Gol! message — shown inside the scoreboard; score slides out as it slides in */
+/* GOL!!! message — shown inside the scoreboard; score slides out as it slides in */
 @keyframes golSlideInFromRight {
   from { transform: translateX(110%); }
   to   { transform: translateX(0); }

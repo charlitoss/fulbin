@@ -130,8 +130,8 @@ function TournamentsModal({ isOpen, onClose, tournaments, selectedId, onSelect }
               <span className="tournament-confirm">
                 <span className="tournament-confirm-text">
                   {confirming.action === 'delete'
-                    ? `¿Eliminar «${t.nombre}»? Sus partidos quedan en Todos.`
-                    : `¿Finalizar «${t.nombre}» y coronar al campeón?`}
+                    ? `Eliminar «${t.nombre}»? Sus partidos quedan en Todos.`
+                    : `Finalizar «${t.nombre}» y coronar al campeón?`}
                 </span>
                 <button
                   className="btn btn-primary btn-sm"

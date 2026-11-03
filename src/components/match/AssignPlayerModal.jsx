@@ -126,7 +126,7 @@ function AssignPlayerModal({
         
         {/* Team selection */}
         <div className="assign-section">
-          <label>Selecciona equipo:</label>
+          <label>Equipo</label>
           <div className="team-selector">
             <button
               className={`team-option team-blanco ${selectedTeam === 'blanco' ? 'selected' : ''} ${isTeamFull('blanco') ? 'full' : ''}`}
@@ -152,7 +152,7 @@ function AssignPlayerModal({
         
         {/* Role selection */}
         <div className="assign-section">
-          <label>Selecciona rol:</label>
+          <label>Rol</label>
           <div className="role-selector">
             {roles.map(role => {
               const isAvailable = !selectedTeam || isRoleAvailable(selectedTeam, role.id)

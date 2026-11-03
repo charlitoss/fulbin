@@ -38,7 +38,7 @@ function BalanceIndicator({ teamStats, teamConfig }) {
           <span className="balance-team-name">{teamConfig.nombreEquipoBlanco}</span>
         </span>
         <h4 className="balance-title">
-          <span className="balance-title-full">Balance de Equipos</span>
+          <span className="balance-title-full">Balance de equipos</span>
           <span className="balance-title-short">Balance</span>
         </h4>
         <span className="balance-team-label balance-team-label-right">

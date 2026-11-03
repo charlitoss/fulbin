@@ -216,8 +216,7 @@ function SoccerField({
         {/* Empty state */}
         {teamConfig.asignaciones.length === 0 && (
           <div className="field-empty">
-            <p>Asigna jugadores a los equipos</p>
-            <p>desde el panel lateral</p>
+            <p>Todavía no hay nadie en la cancha</p>
           </div>
         )}
       </div>

@@ -21,7 +21,7 @@ function ProgressBar({ current, total, showMessage = true, label }) {
       </div>
       {showMessage && isComplete && (
         <p className="progress-message complete">
-          ¡Cupo completo! Puedes continuar al armado de equipos
+          Cupo completo!
         </p>
       )}
     </div>
