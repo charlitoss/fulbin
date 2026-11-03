@@ -86,17 +86,16 @@ Found in the current code — good first `polish` tasks:
 
 | Where | Now | Should be |
 |---|---|---|
-| `SplashPage.jsx:2–4, 31` | Crea tu partido · Invita a tus amigos · Arma los equipos · Organiza el fulbito | Creá · Invitá · Armá · Organizá |
-| `InscriptionStep.jsx:150` | Jugas? | ¿Jugás? |
-| `JoinMatchModal.jsx:530` | Anota a un amigo (opcional) | Anotá a un amigo (opcional) |
-| `JoinMatchModal.jsx:578` | Podes agregar varios separados por coma | Podés… — or redesign so it isn't needed |
-| `AssignPlayerModal.jsx:129, 155` | Selecciona equipo: · Selecciona rol: | Equipo · Rol (labels don't need verbs) |
-| `SoccerField.jsx:219` | Asigna jugadores a los equipos | Asigná… — or an empty state that doesn't instruct |
 | `MyMatchesPage.jsx:74` | Crea tu primer partido apretando el botón crear partido. | Todavía no tenés partidos. + button |
 | `StandingsPage.jsx:129` | Cuando termine un partido, los jugadores ganadores sumarán 3 puntos. | Shorter, or show it in the table header |
-| `BalanceIndicator.jsx:41` | Balance de Equipos | Balance de equipos |
 | `CrtControlPanel.jsx:18, 24–25` | CRT Shader · Reset to defaults | Spanish — the panel is user-facing |
-| `Footer.jsx:7` | Github | GitHub |
+| `InGameHeader.jsx:131` | GOL!!! | ¡GOL! — opening mark (rule 2); ALL CAPS is fine, it's a celebration |
+| `JoinMatchModal.jsx:496` | The Cansado · Normal · Excelente selector has no label at all | `Estado físico` (the glossary word). Without it nobody knows what they're choosing — a first-timer read it as a public rating |
+| `JoinMatchModal.jsx:572` | Agregar “Juan, Pedro” — singular quote around two names | Plural when there's more than one name: `Agregar 2 jugadores` (or quote each name) |
+| `ProgressBar.jsx:7` | Somos 9 /10 — space on the wrong side of the slash | `Somos 9/10` |
+
+Fixed in #44 (voseo, acentos, sentence case): SplashPage, InscriptionStep, JoinMatchModal ×2,
+AssignPlayerModal, SoccerField, BalanceIndicator, Footer.
 
 ## Decisions
 
