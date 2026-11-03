@@ -1,0 +1,50 @@
+name: Idea
+description: Algo nuevo o distinto que podría hacer fulbin. El designer la encuadra antes de construir nada.
+labels: [idea]
+body:
+  - type: textarea
+    id: situation
+    attributes:
+      label: ¿Qué pasa hoy?
+      description: La situación concreta. Quién, cuándo, qué intenta hacer y qué le molesta o le falta.
+      placeholder: "El organizador arma los equipos y a mitad de semana se baja alguien. Tiene que avisar por WhatsApp y rearmar a mano."
+    validations:
+      required: true
+  - type: dropdown
+    id: who
+    attributes:
+      label: ¿A quién le pasa?
+      multiple: true
+      options:
+        - Organizador
+        - Jugador / suplente
+        - Hinchada / visitante
+        - Co-organizador de un grupo
+    validations:
+      required: true
+  - type: dropdown
+    id: frequency
+    attributes:
+      label: ¿Cada cuánto?
+      options:
+        - Cada partido
+        - Seguido
+        - A veces
+        - Una vez / raro
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: ¿Cómo lo sabés?
+      description: Lo viste vos, te lo dijeron, pasó en un partido… Un mensaje de WhatsApp o una captura vale oro.
+  - type: textarea
+    id: idea
+    attributes:
+      label: Si ya tenés una idea de solución
+      description: Opcional. El designer puede proponer otra más simple.
+  - type: textarea
+    id: out
+    attributes:
+      label: Lo que NO es parte de esto
+      description: Opcional. Límites, cosas que no querés que cambie.

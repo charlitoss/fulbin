@@ -1,0 +1,26 @@
+name: Polish
+description: Ajuste visual, de copy o de detalle en algo que ya existe.
+labels: [polish]
+body:
+  - type: input
+    id: where
+    attributes:
+      label: ¿Dónde?
+      description: Pantalla o componente.
+      placeholder: "Modal de anotarse, campo 'Anotá a un amigo'"
+    validations:
+      required: true
+  - type: textarea
+    id: now
+    attributes:
+      label: Cómo está ahora
+      description: Una captura ayuda mucho.
+    validations:
+      required: true
+  - type: textarea
+    id: should
+    attributes:
+      label: Cómo debería estar
+      description: Si es una referencia a un mock, pegá la imagen o el link.
+    validations:
+      required: true

@@ -1,0 +1,46 @@
+name: Bug
+description: Algo que no anda como debería.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: ¿Qué pasó?
+      placeholder: "Al bajarme de un partido, el primer suplente no subió a jugador."
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: ¿Qué esperabas?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Pasos para reproducirlo
+      placeholder: |
+        1. Crear partido 5v5 con 10 jugadores y 1 suplente
+        2. Bajar a un jugador
+        3. …
+    validations:
+      required: true
+  - type: dropdown
+    id: device
+    attributes:
+      label: Dispositivo
+      multiple: true
+      options:
+        - iPhone / Safari
+        - Android / Chrome
+        - Desktop
+        - Desde el link de WhatsApp (navegador interno)
+  - type: input
+    id: link
+    attributes:
+      label: Link al partido o grupo (si aplica)
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Capturas
+      description: Arrastrá imágenes acá.
