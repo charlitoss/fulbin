@@ -35,7 +35,12 @@ Read the issue and all its comments: `gh issue view <N> --comments`. Classify it
 |---|---|---|---|
 | `bug` | `fix` | skip | only if the fix changes UI |
 | `polish` | `polish` | skip | yes |
+| `refactor` | `refactor` | skip | skip — nothing visible may change |
 | anything else | `feat` | yes | yes, if user-facing |
+
+For `refactor`, step 7 runs the designer in **COMPARE mode** (before/after screenshots)
+instead of REVIEW, and skips `first-timer`. COMPARE switches branches, so run it **alone**,
+then `convex-guard` and `e2e-tester` after it — never in parallel in the same checkout.
 
 ## 2. Claim and set up
 
@@ -144,6 +149,11 @@ Closes #<N>
 **Para revisar:** lo que Charly debería mirar con atención.
 **Fuera del alcance previsto:** archivos extra, o "nada".
 ```
+
+For a `refactor`, add a **Antes / después** table to the PR body, one row per screen, with
+the iPhone images side by side and a ✅ (identical) or ⚠️ (differs, plus the diff image).
+Link each image by commit, so it keeps working after merge:
+`https://github.com/charlitoss/fulbin/blob/<commit sha>/docs/specs/<N>/compare/before/<file>?raw=true`.
 
 Leave the issue labeled `in-progress` — its files stay claimed until the PR merges and
 the issue closes.

@@ -1,9 +1,8 @@
 # Fulbin — Brand & look and feel
 
-> **Status: DRAFT for Charly to confirm.** Written by reading the current code
-> (`src/styles/global.css`, `public/`, components). Rules marked **(proposed)** are not yet
-> enforced anywhere — confirm, change or delete them. Once confirmed, the `designer` agent
-> treats this file as law and only proposes changes, never makes them.
+> **Status: confirmed by Charly, 2026-11-03.** Written from the current code
+> (`src/styles/global.css`, `public/`, components). The `designer` agent treats this file as
+> law: it proposes changes under "Open questions for Charly" in a spec, never makes them.
 
 ## The idea in one line
 
@@ -43,7 +42,7 @@ Use tokens only. Never write a hex value in a new rule.
 | Physical state (estado físico) | `--state-excellent` / `--state-normal` / `--state-tired` | green / amber / red |
 | Teams | `--team-white` / `--team-dark` | `#f1f5f9` / `#1e293b` |
 
-**Known debt** (cleanup candidates, see "Open questions"):
+**Known debt** (approved for cleanup, see "Decisions"):
 - `--acid-yellow*` tokens are actually mint (legacy name). Prefer `--color-primary*`.
 - `--text-muted` and `--text-tertiary` are identical.
 - `.card` and `.btn` use a raw `#060606` base and `#000` inset — should become a token.
@@ -53,17 +52,17 @@ Use tokens only. Never write a hex value in a new rule.
 
 - **Family:** `--font-display` and `--font-body` are both GeistPixel-Grid (self-hosted,
   `public/fonts/geist-pixel/`). `Press Start 2P` is used only for scoreboard-style numbers
-  (`.field-player-name`, `.balance-team-value`) — don't spread it further **(proposed)**.
+  (`.field-player-name`, `.balance-team-value`) — don't spread it further.
 - **Scale:** `--type-3xs` (8px) → `--type-hero` (64px). Body is `--type-base` (15px).
   Don't use sizes outside the scale.
 - **Leading / tracking:** `--leading-*`, `--tracking-*` tokens.
 - **Case:** sentence case for labels and headings ("Tabla de posiciones", not
-  "Tabla De Posiciones") **(proposed)** — see VOICE.md.
+  "Tabla De Posiciones") — see VOICE.md.
 
 ## Space, size, layers, motion
 
 - **Spacing:** use `--space-1` … `--space-20` (4px grid). `--spacing-*` is an older
-  duplicate scale — don't use it in new code **(proposed)**.
+  duplicate scale — don't use it in new code.
 - **Icons:** `--icon-xs` (14) … `--icon-xl` (28).
 - **Z-index:** `--z-base` → `--z-toast`. Never a raw z-index.
 - **Motion:** `--duration-fast` (120ms) / `--duration-normal` (220ms) / `--duration-slow`
@@ -82,7 +81,7 @@ Use tokens only. Never write a hex value in a new rule.
   - `.btn-secondary` — grey border, white text.
   - `.btn-ghost` — no border or shadow; for low-emphasis actions.
   - Sizes: `.btn-sm` 34px · `.btn` 42px · `.btn-lg` 52px · `.btn-xl` 60px. Touch targets on
-    mobile ≥ 42px **(proposed)**.
+    mobile ≥ 42px.
   - Focus: 2px mint outline, 2px offset.
 - **Headings (`.form-heading`, page headings):** solid black chip behind the text.
 - **Count chips (`.count-chip`):** numbered steps and counters.
@@ -98,7 +97,7 @@ Use tokens only. Never write a hex value in a new rule.
 - **Custom pixel icons first** — `public/icons/`: calendario, horario, timer, compartir,
   chori, hinchada, teamflag (light/dark), moveplayer, promoteplayer, removeplayer, plus,
   minus, arrow-right, selected-check, and the physical-state set
-  (`State=Good|Fire|Down`). **(proposed)** New icons follow the same pixel style; use
+  (`State=Good|Fire|Down`). New icons follow the same pixel style; use
   `lucide-react` only for generic UI glyphs with no custom equivalent.
 - **Logo:** `public/LOGO.svg` (full), `public/Symbol LOGO.svg` (compact, mobile breakpoints).
 - **Pitch:** the field in the team builder and `background-soccer.webp` are the main
@@ -131,9 +130,11 @@ compares against. **To do:** the designer captures these on its first run (splas
 match, inscription, team builder, in-game, finalized recap, standings, groups, public group
 page, join group).
 
-## Open questions for Charly
+## Decisions
 
-1. Confirm the **(proposed)** rules above.
-2. Clean up the legacy tokens (`--acid-yellow*`, `--spacing-*`, `--text-tertiary`) and
-   tokenize `#060606` / `#000` — as one refactor task?
-3. Split `global.css` (7k+ lines) into one file per feature, so parallel tasks don't collide?
+- **2026-11-03** — All rules in this file confirmed.
+- **2026-11-03** — Clean up the legacy tokens (`--acid-yellow*`, `--spacing-*`,
+  `--text-tertiary`) and tokenize `#060606` / `#000`, as one `refactor` task. Its PR must show
+  before/after screenshots of the key screens so Charly can compare and approve.
+- **2026-11-03** — Split `global.css` into one file per feature, after the token cleanup, as
+  long as nothing visible changes. Same before/after proof.

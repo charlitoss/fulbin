@@ -1,6 +1,6 @@
 # Fulbin — Voice & copy
 
-> **Status: DRAFT for Charly to confirm.** Built from the copy already in the app. The
+> **Status: confirmed by Charly, 2026-11-03.** Built from the copy already in the app. The
 > `designer` owns every user-facing string — buttons, labels, empty states, errors, the
 > splash and the WhatsApp share messages — and checks them against this file.
 
@@ -69,7 +69,7 @@ Use these words, always the same way:
 | jugador | signed up to play | participante, usuario |
 | suplente | waiting list, moves up if someone drops | reserva, en espera |
 | hinchada | comes to watch | espectador, público |
-| anotarse | sign up to a match | inscribirse, registrarse (in UI) |
+| anotarse | sign up to a match | inscribirse, inscripción, registrarse |
 | armar los equipos | split players into teams | generar, asignar equipos |
 | Blanco / Oscuro | the two teams | Equipo A / B, local / visitante |
 | arquero, defensor, mediocampista, delantero | roles | GK, DEF… |
@@ -95,12 +95,11 @@ Found in the current code — good first `polish` tasks:
 | `MyMatchesPage.jsx:74` | Crea tu primer partido apretando el botón crear partido. | Todavía no tenés partidos. + button |
 | `StandingsPage.jsx:129` | Cuando termine un partido, los jugadores ganadores sumarán 3 puntos. | Shorter, or show it in the table header |
 | `BalanceIndicator.jsx:41` | Balance de Equipos | Balance de equipos |
-| `CrtControlPanel.jsx:18, 24–25` | CRT Shader · Reset to defaults | Spanish (or keep only if this panel is dev-only) |
+| `CrtControlPanel.jsx:18, 24–25` | CRT Shader · Reset to defaults | Spanish — the panel is user-facing |
 | `Footer.jsx:7` | Github | GitHub |
 
-## Open questions for Charly
+## Decisions
 
-1. Confirm **voseo everywhere**, including the splash.
-2. "Anotarse" vs "inscribirse" — the UI says "Anotarse", the README says "inscripción".
-   Pick one.
-3. Is the CRT control panel user-facing or a dev tool?
+- **2026-11-03** — Voseo everywhere, including the splash.
+- **2026-11-03** — The UI says "anotarse", never "inscribirse".
+- **2026-11-03** — The CRT control panel is user-facing: its copy follows these rules.

@@ -7,7 +7,7 @@ them into PRs, **you merge**. Nothing reaches `main` or production without you.
 
 ```
 idea ──/triage──▶ needs-charly ──(you answer + agent-ready)──▶ /run-task ──▶ PR ──▶ you merge
-bug / polish ───────────────────(agent-ready)────────────────▶ /run-task ──▶ PR ──▶ you merge
+bug / polish / refactor ────────(agent-ready)────────────────▶ /run-task ──▶ PR ──▶ you merge
 ```
 
 Inside `/run-task`, for one issue:
@@ -45,6 +45,7 @@ Definitions: `.claude/agents/`. Orchestration: `.claude/skills/run-task/` and
 | `idea` | Raw idea, not framed yet | you (template) |
 | `bug` | Something broken | you (template) |
 | `polish` | Visual / copy / detail tweak | you (template) |
+| `refactor` | Internal cleanup, nothing visible may change. PR shows before/after screenshots | you |
 | `agent-ready` | **Go.** Agents may pick it up | you |
 | `priority` | Pick before older issues | you |
 | `in-progress` | An agent run owns it; its files are claimed | orchestrator |

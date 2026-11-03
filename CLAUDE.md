@@ -66,9 +66,10 @@ text, tooltips or tutorials.
 
 ## Conventions
 
-- **Branches:** `feat/<issue>-<slug>`, `fix/<issue>-<slug>`, `polish/<issue>-<slug>`.
+- **Branches:** `feat/<issue>-<slug>`, `fix/<issue>-<slug>`, `polish/<issue>-<slug>`,
+  `refactor/<issue>-<slug>`.
 - **Commits:** `type(scope): message`, lowercase, imperative-ish. Types in use: `feat`, `fix`,
-  `polish`, `design`, `test`, `assets`, `docs`, `chore`. Scope is the area: `groups`, `match`,
+  `polish`, `refactor`, `design`, `test`, `assets`, `docs`, `chore`. Scope is the area: `groups`, `match`,
   `share`, `standings`, `agents`…
 - **CSS:** use tokens from `:root`, never raw hex values or non-zero radii in new rules. Add new
   rules next to the section they belong to in `global.css`, under a `/* Section */` comment.
@@ -86,6 +87,7 @@ A change is done when all of these hold:
 - [ ] It looks right at iPhone 13 width — that's how most people open a match link.
 - [ ] Copy follows `VOICE.md`; visuals follow `BRAND.md`.
 - [ ] No new helper text or tooltip without a written reason in the spec.
+- [ ] Refactors only: before/after screenshots show no visible change (or only the intended one).
 - [ ] The spec in `docs/specs/` is up to date, including the build log.
 
 ## The agent team
@@ -96,7 +98,7 @@ How it works for humans: `docs/agents/README.md`.
 
 | Agent | Does | May write to |
 |---|---|---|
-| `designer` | frames the problem, writes the design + copy brief, reviews usability, brand and voice | `docs/design/`, its sections of the spec, `e2e/_scratch/` |
+| `designer` | frames the problem, writes the design + copy brief, reviews usability, brand and voice, compares before/after on refactors | `docs/design/`, its sections of the spec, `docs/specs/<issue>/compare/`, `e2e/_scratch/` |
 | `planner` | turns a framed issue into acceptance criteria, files to touch, backend plan | its sections of the spec |
 | `builder` | implements the spec | `src/`, `convex/`, `public/`, `index.html`, Build log |
 | `convex-guard` | reviews backend changes for permission and schema safety | nothing (read-only) |
