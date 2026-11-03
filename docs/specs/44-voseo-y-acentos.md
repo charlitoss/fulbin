@@ -35,6 +35,19 @@ Fuera de este issue: los empty states de Mis partidos y Tabla (necesitan diseño
 
 _Sin comentarios de Charly en el issue._
 
+**Actualización 2026-11-03 — Charly, en la sesión, después de abrir el PR #45:**
+
+> "Sorry I didn't read the opening marks rule. Let's not do that. Feel too formal."
+
+Preguntado por el alcance, eligió **toda la app** por encima de revertir solo los dos strings de
+este PR. Decisión: **no se usan signos de apertura (`¿` / `¡`) en ningún texto de la app.** Los
+acentos y el voseo no se tocan — eso sigue siendo lo que pedía el issue. La regla 2 de
+`docs/design/VOICE.md` quedó reescrita en consecuencia y la decisión está fechada en su sección
+"Decisions".
+
+Esto invierte parte del pedido original del issue ("signos de apertura") y amplía el alcance a
+seis archivos fuera de "Files to touch"; ambas cosas están declaradas en el cuerpo del PR.
+
 ## Problem
 <!-- owner: designer (FRAME) -->
 
@@ -265,6 +278,11 @@ criterio "no queda tuteo en `src/`" no se cumple:
 signo de apertura (regla 2), pero el texto está dentro de la animación del gol y su archivo no
 está reclamado por este task. Lo agrego como fila nueva a la tabla de `VOICE.md` en REVIEW, para
 el próximo `polish`.
+
+> **Obsoleto en parte (2026-11-03):** todos los `¿`/`¡` de la tabla de arriba y de la nota sobre
+> `InGameHeader.jsx:131` se revirtieron por decisión de Charly (demasiado formales). El wording
+> final es sin signos de apertura; el resto del brief (voseo, acentos, sentence case, recortes)
+> sigue vigente. Ver el addendum al final de "Review: design".
 
 ### New concepts / helper text
 
@@ -549,6 +567,49 @@ ya están anotados en la tabla de `VOICE.md`, los de layout/UX quedan acá como 
   6. `TeamBuilderStep.jsx:275` — el `AssignPlayerModal` sigue inalcanzable (ya reportado arriba): o
      se cablea o se borra.
 
+### Addendum (2026-11-03): Charly saca los signos de apertura
+
+**Reversión de voz, decidida por Charly, alcance "toda la app".** No había leído la regla de los
+signos de apertura: "Let's not do that. Feel too formal". Preguntado hasta dónde, eligió todo
+`src/`, no solo los dos strings de este PR. `¿` y `¡` quedan **fuera** de la voz de fulbin; acentos
+y voseo no se tocan. Registrado en `docs/design/VOICE.md`: regla 2 reescrita (tildes obligatorias,
+signos de apertura prohibidos), el ejemplo de tono de la línea 16 (`¡GOL!` → `GOL!`) y una línea en
+"Decisions" fechada 2026-11-03 con el motivo.
+
+**Qué invalida de mi review de arriba** (nada de lo otro cambia):
+
+- **Void** — la última viñeta de "Copy" ("no queda `!`/`?` sin signo de apertura"): el criterio se
+  invirtió. Verificado contra el nuevo HEAD (`50d8977`): `grep -rn '[¿¡]' src/ index.html` no
+  devuelve nada, así que `src/` cumple la regla nueva, incluidos los seis archivos que estaban
+  fuera de "Files to touch" (`AdminPage`, `GroupsPage`, `TournamentsModal`, `ClaimMatchBanner`,
+  `ShareButton`, `StandingsShareMenu`).
+- **Actualizado, sigue OK** — `InscriptionStep.jsx:150` ahora dice `Jugás?`, `:208`
+  `Somos 10! Se juega` y `ProgressBar.jsx:24` `Cupo completo!`. Los tres conservan el acento y el
+  voseo, que es lo que este issue venía a arreglar.
+- **Void** — la fila de `InGameHeader.jsx:131` (`GOL!!!` → `¡GOL!`) que había agregado a "Known
+  inconsistencies" de `VOICE.md`: la saqué. Sin el signo de apertura no queda defecto —`GOL!!!` en
+  mayúsculas con `!` repetidos es exactamente el registro de celebración de la regla 8. **No hay
+  `polish` de seguimiento por ese string.** Las otras filas de la tabla (MyMatchesPage,
+  StandingsPage, CrtControlPanel, los dos de JoinMatchModal, ProgressBar `Somos 9 /10`) siguen
+  vigentes.
+- **Capturas desactualizadas, verdicto de layout intacto** — `docs/specs/44/02-inscripcion-falta-1-mobile.png`,
+  `03-inscripcion-faltan-5-mobile.png` y `04-inscripcion-completo-mobile.png` muestran `¿Jugás?` y
+  `¡Somos 10!`, con un caracter que ya no existe. No las volví a sacar: los strings quedan 1
+  caracter más cortos y están centrados en una línea, así que no hay riesgo nuevo de wrap ni
+  desplazamiento. Si Charly quiere las capturas al día antes de mergear, es una corrida de
+  `e2e/_scratch` de 5 minutos.
+- **Sin cambios** — todo el resto: voseo y acentos de la splash, `GitHub`, labels `Equipo` / `Rol`,
+  empty state de la cancha, hint borrado, regla muerta `.form-group .hint`, brand y layout.
+
+**Nota de diseño, al margen de la decisión (se implementa igual):** lo único que se pierde con el
+`¿` es el aviso temprano en preguntas largas — `Eliminar definitivamente? También se borra la
+cuenta de WorkOS.` (`AdminPage.jsx`) se lee como afirmación hasta el signo final. Mitigación, ya
+anotada en la regla 2: las preguntas van cortas. Hoy la más larga es esa y aguanta; si alguna crece,
+se parte en dos frases, no se le devuelve el signo.
+
+**Pendiente ajeno a mí:** las aserciones de `e2e/copy.spec.ts` (del `e2e-tester`, en curso) y, en la
+raíz del repo, volvió a quedar `playwright.tmp.config.ts` sin trackear — que no entre al PR.
+
 ## Review: first-timer
 <!-- written by the orchestrator from first-timer's report -->
 
@@ -606,13 +667,14 @@ GitHub no cambia.
 **Added** `e2e/copy.spec.ts` (+ row in `e2e/README.md`). No existing spec changed or broke.
 
 - Splash: headline `Organizá el fulbito` / `con amigos`, los 4 pasos en orden, link `GitHub` con el `href` intacto.
-- Inscripción: `¿Jugás?`; `Falta 1 jugador`; `Faltan 5 jugadores`; `¡Somos 10! Se juega` (el mensaje visible, el de `InscriptionStep`; no se espera el de `ProgressBar`, que no se renderiza).
+- Inscripción: `Jugás?`; `Falta 1 jugador`; `Faltan 5 jugadores`; `Somos 10! Se juega` (el mensaje visible, el de `InscriptionStep`; no se espera el de `ProgressBar`, que no se renderiza).
 - Balance: `Balance de equipos` solo en desktop (skip en mobile); `Balance` corto solo en mobile.
 - No cubierto e2e: label/hint de `JoinMatchModal`, labels de `AssignPlayerModal` y empty state de la cancha (la cancha autogenera equipos, no queda vacía por la UI normal).
 
-**Run** (`chromium-desktop` + `webkit-mobile-iphone`, `co-ownership` no hace falta): suite completa 59 passed, 3 skipped, 0 failed. `copy.spec.ts`: 4 passed + 1 skipped por proyecto (los dos tests de Balance se excluyen mutuamente por ancho).
+**Run** (`chromium-desktop` + `webkit-mobile-iphone`, `co-ownership` no hace falta): suite completa 47 passed, 3 skipped, 0 failed (50 tests, sin `co-ownership`). `copy.spec.ts`: 4 passed + 1 skipped por proyecto (los dos tests de Balance se excluyen mutuamente por ancho).
 
 **Notas**
+- Actualización por la decisión de sacar `¿` y `¡`: las aserciones esperan `Jugás?` y `Somos 10! Se juega`. `toHaveText` con string compara el texto completo, así que ya falla si vuelve un `¿`/`¡` inicial; no agregué otro guard (sería redundante).
 - Test bug corregido: `.step-title` matchea 3 elementos en la inscripción (Suplentes, Hinchada); se usa `.first()`.
 - Entorno: el puerto 3000 lo tiene otro proyecto (`seller-center-proto`, vite) y `reuseExistingServer` lo reutiliza, así que `npx playwright test` normal falla con la app equivocada. Corrí con una copia temporal del config en el puerto 3123 (ya borrada). Para correr normal hay que liberar el 3000.
 - `e2e/_scratch/shots44.spec.ts` (del designer) falló una vez ("modal anotarse", timeout de click) en una corrida; pasó en la siguiente. No es mío.
