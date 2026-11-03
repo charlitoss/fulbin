@@ -2,7 +2,7 @@ import { test, expect } from "./helpers/test";
 import { setupMatch } from "./helpers/match";
 import { advanceToStep, seedRegistrations } from "./helpers/convex";
 
-// Copy polish (#44): voseo, acentos, signos de apertura, sentence case.
+// Copy polish (#44): voseo, acentos, sin signos de apertura, sentence case.
 test.describe("copy: voseo y acentos", () => {
   test("splash: headline y pasos en voseo, footer dice GitHub", async ({ page }) => {
     await page.goto("/");
@@ -22,16 +22,16 @@ test.describe("copy: voseo y acentos", () => {
     await expect(gh).toHaveAttribute("href", "https://github.com/charlitoss");
   });
 
-  test("inscripción: título ¿Jugás? y faltante en voseo", async ({ page }) => {
+  test("inscripción: título Jugás? y faltante en voseo", async ({ page }) => {
     const { matchId, playerIds } = await setupMatch({ cantidadJugadores: 10 });
     await seedRegistrations({ matchId, playerIds: playerIds.slice(0, 9) });
 
     await page.goto(`/#/partido/${matchId}`);
-    await expect(page.locator(".step-title").first()).toHaveText("¿Jugás?");
+    await expect(page.locator(".step-title").first()).toHaveText("Jugás?");
     await expect(page.locator(".continue-hint")).toHaveText("Falta 1 jugador");
   });
 
-  test("inscripción: plural del faltante y cupo completo con ¡", async ({ page }) => {
+  test("inscripción: plural del faltante y mensaje de cupo completo", async ({ page }) => {
     const { matchId, playerIds } = await setupMatch({ cantidadJugadores: 10 });
     await seedRegistrations({ matchId, playerIds: playerIds.slice(0, 5) });
     await page.goto(`/#/partido/${matchId}`);
@@ -39,7 +39,7 @@ test.describe("copy: voseo y acentos", () => {
 
     await seedRegistrations({ matchId, playerIds: playerIds.slice(5) });
     // Visible complete message lives in InscriptionStep (ProgressBar's is not rendered).
-    await expect(page.locator(".progress-message.complete")).toHaveText("¡Somos 10! Se juega");
+    await expect(page.locator(".progress-message.complete")).toHaveText("Somos 10! Se juega");
   });
 
   test("balance: título completo en sentence case (solo desktop)", async ({ page, viewport }) => {
