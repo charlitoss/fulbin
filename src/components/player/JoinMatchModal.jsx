@@ -147,7 +147,7 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
     setError('')
     
     if (!friendName.trim()) {
-      setError('Ingresa el nombre del amigo')
+      setError('Escribí el nombre del amigo')
       return
     }
     
@@ -527,7 +527,7 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
         {/* Friends section - only for jugador and suplente */}
         {tipoInscripcion !== 'hinchada' && (
           <div className="friends-section form-group">
-            <label htmlFor="friend-input">Anota a un amigo (opcional)</label>
+            <label htmlFor="friend-input">Anotá a un amigo (opcional)</label>
             <div className="typeahead-wrap">
               <input
                 id="friend-input"
@@ -575,7 +575,6 @@ function JoinMatchModal({ isOpen, onClose, matchId, onJoined, match, playerOnly 
                 </div>
               )}
             </div>
-            <span className="hint">Podes agregar varios separados por coma</span>
 
             {friends.length > 0 && (
               <div className="friends-list-items">

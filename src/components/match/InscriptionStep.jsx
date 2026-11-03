@@ -147,7 +147,7 @@ function InscriptionStep({ match, canManage = false, deviceId, onRegisterAddPlay
     <>
       <div className="inscription-step">
         <div className="inscription-step-header">
-          <p className="step-title">Jugas?</p>
+          <p className="step-title">¿Jugás?</p>
           <ProgressBar
             current={confirmedCount}
             total={requiredCount}
@@ -200,12 +200,12 @@ function InscriptionStep({ match, canManage = false, deviceId, onRegisterAddPlay
 
           {!isQuotaComplete && (
             <p className="continue-hint">
-              Necesitas {requiredCount - confirmedCount} jugador{requiredCount - confirmedCount !== 1 ? 'es' : ''} más para continuar
+              {requiredCount - confirmedCount === 1 ? 'Falta 1 jugador' : `Faltan ${requiredCount - confirmedCount} jugadores`}
             </p>
           )}
           {isQuotaComplete && (
             <p className="progress-message complete">
-              Somos {confirmedCount}! Se juega
+              ¡Somos {confirmedCount}! Se juega
             </p>
           )}
         </div>
