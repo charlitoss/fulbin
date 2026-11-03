@@ -35,3 +35,6 @@ yarn-error.log*
 
 # OS
 Thumbs.db
+
+# Agent scratch space (designer screenshots, throwaway specs)
+/e2e/_scratch/

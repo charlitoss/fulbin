@@ -1,0 +1,69 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+
+  e2e:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # The suite runs against the shared DEV Convex deployment, so never run two at once.
+    concurrency:
+      group: e2e-shared-dev-convex
+      cancel-in-progress: false
+    env:
+      CI: "true"
+      TEST_CONVEX_URL: ${{ secrets.TEST_CONVEX_URL }}
+      E2E_SECRET: ${{ secrets.E2E_SECRET }}
+      ALLOW_TEST_MUTATIONS: "1"
+    steps:
+      - name: Check test secrets
+        id: secrets
+        run: |
+          if [ -z "$TEST_CONVEX_URL" ] || [ -z "$E2E_SECRET" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::E2E skipped: add TEST_CONVEX_URL and E2E_SECRET as repository secrets to enable it."
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.secrets.outputs.skip != 'true'
+      - uses: actions/setup-node@v4
+        if: steps.secrets.outputs.skip != 'true'
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+        if: steps.secrets.outputs.skip != 'true'
+      - run: npx playwright install --with-deps chromium webkit
+        if: steps.secrets.outputs.skip != 'true'
+
+      # Browser projects only. The co-ownership project needs Convex CLI admin credentials
+      # (`npx convex run --identity`), so it runs locally — see e2e/README.md.
+      # Note: this tests the frontend in the PR against the functions currently on the dev
+      # deployment. PRs that change convex/ must be pushed there first (`npx convex dev --once`).
+      - run: npx playwright test --project=chromium-desktop --project=webkit-mobile-iphone
+        if: steps.secrets.outputs.skip != 'true'
+
+      - uses: actions/upload-artifact@v4
+        if: failure() && steps.secrets.outputs.skip != 'true'
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
