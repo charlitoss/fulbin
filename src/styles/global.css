@@ -5183,7 +5183,7 @@ body.crt-on #root {
   font-variant-numeric: tabular-nums;
 }
 
-/* ¡Gol! message — shown inside the scoreboard; score slides out as it slides in */
+/* GOL!!! message — shown inside the scoreboard; score slides out as it slides in */
 @keyframes golSlideInFromRight {
   from { transform: translateX(110%); }
   to   { transform: translateX(0); }

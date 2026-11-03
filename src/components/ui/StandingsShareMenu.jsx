@@ -82,7 +82,7 @@ function StandingsShareMenu({ groupName, tournamentName, partidos, tabla, result
               <Image size={18} />
               <span>
                 {feedback === 'image'
-                  ? '¡Copiado!'
+                  ? 'Copiado!'
                   : feedback === 'image-error'
                     ? 'No se pudo generar'
                     : 'Copiar imagen (Tabla)'}
@@ -93,7 +93,7 @@ function StandingsShareMenu({ groupName, tournamentName, partidos, tabla, result
             {publicUrl && (
               <button className="share-option" onClick={copyPublicLink}>
                 <Link2 size={18} />
-                <span>{feedback === 'link' ? '¡Copiado!' : 'Copiar link público'}</span>
+                <span>{feedback === 'link' ? 'Copiado!' : 'Copiar link público'}</span>
                 {feedback === 'link' && <Check size={16} className="copied-icon" />}
               </button>
             )}

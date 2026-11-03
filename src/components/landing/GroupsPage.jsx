@@ -123,7 +123,7 @@ function GroupSettingsModal({ group, onClose }) {
                   >
                     {copied === 'invite' ? (
                       <>
-                        <Check size={16} /> ¡Copiado!
+                        <Check size={16} /> Copiado!
                       </>
                     ) : (
                       <>
@@ -206,7 +206,7 @@ function GroupSettingsModal({ group, onClose }) {
                 >
                   {copied === 'public' ? (
                     <>
-                      <Check size={16} /> ¡Copiado!
+                      <Check size={16} /> Copiado!
                     </>
                   ) : (
                     <>
@@ -224,7 +224,7 @@ function GroupSettingsModal({ group, onClose }) {
             confirmDelete ? (
               <div className="group-actions-row">
                 <span className="group-hint">
-                  Los partidos jugados se conservan pero quedan sin grupo. ¿Seguro?
+                  Los partidos jugados se conservan pero quedan sin grupo. Seguro?
                 </span>
                 <button
                   type="button"

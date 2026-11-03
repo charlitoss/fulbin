@@ -162,7 +162,7 @@ function ShareButton({ matchId, match }) {
 
             <button className="share-option" onClick={copyLink}>
               <Link2 size={18} />
-              <span>{copied ? '¡Copiado!' : 'Copiar link'}</span>
+              <span>{copied ? 'Copiado!' : 'Copiar link'}</span>
               {copied && <Check size={16} className="copied-icon" />}
             </button>
           </div>
