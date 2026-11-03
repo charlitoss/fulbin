@@ -348,6 +348,53 @@ escrito entre los que sí entraban en el claim.
 
 **Sin preguntas abiertas nuevas.**
 
+**5º commit — `50d8977 polish(copy): quitar los signos de apertura de toda la app`** (pedido
+nuevo de Charly, posterior a la review y a la apertura del PR #45)
+
+Charly pidió sacar **todos** los signos de apertura (`¿` y `¡`) del copy visible de la app: no
+había leído la regla 2 de `VOICE.md` cuando se escribió el spec y en el registro de fulbin le
+leen formales. Eligió explícitamente la opción app-wide por sobre revertir solo los dos strings
+de este PR. **Esto revierte parte de #44**: los acentos y el voseo quedan exactamente como
+están, solo se van los signos de apertura.
+
+Revertido de lo que había hecho este PR:
+
+- `src/components/match/InscriptionStep.jsx:150` — `¿Jugás?` → `Jugás?`.
+- `src/components/match/InscriptionStep.jsx:208` — `¡Somos {confirmedCount}! Se juega` →
+  `Somos {confirmedCount}! Se juega`.
+- `src/components/ui/ProgressBar.jsx:24` — `¡Cupo completo!` → `Cupo completo!` (sigue sin
+  renderizarse nunca, ver 2º commit).
+
+Barrido del resto de la app (los seis archivos nuevos, ver desvío abajo):
+
+- `src/components/ui/ShareButton.jsx:165` y `src/components/ui/StandingsShareMenu.jsx:85,96` —
+  `¡Copiado!` → `Copiado!`.
+- `src/components/landing/GroupsPage.jsx:126,209` — `¡Copiado!` → `Copiado!`;
+  `:227` — `¿Seguro?` → `Seguro?`.
+- `src/components/landing/TournamentsModal.jsx:133,134` — `¿Eliminar «…»?` → `Eliminar «…»?` y
+  `¿Finalizar «…»?` → `Finalizar «…»?`.
+- `src/components/landing/AdminPage.jsx:147,148` — `¿Eliminar definitivamente?` /
+  `¿Eliminar la cuenta?` sin el `¿`.
+- `src/components/match/ClaimMatchBanner.jsx:26` — `¿Organizás este partido?` →
+  `Organizás este partido?`.
+- `src/styles/global.css:5186` — comentario de CSS, no copy: `/* ¡Gol! message … */` →
+  `/* GOL!!! message … */`. No es texto visible, pero describía mal lo que se renderiza
+  (`InGameHeader.jsx:131` siempre dijo `GOL!!!`, sin `¡`) y era lo único que quedaba con un signo
+  de apertura en `src/`, así que el grep final da vacío.
+
+**Desvío de "Files to touch":** seis archivos nuevos (`ShareButton.jsx`,
+`StandingsShareMenu.jsx`, `GroupsPage.jsx`, `TournamentsModal.jsx`, `AdminPage.jsx`,
+`ClaimMatchBanner.jsx`) quedan fuera del claim original de #44. Charly amplió el alcance él mismo
+y lo declara en el PR. En esos seis se cambió **solo** el signo de apertura: ningún otro string,
+ninguna lógica, ningún CSS.
+
+**Verificación:** `npm run build` pasa. `grep -rn '¿\|¡' src/` no devuelve nada, y tampoco las
+formas escapadas (`&iexcl;`, `&iquest;`, `&#161;`, `&#191;`, `¡`, `¿`). `convex/`,
+`index.html` y `public/` nunca tuvieron signos de apertura (verificado con el mismo barrido), así
+que **sigue sin hacer falta ningún `npx convex dev --once` ni deploy de Convex**. No se tocó
+`docs/design/VOICE.md` (la regla 2 la actualiza el designer) ni `e2e/` (las aserciones de
+`copy.spec.ts` las actualiza el e2e-tester).
+
 ## Review: design
 <!-- owner: designer (REVIEW). BLOCKER / SHOULD-FIX / OK, with file:line. -->
 
