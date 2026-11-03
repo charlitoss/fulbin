@@ -1,6 +1,6 @@
 # 44 – Unificar voseo, acentos y textos en inglés
 
-Issue: #44 · Branch: `polish/44-voseo-y-acentos` · Status: briefed
+Issue: #44 · Branch: `polish/44-voseo-y-acentos` · Status: reviewing
 <!-- Status: framing → planned → briefed → building → reviewing → pr-open → merged / dropped -->
 
 Every agent reads this whole file before starting and writes **only its own sections**.
@@ -274,6 +274,62 @@ hints, placeholders explicativos ni onboarding.
 
 ## Build log
 <!-- owner: builder. What was done, commit by commit, and any deviation from the spec and why. -->
+
+Tres commits, solo strings. `convex/` no se tocó (Backend: None), así que **no hace falta ningún
+`npx convex dev --once` ni deploy de Convex**. Sin reglas nuevas en `src/styles/global.css`
+(no hizo falta ninguna) y sin tocar `e2e/` ni `docs/design/VOICE.md`. `npm run build` pasa.
+
+Se siguió la tabla "Copy" de la sección Design como autoridad de wording en los casos donde
+difería del planner.
+
+**`02957a3 polish(landing): voseo en la splash y GitHub en el footer`**
+
+- `src/components/landing/SplashPage.jsx` — array `STEPS`: `Creá tu partido`, `Invitá a tus
+  amigos`, `Armá los equipos` (el 4º, `Anotá los goles`, ya estaba bien). Headline:
+  `Organizá el fulbito` (la segunda línea, `con amigos`, sin cambios).
+- `src/components/ui/Footer.jsx` — `Github` → `GitHub`. El `href` no cambió.
+
+**`08c0a7d polish(match): voseo y signos de apertura en la anotación`**
+
+- `src/components/match/InscriptionStep.jsx` — título del paso `Jugas?` → `¿Jugás?`; mensaje de
+  cupo lleno `Somos N! Se juega` → `¡Somos N! Se juega`; y el `continue-hint` pasó de
+  `Necesitas N jugador(es) más para continuar` a `Falta 1 jugador` / `Faltan N jugadores`. Para
+  pluralizar el verbo además del sustantivo, el ternario que había inline sobre el sufijo `es` se
+  reemplazó por un ternario sobre la frase completa
+  (`requiredCount - confirmedCount === 1 ? 'Falta 1 jugador' : \`Faltan ${…} jugadores\``). Es el
+  mismo patrón, misma expresión de faltante, sin cambios de clase ni de condición de render.
+- `src/components/player/JoinMatchModal.jsx` — error del campo `Ingresa el nombre del amigo` →
+  `Escribí el nombre del amigo` (sin punto final, como el resto de los errores del modal); label
+  `Anota a un amigo (opcional)` → `Anotá a un amigo (opcional)`; se borró el
+  `<span className="hint">Podes agregar varios separados por coma</span>` entero (decisión 2 de
+  Design). `.hint` no tenía regla en `global.css` y era su único uso: no queda CSS muerto ni
+  pendiente de limpiar.
+- `src/components/ui/ProgressBar.jsx` — el mensaje quedó en `¡Cupo completo!`. **Solo el string**:
+  el prop `showMessage` y la rama `{showMessage && isComplete && (…)}` quedaron exactamente como
+  estaban, aunque hoy ese texto no se renderice nunca (`showMessage={false}` en el único caller,
+  `InscriptionStep.jsx:151`) — sacar código muerto no es de este task.
+
+**`f783f39 polish(match): labels, cancha vacía y balance en sentence case`**
+
+- `src/components/match/AssignPlayerModal.jsx` — labels `Selecciona equipo:` → `Equipo` y
+  `Selecciona rol:` → `Rol`.
+- `src/components/match/SoccerField.jsx` — empty state: un solo `<p>Todavía no hay nadie en la
+  cancha</p>`; se borró el `<p>desde el panel lateral</p>`. Se siguió la decisión 3 de Design
+  (línea de estado) y **no** el criterio del planner (`Asigná jugadores a los equipos`), porque la
+  sección Design es la autoridad de wording: ese overlay también lo ve quien no puede asignar.
+- `src/components/match/BalanceIndicator.jsx` — `Balance de Equipos` → `Balance de equipos`. La
+  variante corta de mobile (`Balance`) no se tocó.
+
+**Fuera de alcance, sin tocar:** `MyMatchesPage.jsx:74`, `StandingsPage.jsx:129`,
+`CrtControlPanel.jsx` y `InGameHeader.jsx:131` (`GOL!!!`).
+
+**Desvío del criterio del grep:** el barrido
+`grep -rnE "\b(Crea|Invita|Arma|Organiza|Anota|Selecciona|Asigna|Puedes|Podes|Tenes|Queres|Jugas)\b" src/ --include=*.jsx`
+devuelve un único resultado: `MyMatchesPage.jsx:74` (`Crea tu primer partido…`), que el propio
+spec deja fuera de alcance. Todos los demás desaparecieron. No hay ningún otro string visible mal
+escrito entre los que sí entraban en el claim.
+
+**Sin preguntas abiertas nuevas.**
 
 ## Review: design
 <!-- owner: designer (REVIEW). BLOCKER / SHOULD-FIX / OK, with file:line. -->
