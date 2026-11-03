@@ -275,9 +275,10 @@ hints, placeholders explicativos ni onboarding.
 ## Build log
 <!-- owner: builder. What was done, commit by commit, and any deviation from the spec and why. -->
 
-Tres commits, solo strings. `convex/` no se tocó (Backend: None), así que **no hace falta ningún
-`npx convex dev --once` ni deploy de Convex**. Sin reglas nuevas en `src/styles/global.css`
-(no hizo falta ninguna) y sin tocar `e2e/` ni `docs/design/VOICE.md`. `npm run build` pasa.
+Cuatro commits: tres de strings y uno de limpieza de CSS muerto (review de Design). `convex/` no
+se tocó (Backend: None), así que **no hace falta ningún `npx convex dev --once` ni deploy de
+Convex**. Ninguna regla nueva en `src/styles/global.css` (solo se borró una, ver el 4º commit) y
+sin tocar `e2e/` ni `docs/design/VOICE.md`. `npm run build` pasa.
 
 Se siguió la tabla "Copy" de la sección Design como autoridad de wording en los casos donde
 difería del planner.
@@ -302,8 +303,10 @@ difería del planner.
   `Escribí el nombre del amigo` (sin punto final, como el resto de los errores del modal); label
   `Anota a un amigo (opcional)` → `Anotá a un amigo (opcional)`; se borró el
   `<span className="hint">Podes agregar varios separados por coma</span>` entero (decisión 2 de
-  Design). `.hint` no tenía regla en `global.css` y era su único uso: no queda CSS muerto ni
-  pendiente de limpiar.
+  Design). Era el único uso de `className="hint"` en todo `src/`. **Corrección:** acá dije que
+  `.hint` no tenía regla en `global.css` — era falso. El span vivía dentro de
+  `<div className="friends-section form-group">`, así que sí estaba estilado por
+  `.form-group .hint`, y borrarlo dejó esa regla muerta. Se limpió en el 4º commit.
 - `src/components/ui/ProgressBar.jsx` — el mensaje quedó en `¡Cupo completo!`. **Solo el string**:
   el prop `showMessage` y la rama `{showMessage && isComplete && (…)}` quedaron exactamente como
   estaban, aunque hoy ese texto no se renderice nunca (`showMessage={false}` en el único caller,
@@ -320,6 +323,20 @@ difería del planner.
 - `src/components/match/BalanceIndicator.jsx` — `Balance de Equipos` → `Balance de equipos`. La
   variante corta de mobile (`Balance`) no se tocó.
 
+**4º commit — `polish(match): borrar la regla muerta .form-group .hint`** (SHOULD-FIX de la
+review de Design)
+
+- `src/styles/global.css` — se borró la regla `.form-group .hint` (`font-size`, `color`,
+  `margin-top`), 5 líneas más la línea en blanco que la separaba de `.form-row`. Era la única
+  regla que estilaba el span borrado en el commit anterior y ya nadie renderiza esa clase:
+  `grep -rn 'className="hint"' src/` no devuelve nada. Sin efecto visual.
+- **Desvío de "Files to touch":** `src/styles/global.css` no estaba en la lista. Se agregó solo
+  para esta eliminación, por pedido explícito del orchestrator a partir del SHOULD-FIX; no se
+  agregó ninguna regla. `.hint-match` y `.hint-different` (clases distintas, en uso) quedaron
+  intactas.
+- No se actuó sobre las "Observations for a future polish" de la review (modal inalcanzable,
+  `ProgressBar` sin render, `GOL!!!`): son tasks aparte.
+
 **Fuera de alcance, sin tocar:** `MyMatchesPage.jsx:74`, `StandingsPage.jsx:129`,
 `CrtControlPanel.jsx` y `InGameHeader.jsx:131` (`GOL!!!`).
 
@@ -334,6 +351,97 @@ escrito entre los que sí entraban en el claim.
 ## Review: design
 <!-- owner: designer (REVIEW). BLOCKER / SHOULD-FIX / OK, with file:line. -->
 
+Revisado contra la tabla "Copy" de Design, string por string, con capturas en iPhone 13 (390px)
+y 1280×800. Capturas en `docs/specs/44/` (ver lista al final).
+
+### Copy
+
+- **OK** — `SplashPage.jsx:2-4` (`Creá tu partido` · `Invitá a tus amigos` · `Armá los equipos`),
+  `SplashPage.jsx:31` (`Organizá el fulbito`): los cuatro pasos y el headline llegaron textuales,
+  con tilde, y el ancho no se movió (captura `01-splash-mobile.png`: el headline sigue en dos
+  líneas, los pasos en una cada uno).
+- **OK** — `InscriptionStep.jsx:150` (`¿Jugás?`): signo de apertura y tilde, en una línea al lado
+  de la barra de progreso en 390px.
+- **OK** — `InscriptionStep.jsx:208` (`¡Somos 10! Se juega`): el `¡` está, en mint, centrado bajo
+  `Armar equipos`.
+- **OK** — `InscriptionStep.jsx:203`: `Falta 1 jugador` / `Faltan 5 jugadores`. El ternario sobre
+  la frase completa pluraliza bien verbo y sustantivo; el `== 1` usa la misma expresión de
+  faltante que el render, no hay riesgo de desfasaje. Verificado en pantalla en los dos casos.
+- **OK** — `JoinMatchModal.jsx:150` (`Escribí el nombre del amigo`), `:530` (`Anotá a un amigo
+  (opcional)`).
+- **OK** — `SoccerField.jsx:219` (`Todavía no hay nadie en la cancha`), una sola línea, centrada
+  sobre la cancha, sin corte ni wrap en 390px.
+- **OK** — `BalanceIndicator.jsx:41`: en 1280px dice `Balance de equipos` (sentence case) y en
+  390px sigue la variante corta `Balance`. Las dos verificadas.
+- **OK** — `Footer.jsx:7`: `GitHub`, `href` intacto.
+- **OK** — `ProgressBar.jsx:24`: `¡Cupo completo!`.
+- **OK** — No queda tuteo ni `!`/`?` sin signo de apertura en strings visibles de `src/`: el
+  barrido de verbos devuelve solo `MyMatchesPage.jsx:74` (fuera de alcance) y el de puntuación
+  solo `InGameHeader.jsx:131` (`GOL!!!`, fuera de alcance, ya agregado a la tabla de `VOICE.md`).
+
+### Forma del código y restos
+
+- **SHOULD-FIX** — `src/styles/global.css:1124`: la regla `.form-group .hint` quedó muerta. El
+  `<span className="hint">` borrado estaba dentro de `<div className="friends-section
+  form-group">`, así que **sí** tenía estilo por `.form-group .hint` (mi brief, decisión 2, y el
+  Build log dicen que `.hint` no tenía regla — era falso; el error es mío, no del builder). Es el
+  único uso de `.hint` en todo `src/` (`.hint-match` y `.hint-different` son otras clases).
+  Fix: borrar las 4 líneas de `global.css:1124-1128`. Sin efecto visual: nadie renderiza la clase.
+  Corregir también esa frase del Build log (es del builder).
+- **OK** — `JoinMatchModal.jsx:527-580`: la sección de amigos quedó limpia después de borrar el
+  span — label, input y lista de amigos consecutivos, sin nodo vacío ni hueco extra
+  (`05-modal-amigos-mobile.png`). Y el trabajo del hint borrado lo hace la UI: con `Mati` tipeado
+  aparece `+ Agregar “Mati”` (`09`), y con `Juan, Pedro` el botón primario pasa a `Confirmar (2)`
+  (`10`) — la coma se demuestra sola, como decía la decisión 2.
+- **OK** — `AssignPlayerModal.jsx:129,155`: labels `Equipo` y `Rol`, sin `:`. **No verificable en
+  pantalla**: el modal hoy es inalcanzable — `TeamBuilderStep.jsx:275 handleOpenAssign` es el
+  único lugar que hace `setShowAssignModal(true)` y no está cableado a ningún handler (`grep`
+  sobre todo `src/`). Los strings están bien; el modal no se abre. Que no se arregle acá, pero va
+  como hallazgo: o se cablea o se borra, en un task propio.
+- **OK** — `ProgressBar.jsx:24` sigue sin renderizarse nunca (único caller
+  `InscriptionStep.jsx:151` con `showMessage={false}`), tal como anticipó la decisión 1. El string
+  quedó bien para cuando se reuse; el código muerto es para otro task.
+- **OK** — Alcance: `git diff main...HEAD --stat` toca 8 archivos de `src/components/`, todos
+  reclamados. **Cero cambios en `src/styles/global.css`**, y `MyMatchesPage.jsx`,
+  `StandingsPage.jsx`, `CrtControlPanel.jsx` e `InGameHeader.jsx` intactos.
+
+### Layout y brand
+
+- **OK** — iPhone 13: nada se desplazó. `¿Jugás?` + barra en una línea; `Falta 1 jugador` y
+  `¡Somos 10! Se juega` centrados bajo el botón; cancha vacía en una línea; modal de anotarse sin
+  cambios de alto perceptibles.
+- **OK** — 1280×800: igual, más `Balance de equipos` completo (`07-balance-desktop.png`).
+- **OK** — Brand: el diff es 100% texto entre etiquetas. Sin hex crudos, sin `border-radius`, sin
+  `font-family`, sin `style={{…}}`, sin iconos ni tokens nuevos.
+- **OK** — Sin texto de ayuda nuevo: el task borra dos líneas explicativas y recorta una tercera.
+
+### Observaciones para el próximo polish (no de este PR)
+
+- `JoinMatchModal.jsx:423` — el `.form-error` se renderiza arriba de todo el modal, mientras el
+  campo de amigos está al final: en iPhone 13, apretar Enter con el campo vacío muestra
+  `Escribí el nombre del amigo` fuera de pantalla (`08-modal-error-amigo-mobile.png`). El string
+  está bien; el lugar no. Es previo a este task.
+- `ProgressBar.jsx:7` — `Somos ${current} /${total}` imprime `Somos 9 /10`, con el espacio del
+  lado equivocado.
+- `global.css:3694-3706` (`.field-empty`) — texto blanco al 80% sobre la cancha mint: se lee, pero
+  justo (`06-cancha-vacia-mobile.png`). Candidato a un fondo/contraste propio.
+- `JoinMatchModal.jsx:570` — `Agregar “Juan, Pedro”` habla en singular cuando va a agregar dos.
+- En el working tree hay dos archivos sin trackear que no son de este task: `e2e/copy.spec.ts`
+  (del `e2e-tester`) y `playwright.tmp.config.ts` en la raíz — ese último no debería entrar al PR.
+
+### Capturas (iPhone 13 salvo donde dice desktop)
+
+`docs/specs/44/01-splash-mobile.png` · `01-splash-desktop.png` ·
+`02-inscripcion-falta-1-mobile.png` · `03-inscripcion-faltan-5-mobile.png` ·
+`04-inscripcion-completo-mobile.png` · `05-modal-amigos-mobile.png` ·
+`06-cancha-vacia-mobile.png` · `06-cancha-vacia-desktop.png` · `07-balance-mobile.png` ·
+`07-balance-desktop.png` · `08-modal-error-amigo-mobile.png` · `09-modal-typeahead-mobile.png` ·
+`10-modal-coma-mobile.png`
+
+No se pudieron capturar: el `AssignPlayerModal` (labels `Equipo` / `Rol`) porque el modal es
+inalcanzable desde la UI, y `¡Cupo completo!` de `ProgressBar` porque su único caller lo
+desactiva. Ninguna de las dos se falseó.
+
 ## Review: first-timer
 <!-- written by the orchestrator from first-timer's report -->
 
@@ -342,6 +450,21 @@ escrito entre los que sí entraban en el claim.
 
 ## Tests
 <!-- owner: e2e-tester. Specs added/changed, projects run, results. -->
+
+**Added** `e2e/copy.spec.ts` (+ row in `e2e/README.md`). No existing spec changed or broke.
+
+- Splash: headline `Organizá el fulbito` / `con amigos`, los 4 pasos en orden, link `GitHub` con el `href` intacto.
+- Inscripción: `¿Jugás?`; `Falta 1 jugador`; `Faltan 5 jugadores`; `¡Somos 10! Se juega` (el mensaje visible, el de `InscriptionStep`; no se espera el de `ProgressBar`, que no se renderiza).
+- Balance: `Balance de equipos` solo en desktop (skip en mobile); `Balance` corto solo en mobile.
+- No cubierto e2e: label/hint de `JoinMatchModal`, labels de `AssignPlayerModal` y empty state de la cancha (la cancha autogenera equipos, no queda vacía por la UI normal).
+
+**Run** (`chromium-desktop` + `webkit-mobile-iphone`, `co-ownership` no hace falta): suite completa 59 passed, 3 skipped, 0 failed. `copy.spec.ts`: 4 passed + 1 skipped por proyecto (los dos tests de Balance se excluyen mutuamente por ancho).
+
+**Notas**
+- Test bug corregido: `.step-title` matchea 3 elementos en la inscripción (Suplentes, Hinchada); se usa `.first()`.
+- Entorno: el puerto 3000 lo tiene otro proyecto (`seller-center-proto`, vite) y `reuseExistingServer` lo reutiliza, así que `npx playwright test` normal falla con la app equivocada. Corrí con una copia temporal del config en el puerto 3123 (ya borrada). Para correr normal hay que liberar el 3000.
+- `e2e/_scratch/shots44.spec.ts` (del designer) falló una vez ("modal anotarse", timeout de click) en una corrida; pasó en la siguiente. No es mío.
+- Ningún bug de la app encontrado.
 
 ## Open questions for Charly
 <!-- anyone may add. While this has unanswered items, the orchestrator stops and labels the issue needs-charly. -->
