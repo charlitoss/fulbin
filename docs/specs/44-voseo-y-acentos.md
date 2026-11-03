@@ -1,6 +1,6 @@
 # 44 – Unificar voseo, acentos y textos en inglés
 
-Issue: #44 · Branch: `polish/44-voseo-y-acentos` · Status: reviewing
+Issue: #44 · Branch: `polish/44-voseo-y-acentos` · Status: pr-open
 <!-- Status: framing → planned → briefed → building → reviewing → pr-open → merged / dropped -->
 
 Every agent reads this whole file before starting and writes **only its own sections**.
@@ -381,7 +381,9 @@ y 1280×800. Capturas en `docs/specs/44/` (ver lista al final).
 
 ### Forma del código y restos
 
-- **SHOULD-FIX** — `src/styles/global.css:1124`: la regla `.form-group .hint` quedó muerta. El
+- **SHOULD-FIX — RESUELTO en `d1c284a`** (`polish(match): borrar la regla muerta .form-group
+  .hint`; `global.css`, −6 líneas, sin reglas nuevas, sin efecto visual).
+  `src/styles/global.css:1124`: la regla `.form-group .hint` quedó muerta. El
   `<span className="hint">` borrado estaba dentro de `<div className="friends-section
   form-group">`, así que **sí** tenía estilo por `.form-group .hint` (mi brief, decisión 2, y el
   Build log dicen que `.hint` no tenía regla — era falso; el error es mío, no del builder). Es el
@@ -402,7 +404,8 @@ y 1280×800. Capturas en `docs/specs/44/` (ver lista al final).
   `InscriptionStep.jsx:151` con `showMessage={false}`), tal como anticipó la decisión 1. El string
   quedó bien para cuando se reuse; el código muerto es para otro task.
 - **OK** — Alcance: `git diff main...HEAD --stat` toca 8 archivos de `src/components/`, todos
-  reclamados. **Cero cambios en `src/styles/global.css`**, y `MyMatchesPage.jsx`,
+  reclamados, más `src/styles/global.css` **solo con la eliminación de `d1c284a`** (ninguna regla
+  nueva, ninguna declaración modificada), y `MyMatchesPage.jsx`,
   `StandingsPage.jsx`, `CrtControlPanel.jsx` e `InGameHeader.jsx` intactos.
 
 ### Layout y brand
@@ -423,11 +426,11 @@ y 1280×800. Capturas en `docs/specs/44/` (ver lista al final).
   está bien; el lugar no. Es previo a este task.
 - `ProgressBar.jsx:7` — `Somos ${current} /${total}` imprime `Somos 9 /10`, con el espacio del
   lado equivocado.
-- `global.css:3694-3706` (`.field-empty`) — texto blanco al 80% sobre la cancha mint: se lee, pero
+- `global.css:3688-3700` (`.field-empty`) — texto blanco al 80% sobre la cancha mint: se lee, pero
   justo (`06-cancha-vacia-mobile.png`). Candidato a un fondo/contraste propio.
 - `JoinMatchModal.jsx:570` — `Agregar “Juan, Pedro”` habla en singular cuando va a agregar dos.
-- En el working tree hay dos archivos sin trackear que no son de este task: `e2e/copy.spec.ts`
-  (del `e2e-tester`) y `playwright.tmp.config.ts` en la raíz — ese último no debería entrar al PR.
+- En el working tree quedaba `playwright.tmp.config.ts` en la raíz, del `e2e-tester`: **ya no
+  está** (verificado en la 2ª pasada). Sin tracked files ajenos al task.
 
 ### Capturas (iPhone 13 salvo donde dice desktop)
 
@@ -442,11 +445,113 @@ No se pudieron capturar: el `AssignPlayerModal` (labels `Equipo` / `Rol`) porque
 inalcanzable desde la UI, y `¡Cupo completo!` de `ProgressBar` porque su único caller lo
 desactiva. Ninguna de las dos se falseó.
 
+### Triage de la review del `first-timer` (2ª pasada)
+
+**Nada de esto cambia en este PR.** El único hallazgo que toca un string nuestro es el contraste de
+la cancha vacía, y es preexistente (abajo el porqué). Los demás son defectos previos; los de copy
+ya están anotados en la tabla de `VOICE.md`, los de layout/UX quedan acá como hallazgos.
+
+- **OK (ningún cambio) — `SoccerField.jsx:219` + `global.css:3688` (`.field-empty`): el contraste
+  es preexistente, va a un issue aparte.** El `first-timer` tiene razón en que
+  `Todavía no hay nadie en la cancha` "casi no se lee" (y coincide con mi propia observación), pero
+  el defecto no lo introdujo este PR: `.field-empty` no se tocó — mismo
+  `color: rgba(255,255,255,0.8)`, mismo `text-shadow: 0 1px 3px rgba(0,0,0,0.5)`, mismo
+  `font-size` y mismo centrado que ya tenían las dos líneas viejas
+  (`Asigna jugadores a los equipos` / `desde el panel lateral`), que cruzaban la misma línea
+  vertical del medio y los mismos puntos de penal con la misma legibilidad. Cambió el texto, no su
+  legibilidad.
+  Y el arreglo es un cambio visual sobre la cancha, no de copy: toca la única superficie mint
+  grande de la app, afecta los dos anchos y no tiene cobertura de screenshots. El criterio de
+  aceptación de este task dice explícitamente que una regla nueva en `global.css` es señal de que
+  el cambio se fue de alcance.
+  **Fix para el issue de seguimiento, para que sea trivial:** una sola declaración ya existente en
+  `.field-empty` (`global.css:3696`), `text-shadow: 0 1px 3px rgba(0,0,0,0.5)` →
+  un drop shadow duro de marca contra el fondo (`text-shadow: 2px 2px 0 var(--color-bg)`),
+  manteniendo `color` y el centrado. Son 2 líneas de diff, cero reglas nuevas, cero cambio de
+  layout — pero es una decisión de BRAND sobre la cancha y quiero verla en capturas antes/después,
+  no colada en un polish de copy. Alternativa a evaluar ahí: bajar el texto fuera de la línea del
+  medio.
+- **OK — `Confirmar (2)`: no es un defecto.** `JoinMatchModal.jsx:378` cuenta
+  `(tu nombre ? 1 : 0) + amigos`; en la captura `10-modal-coma-mobile.png` el campo `Tu nombre`
+  está vacío, así que 2 es correcto (dos amigos, nadie más). La confusión viene del estado de la
+  captura — artefacto de mi spec de scratch, no de la app. Sin fila en `VOICE.md`, sin cambio.
+- **Anotado en `VOICE.md` (copy, próximo `polish`)** — tres filas nuevas en "Known
+  inconsistencies": `JoinMatchModal.jsx:496` (el selector `Cansado · Normal · Excelente` no tiene
+  ningún `<label>`: el `form-group` arranca directo en `.physical-state-selector`, por eso el
+  `first-timer` lo leyó como una calificación pública → `Estado físico`, la palabra del glosario),
+  `JoinMatchModal.jsx:572` (`Agregar “Juan, Pedro”` entrecomilla dos nombres como si fueran uno) y
+  `ProgressBar.jsx:7` (`Somos 9 /10`). Los tres son strings, no layout.
+- **Hallazgos para issues futuros (no son copy, no van a `VOICE.md`, no se tocan acá):**
+  1. **Mobile, equipos armados: los nombres se pisan y se salen del borde** (`BALAN... AN...`) y las
+     listas se cortan a la derecha. Es el peor de todos — pasa en iPhone 13, que es como se abre el
+     link, y no lo vimos en nuestras capturas porque la cancha de este task estaba vacía. Merece
+     issue propio (`polish`/`fix` de layout en `TeamPanel` / `.field-player-name`), con capturas con
+     nombres largos reales.
+  2. **`JoinMatchModal.jsx:423` — el `.form-error` se renderiza arriba del modal** mientras el campo
+     que falla está al final: en 390px el mensaje queda fuera de pantalla
+     (`08-modal-error-amigo-mobile.png`). El string está bien; el lugar no. Mismo issue o uno de
+     "errores al lado del campo".
+  3. **El selector `Jugador / Suplente / Hinchada` aparece o no según el estado del cupo** y nada lo
+     anuncia: "no entiendo cuándo aparece". Es lógica de UI, necesita FRAME propio.
+  4. **El selector de estado físico, además de no tener label, no dice para qué sirve** (entra en el
+     balance de equipos). La fila de `VOICE.md` cubre el label; si con el label puesto sigue sin
+     entenderse, es rediseño, no copy (regla 5: no se arregla con texto de ayuda).
+  5. **Dos formas de anotarse** (el botón `Anotarme` y los `+` de cada `Lugar disponible`) y la `X`
+     roja de borrarse "muy a mano". Es una decisión de producto — va a FRAME, es candidato a
+     *quitar* un camino, no a explicarlo.
+  6. `TeamBuilderStep.jsx:275` — el `AssignPlayerModal` sigue inalcanzable (ya reportado arriba): o
+     se cablea o se borra.
+
 ## Review: first-timer
 <!-- written by the orchestrator from first-timer's report -->
 
+**Meta:** "organizar un fulbito con tus amigos para el sábado — armar el partido, conseguir que
+se anoten, y armar los equipos". Le di solo las 13 capturas de `docs/specs/44/`, en orden.
+
+**Resultado: llegó a la meta, con dudas.** Ninguna duda está en un string que este PR cambió,
+salvo la legibilidad de la cancha vacía (ver abajo).
+
+Sobre el copy de este task — todo positivo:
+- `Faltan 5 jugadores`: "está clarísimo".
+- `¡Somos 10! Se juega`: "Es el mejor momento del flujo", cero dudas.
+- Los 4 pasos de la splash "me cuentan el flujo entero. Eso está muy bien".
+- `Anotá a un amigo (opcional)` + placeholder `Juan, Pedro, Mati`: "entiendo que separo con
+  comas" — **sin el hint borrado**. Confirma la decisión 2 del BRIEF.
+- `Falta 1 jugador` en el botón apagado "se entiende bien".
+
+Hallazgo sobre un string que sí cambiamos:
+- **`SoccerField.jsx` (capturas 7–8):** "El texto `Todavía no hay nadie en la cancha` está encima
+  de las líneas de la cancha y casi no se lee. Se pisa con la línea del medio y con el área."
+  Coincide con la observación del `designer` sobre `.field-empty` (`global.css:3694`).
+
+Dudas sobre cosas **preexistentes**, fuera del alcance de un polish de copy (quedan como material
+para próximos issues, no se tocan acá):
+- Mobile, vista de equipos armados: los nombres se pisan y se salen del borde
+  (`BALAN... AN... E2E-E2E-BALAN`) y las listas se cortan a la derecha. "el equipo armado en
+  mobile se ve roto".
+- El error `.form-error` aparece arriba del modal y el campo del amigo queda fuera de pantalla:
+  "El error está arriba de todo y el campo del amigo está abajo, fuera de pantalla. No lo veo."
+- El selector `Jugador / Suplente / Hinchada` aparece en una captura y no en otra: "No entiendo
+  cuándo aparece."
+- `Cansado / Normal / Excelente`: "no sé para qué sirve… pensé que era una calificación que ven
+  todos".
+- `Confirmar (2)` con dos amigos: "Me confunde que sea 2 cuando soy yo más 2 amigos."
+- `+ Agregar “Juan, Pedro”` en singular para dos nombres.
+- Dos formas de anotarse (botón y los `+` de cada lugar) y la `X` roja "muy a mano".
+
+Faltante de método, no del producto: no vio la pantalla de crear partido ni qué pasa al tocar
+`Compartir`, porque esas pantallas no cambiaron y no se las di.
+
 ## Review: convex
 <!-- written by the orchestrator from convex-guard's report. "Not applicable" if convex/ untouched. -->
+
+**Not applicable.** No se corrió `convex-guard`: `convex/` no se tocó en toda la rama (verificado
+con `git diff --name-only origin/main...HEAD`) y el cambio no renderiza contenido de usuario en
+ningún lugar nuevo — son strings literales entre tags, todos por JSX normal (`{value}`), sin
+`dangerouslySetInnerHTML` ni `innerHTML`, y sin tocar ningún `href` salvo para confirmar que el de
+GitHub no cambia.
+
+**No hace falta ningún deploy de Convex** (ni `npx convex dev --once` ni producción) para este PR.
 
 ## Tests
 <!-- owner: e2e-tester. Specs added/changed, projects run, results. -->
