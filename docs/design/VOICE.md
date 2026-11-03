@@ -13,14 +13,18 @@ organizer uses it a bit more, but is still doing it on the side of their life.
 ## How we sound
 
 **Like the friend who organizes the partido, writing in the group chat.** Rioplatense,
-warm, quick, a bit of humor where the moment allows (¡GOL!, campeón, tercer tiempo).
+warm, quick, a bit of humor where the moment allows (GOL!, campeón, tercer tiempo).
 Never corporate, never cute for its own sake, never explaining what's obvious.
 
 ## Rules
 
 1. **Voseo, always.** Organizá, anotate, armá, invitá, probá, jugás, podés. Never tú
    (organiza, anota, puedes) and never usted.
-2. **Accents and opening marks.** ¿Jugás? — not "Jugas?". ¡Gol! — not "Gol!".
+2. **Accents always, opening marks never.** Tildes are not optional: Jugás, podés, querés,
+   campeón, está — never "Jugas", "podes". But no `¿` and no `¡`: Jugás? and Gol! — not
+   "¿Jugás?", not "¡Gol!". Nobody opens a mark in the group chat; in our register it reads
+   formal. *Note (designer):* a long question can stay ambiguous until its `?` — the fix is a
+   shorter question, not the mark.
 3. **Buttons are verbs.** "Crear partido", "Anotarme", "Compartir", "Empezar partido".
    Not "OK", "Aceptar", "Continuar" when a specific verb exists.
 4. **Short.** Buttons 1–3 words. Labels ≤ 4 words. Empty states: one line + one action.
@@ -89,16 +93,24 @@ Found in the current code — good first `polish` tasks:
 | `MyMatchesPage.jsx:74` | Crea tu primer partido apretando el botón crear partido. | Todavía no tenés partidos. + button |
 | `StandingsPage.jsx:129` | Cuando termine un partido, los jugadores ganadores sumarán 3 puntos. | Shorter, or show it in the table header |
 | `CrtControlPanel.jsx:18, 24–25` | CRT Shader · Reset to defaults | Spanish — the panel is user-facing |
-| `InGameHeader.jsx:131` | GOL!!! | ¡GOL! — opening mark (rule 2); ALL CAPS is fine, it's a celebration |
 | `JoinMatchModal.jsx:496` | The Cansado · Normal · Excelente selector has no label at all | `Estado físico` (the glossary word). Without it nobody knows what they're choosing — a first-timer read it as a public rating |
 | `JoinMatchModal.jsx:572` | Agregar “Juan, Pedro” — singular quote around two names | Plural when there's more than one name: `Agregar 2 jugadores` (or quote each name) |
 | `ProgressBar.jsx:7` | Somos 9 /10 — space on the wrong side of the slash | `Somos 9/10` |
 
-Fixed in #44 (voseo, acentos, sentence case): SplashPage, InscriptionStep, JoinMatchModal ×2,
-AssignPlayerModal, SoccerField, BalanceIndicator, Footer.
+Fixed in #44 (voseo, accents, sentence case): SplashPage, InscriptionStep, JoinMatchModal ×2,
+AssignPlayerModal, SoccerField, BalanceIndicator, Footer. The opening marks #44 had added were
+taken out again in the same PR, together with the ones already in `src/` (see Decisions).
+
+`InGameHeader.jsx:131` (`GOL!!!`) used to be listed here as missing its `¡`. It isn't a defect
+any more: ALL CAPS and stacked `!` are exactly the celebration register of rule 8.
 
 ## Decisions
 
 - **2026-11-03** — Voseo everywhere, including the splash.
 - **2026-11-03** — The UI says "anotarse", never "inscribirse".
 - **2026-11-03** — The CRT control panel is user-facing: its copy follows these rules.
+- **2026-11-03** — **No opening marks (`¿`, `¡`) anywhere in the UI.** Charly's call, overruling
+  the first version of rule 2: they feel too formal for how fulbin talks — a friend in the group
+  chat writes "Jugás?" and "Gol!". Applied to the whole app, not just the two strings #44 had
+  added. Accents and voseo are unaffected and still required. Designer's note on the record: a
+  long question reads ambiguously until its `?`, so questions stay short.
