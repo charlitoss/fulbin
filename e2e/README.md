@@ -111,6 +111,7 @@ their groups/memberships/tournaments.
 | `full-lifecycle.spec.ts` | create → register → build teams → start → score → finish; refresh preserves state |
 | `inscription.spec.ts` | quota gating; suplentes/hinchada don't count toward the jugador quota |
 | `team-builder.spec.ts` | balance indicator renders; LIFO smoke |
+| `copy.spec.ts` | copy polish (#44): splash voseo + GitHub footer, `¿Jugás?`, `Falta/Faltan N jugadores`, `¡Somos N! Se juega`, `Balance de equipos` (desktop) / `Balance` (mobile) |
 | `mobile.spec.ts` | iOS date-input alignment (`dfa3a88`); in-game 820px cap (`38c47de`) |
 | `co-ownership.spec.ts` | invite → join → co-manage → shared standings → access control → member removal; anonymous invite + public group pages in the browser |
 
